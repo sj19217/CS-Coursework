@@ -5,14 +5,7 @@ part work.
 
 import re
 
-def main(asmfile):
-    with open(asmfile, "rt") as file:
-        text = file.read()
-
-    # Now the text is available
-
-    # 1. PERFORM TEXT NORMALISATION
-
+def normalise_text(text):
     # 1.1. Split text into lines
 
     lines = text.split("\n")
@@ -35,7 +28,21 @@ def main(asmfile):
     # 1.6. Put the lines back together
     normalised_text = "\n".join(lines)
 
+    return normalised_text
+
+def main(asmfile):
+    with open(asmfile, "rt") as file:
+        text = file.read()
+
+    # Now the text is available
+
+    # 1. PERFORM TEXT NORMALISATION
+
+    normalised_text = normalise_text(text)
+
     print(normalised_text)
+
+
 
 
 
