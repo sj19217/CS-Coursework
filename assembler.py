@@ -6,8 +6,16 @@ part work.
 import re
 from pprint import pprint
 
+META_CONFIG_DEFAULT = {
+    "mem_amt": 4
+}
 
 def normalise_text(text):
+    """
+    Removes comments, unnecessary whitespace and empty lines
+    :param text:
+    :return:
+    """
     # 1.1. Split text into lines
 
     lines = text.split("\n")
@@ -34,6 +42,11 @@ def normalise_text(text):
 
 
 def split_into_sections(text):
+    """
+    Takes the normalised text and splits it into its individual sections
+    :param text:
+    :return:
+    """
     # Don't bother with regular expressions for this
     # Just split where "section." occurs
     parts = text.split("section.")
@@ -47,6 +60,28 @@ def split_into_sections(text):
         sections_dict[title] = other[0] if len(other) > 0 else ""
 
     return sections_dict
+
+
+def divide_and_contextualise(section_dict: dict):
+    """
+    Divides the sections up into lines. Interprets the meta section to create a config dict, and then creates a list
+    of Instruction objects based on the data and text sections. Returns both as a tuple
+    :param section_dict:
+    :return:
+    """
+
+    # 4.1. Split the meta section into lines and interpret them
+    # Create the dict based on META_CONFIG_DEFAULT
+    config_dict = META_CONFIG_DEFAULT.copy()
+
+    # Split meta section into lines
+    meta_lines = section_dict["meta"].split("\n")
+
+    # Go through the lines and split on an = sign, then act on that
+    for line in meta_lines:
+        item, value = line.split("=")
+        config_dict.update(**{item: value})
+
 
 
 def main(asmfile):
@@ -63,6 +98,9 @@ def main(asmfile):
     # 2. SPLIT DOCUMENT INTO SECTIONS
     section_dict = split_into_sections(normalised_text)
     pprint(section_dict)
+
+    # 3. DIVIDE LINES AND CONTEXTUALISE
+    config_dict, instruction_list = divide_and_contextualise(section_dict)
 
 if __name__ == "__main__":
     import sys
