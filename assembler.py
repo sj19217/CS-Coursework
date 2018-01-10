@@ -272,7 +272,7 @@ def divide_and_contextualise(section_dict: dict):
     config_dict = META_CONFIG_DEFAULT.copy()
 
     # Split meta section into lines
-    meta_lines = section_dict["meta"].split("\n")
+    meta_lines = [x.strip() for x in section_dict["meta"].split("\n") if x.strip()]
 
     # Go through the lines and split on an = sign, then act on that
     for line in meta_lines:
@@ -283,7 +283,15 @@ def divide_and_contextualise(section_dict: dict):
     instruction_list = []
 
     # Start with the data section, adding each one as a DataInstruction instance
+    data_lines = [x.strip() for x in section_dict["data"].split("\n") if x.strip()]
+    for line in data_lines:
+        # Takes the form name VAR type initial
+        name, type_and_initial = [x.strip() for x in line.split("VAR") if x.strip()]
+        dtype, initial = type_and_initial.split()
 
+        data_type = getattr(DataType, dtype)
+
+        instruction_list.append(DataInstruction(len(instruction_list), name, initial, data_type))
 
 
 def main(asmfile):
