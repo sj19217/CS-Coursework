@@ -3,9 +3,7 @@
   <component name="ChangeListManager">
     <list default="true" id="ce6d4a90-30a5-4d92-ba6a-cc7910f37b5b" name="Default" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change beforePath="$PROJECT_DIR$/Instruction Class Diagram.html" afterPath="$PROJECT_DIR$/Instruction Class Diagram.html" />
       <change beforePath="$PROJECT_DIR$/assembler.py" afterPath="$PROJECT_DIR$/assembler.py" />
-      <change beforePath="$PROJECT_DIR$/ideas.md" afterPath="$PROJECT_DIR$/ideas.md" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -35,8 +33,8 @@
       <file leaf-file-name="assembler.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/assembler.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="690">
-              <caret line="538" column="6" lean-forward="true" selection-start-line="538" selection-start-column="6" selection-end-line="538" selection-end-column="6" />
+            <state relative-caret-position="6473">
+              <caret line="537" column="0" lean-forward="false" selection-start-line="537" selection-start-column="0" selection-end-line="537" selection-end-column="0" />
               <folding>
                 <element signature="e#137#146#0" expanded="true" />
                 <element signature="e#285#1992#0" expanded="false" />
@@ -402,7 +400,14 @@
       <option name="project" value="LOCAL" />
       <updated>1515594724239</updated>
     </task>
-    <option name="localTasksCounter" value="10" />
+    <task id="LOCAL-00010" summary="Added Operand and its subclasses, including logic">
+      <created>1515600610066</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1515600610066</updated>
+    </task>
+    <option name="localTasksCounter" value="11" />
     <servers />
   </component>
   <component name="ToolWindowManager">
@@ -414,7 +419,7 @@
       <window_info id="Python Console" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3295325" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3295325" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32839224" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Project" active="true" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.16111708" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.16111708" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="Docker" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="false" weight="0.33" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
       <window_info id="Database" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32975295" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
       <window_info id="SciView" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
@@ -454,7 +459,8 @@
     <MESSAGE value="Added creating a config dict from the meta section" />
     <MESSAGE value="Added a dict of opcodes and their bytes, and the Instruction and DataInstruction classes" />
     <MESSAGE value="Split up the data section and add all into the instruction list" />
-    <option name="LAST_COMMIT_MESSAGE" value="Split up the data section and add all into the instruction list" />
+    <MESSAGE value="Added Operand and its subclasses, including logic" />
+    <option name="LAST_COMMIT_MESSAGE" value="Added Operand and its subclasses, including logic" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -759,8 +765,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/assembler.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="690">
-          <caret line="538" column="6" lean-forward="true" selection-start-line="538" selection-start-column="6" selection-end-line="538" selection-end-column="6" />
+        <state relative-caret-position="6473">
+          <caret line="537" column="0" lean-forward="false" selection-start-line="537" selection-start-column="0" selection-end-line="537" selection-end-column="0" />
           <folding>
             <element signature="e#137#146#0" expanded="true" />
             <element signature="e#285#1992#0" expanded="false" />

@@ -534,9 +534,41 @@ def divide_and_contextualise(section_dict: dict):
             operand1 = interpret_operand(parts[0])
             operand2 = interpret_operand(parts[1])
 
+        # We now have both operands; that's everything
+
+
 
 def interpret_operand(string: str) -> Operand:
-    pass
+    # The operand can be one of four things:
+    # * register (the name of a register)
+    # * immediate (a number)
+    # * address (a string other than a register name)
+    # * arithmetic (an expression inside square brackets)
+
+    string = string.strip() # Just to make sure
+
+    # Is it a register name?
+    if string.lower() in REGISTERS.keys():
+        # Yes it is
+        return RegisterOperand(string)
+
+    # Is it an immediate value?
+    try:
+        val = int(string)
+        return ImmediateOperand(val)
+    except ValueError:
+        pass   # it isn't an immediate value
+
+    # Is it an address label/variable?
+    if string.isalnum():
+        return AddressOperand(string)
+
+    # Is it an arithmetic expression?
+    if string[0] == "[" and string[-1] == "]":
+        return ArithmeticOperand(string[1: -2])
+
+    # If it was none of those then it is invalid
+    raise ValueError("Invalid operand: {}".format(string))
 
 
 
