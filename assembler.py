@@ -717,6 +717,14 @@ def encode_instruction_list(instruction_list):
     return encoded
 
 
+def place_memory_addresses(mem_table, instruction_list):
+    for instr in instruction_list:
+        if isinstance(instr.operand1, str):
+            instr.operand1 = AddressOperand(mem_table[instr.operand1])
+
+        if isinstance(instr.operand2, str):
+            instr.operand2 = AddressOperand(mem_table[instr.operand2])
+
 
 def main(asmfile):
     with open(asmfile, "rt") as file:
@@ -740,6 +748,8 @@ def main(asmfile):
     mem_table = record_labels_and_variables(instruction_list)
 
     # 5. CONVERT EACH LINE TO BYTES
+    place_memory_addresses(mem_table, instruction_list)
+
     bytecode = b""
     bytecode += encode_metadata(config_dict)
     bytecode += encode_instruction_list(instruction_list)
