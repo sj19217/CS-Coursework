@@ -319,7 +319,21 @@ class TextInstruction(Instruction):
         opcode_byte = struct.pack(">B", opcode_num)
 
         # Next, find the operand byte
+        operand_num = self.operand1.get_bit_designation() if self.operand1 is not None else 0
+        operand_num << 4    # Shift the bits to the left to make space for the second
+        operand_num += self.operand2.get_bit_designation() if self.operand2 is not None else 0
+        operand_byte = struct.pack(">B", operand_num)
 
+        # Get the operand bytes
+        op1_bytes = self.operand1.get_bytes() if self.operand1 is not None else b""
+        op2_bytes = self.operand2.get_bytes() if self.operand2 is not None else b""
+
+        # Add them together
+        instr_bytes = opcode_byte + operand_byte + op1_bytes + op2_bytes
+
+        assert len(instr_bytes) == self.get_bytes_length()
+
+        return instr_bytes
 
 
 
@@ -596,7 +610,7 @@ def divide_and_contextualise(section_dict: dict):
         mnemonic = parts[0]
         del parts[0]
 
-        # The lisy of parts should now just consist of the operands, separated by a space
+        # The list of parts should now just consist of the operands, separated by a space
         if len(parts) == 0:
             # No operands
             operand1 = None
@@ -607,8 +621,16 @@ def divide_and_contextualise(section_dict: dict):
         elif len(parts) == 2:
             operand1 = interpret_operand(parts[0])
             operand2 = interpret_operand(parts[1])
+        else:
+            raise Exception("Invalid length of ")
 
         # We now have both operands; that's everything
+        instruction_list.append(TextInstruction(instr_num=len(instruction_list),
+                                                opcode=mnemonic,
+                                                dtype=dtype,
+                                                label=label,
+                                                op1=operand1,
+                                                op2=operand2))
 
 
 
