@@ -1,3 +1,6 @@
+## Things to do:
+* Remove get_start_address() from UML diagram for instructions
+
 ## Possible tests to implement
 * Incorrect section names
 * Missing section

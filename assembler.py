@@ -5,8 +5,9 @@ part work.
 
 import re
 from pprint import pprint
-from enum import Enum
 import struct
+from collections import namedtuple
+from functools import lru_cache
 
 META_CONFIG_DEFAULT = {
     "mem_amt": 4
@@ -163,33 +164,19 @@ REGISTERS = {
     "dl": 0xD3
 }
 
+DataTypeMetadata = namedtuple("DataTypeMetadata", ["size"])
+
+DTYPE_META = {
+    "char": DataTypeMetadata(1),
+    "uchar": DataTypeMetadata(1),
+    "short": DataTypeMetadata(2),
+    "ushort": DataTypeMetadata(2),
+    "int": DataTypeMetadata(4),
+    "uint": DataTypeMetadata(4),
+    "float": DataTypeMetadata(4)
+}
+
 # ---------- CLASSES
-
-class DataType(Enum):
-    char=1
-    uchar=2
-    short=3
-    ushort=4
-    int=5
-    uint=6
-    float=7
-
-    def name(self):
-        if self == DataType.char:
-            return "char"
-        elif self == DataType.uchar:
-            return "uchar"
-        elif self == DataType.short:
-            return "short"
-        elif self == DataType.ushort:
-            return "ushort"
-        elif self == DataType.int:
-            return "int"
-        elif self == DataType.uint:
-            return "uint"
-        elif self == DataType.float:
-            return "float"
-
 
 
 class Instruction:
@@ -200,9 +187,6 @@ class Instruction:
         raise NotImplementedError("Must only use a subclass of Instruction")
 
     def get_bytes(self, var_table, label_table):
-        raise NotImplementedError("Must only use a subclass of Instruction")
-
-    def get_start_address(self):
         raise NotImplementedError("Must only use a subclass of Instruction")
 
 
@@ -220,7 +204,7 @@ class DataInstruction(Instruction):
 
     def _calculate_valsize(self):
         """Calculate the number of bytes in the value"""
-        if self.data_type == DataType.float:
+        if self.data_type == "float":
             valsize = 4
         else:
             # An integer type; calculate its size
@@ -267,7 +251,7 @@ class DataInstruction(Instruction):
 
 
 class TextInstruction(Instruction):
-    def __init__(self, instr_num, opcode: str, dtype: DataType, op1, op2, label: str):
+    def __init__(self, instr_num, opcode: str, dtype: str, op1, op2, label: str):
         super().__init__(instr_num)
         self.opcode_mnemonic = opcode
         self.data_type = dtype
@@ -302,14 +286,11 @@ class TextInstruction(Instruction):
             opcode_num = OPCODES[self.opcode_mnemonic + "_" + self.data_type.name()]
 
         # If neither of those, then it might be size based
-        elif self.data_type in (DataType.char, DataType.uchar)\
-             and self.opcode_mnemonic + "_1B" in OPCODES.keys():
+        elif self.data_type in ("char", "uchar") and self.opcode_mnemonic + "_1B" in OPCODES.keys():
             opcode_num = OPCODES[self.opcode_mnemonic + "_1B"]
-        elif self.data_type in (DataType.short, DataType.ushort)\
-             and self.opcode_mnemonic + "_2B" in OPCODES.keys():
+        elif self.data_type in ("short", "ushort") and self.opcode_mnemonic + "_2B" in OPCODES.keys():
             opcode_num = OPCODES[self.opcode_mnemonic + "_2B"]
-        elif self.data_type in (DataType.int, DataType.uint, DataType.float)\
-             and self.opcode_mnemonic + "_4B" in OPCODES.keys():
+        elif self.data_type in ("int", "uint", "float") and self.opcode_mnemonic + "_4B" in OPCODES.keys():
             opcode_num = OPCODES[self.opcode_mnemonic + "_4B"]
 
         else:
@@ -575,9 +556,7 @@ def divide_and_contextualise(section_dict: dict):
         name, type_and_initial = [x.strip() for x in line.split("VAR") if x.strip()]
         dtype, initial = type_and_initial.split()
 
-        data_type = getattr(DataType, dtype)
-
-        instruction_list.append(DataInstruction(len(instruction_list), name, initial, data_type))
+        instruction_list.append(DataInstruction(len(instruction_list), name, initial, dtype))
 
     # Next move onto the text section
     text_lines = [x.strip() for x in section_dict["text"].split("\n") if x.strip()]
@@ -597,14 +576,14 @@ def divide_and_contextualise(section_dict: dict):
         # Next is the type. parts[1] could be a data type or it could not be
         dtype = 0
         if parts[1].lower() in ("char", "uchar", "short", "ushort", "int", "uint", "float"):
-            dtype = getattr(DataType, parts[1].lower())
+            dtype = parts[1].lower()
             del parts[1]
         elif parts[1].upper() == "1B":
-            dtype = DataType.char
+            dtype = "char"
         elif parts[1].upper() == "2B":
-            dtype = DataType.short
+            dtype = "short"
         elif parts[1].upper() == "4B":
-            dtype = DataType.int
+            dtype = "int"
 
         # If not then assume the data type is unspecified
         mnemonic = parts[0]
@@ -631,6 +610,8 @@ def divide_and_contextualise(section_dict: dict):
                                                 label=label,
                                                 op1=operand1,
                                                 op2=operand2))
+        
+        return config_dict, instruction_list
 
 
 
@@ -667,6 +648,73 @@ def interpret_operand(string: str) -> Operand:
     raise ValueError("Invalid operand: {}".format(string))
 
 
+def record_labels_and_variables(instruction_list):
+    # Create the empty tables
+    label_table = {}
+    var_table = {}
+    mem_table = {}
+
+    # Loop through the instructions
+    for instruction in instruction_list:
+        # If the instruction is a DataInstruction, add it to the variable table with its relative position
+        if isinstance(instruction, DataInstruction):
+            var_table[instruction.name] = (calculate_var_table_size(var_table), instruction.data_type)
+
+        # If the instruction is a TextInstruction and has a label, add it to the label table
+        elif isinstance(instruction, TextInstruction):
+            if instruction.label != "":
+                label_table[instruction.label] = instruction.instruction_num
+
+        # If it was neither of these types, what's it doing here?
+        else:
+            raise ValueError("Item in instruction list is neither DataInstruction nor TextInstruction: {}".format(instruction))
+
+
+    # Calculate the total size of the text section
+    total_text_section_size = sum(instr.get_bytes_length() for instr in instruction_list)
+
+    # Add all the variables to the memory address table
+    for name, (offset, _) in var_table.items():
+        mem_table[name] = total_text_section_size + offset
+
+    # Add all the labels to the memory address table
+    for name, instr_num in label_table.items():
+        mem_table[name] = calculate_instr_start_address(instr_num, instruction_list)
+
+    # That's done, so return it
+    return mem_table
+
+
+
+def calculate_var_table_size(var_table):
+    size = 0
+    for (var, (_, dtype)) in var_table.items():
+        size += DTYPE_META[dtype].size
+
+    return size
+
+@lru_cache()
+def calculate_instr_start_address(instr_num, instruction_list):
+    total = 0
+    for instr in instruction_list[:instr_num]:
+        total += instr.get_bytes_length()
+    return total
+
+
+def encode_metadata(config_dict):
+    encoded = b""
+    for key, value in config_dict.items():
+        encoded += key.encode() + b"=" + str(value).encode() + b"&"
+    encoded += b"\x00\x00\x00\x00"
+
+    return encoded
+
+
+def encode_instruction_list(instruction_list):
+    encoded = b""
+    for instr in instruction_list:
+        encoded += instr.get_bytes()
+    return encoded
 
 
 
@@ -687,6 +735,16 @@ def main(asmfile):
 
     # 3. DIVIDE LINES AND CONTEXTUALISE
     config_dict, instruction_list = divide_and_contextualise(section_dict)
+
+    # 4. RECORD LABELS/VARIABLES
+    mem_table = record_labels_and_variables(instruction_list)
+
+    # 5. CONVERT EACH LINE TO BYTES
+    bytecode = b""
+    bytecode += encode_metadata(config_dict)
+    bytecode += encode_instruction_list(instruction_list)
+
+    print(bytecode)
 
 if __name__ == "__main__":
     import sys
