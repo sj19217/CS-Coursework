@@ -174,6 +174,22 @@ class DataType(Enum):
     uint=6
     float=7
 
+    def name(self):
+        if self == DataType.char:
+            return "char"
+        elif self == DataType.uchar:
+            return "uchar"
+        elif self == DataType.short:
+            return "short"
+        elif self == DataType.ushort:
+            return "ushort"
+        elif self == DataType.int:
+            return "int"
+        elif self == DataType.uint:
+            return "uint"
+        elif self == DataType.float:
+            return "float"
+
 
 
 class Instruction:
@@ -251,7 +267,59 @@ class DataInstruction(Instruction):
 
 
 class TextInstruction(Instruction):
-    pass
+    def __init__(self, instr_num, opcode: str, dtype: DataType, op1, op2, label: str):
+        super().__init__(instr_num)
+        self.opcode_mnemonic = opcode
+        self.data_type = dtype
+        self.operand1 = op1
+        self.operand2 = op2
+        self.label = label
+
+    def get_bytes_length(self):
+        # (Opcode byte + operand byte = 2) + operand 1 + operand 2
+        length = 2
+        if self.operand1 is not None:
+            length += self.operand1.get_required_length()
+
+        if self.operand2 is not None:
+            length += self.operand2.get_required_length()
+
+        return length
+
+    def get_bytes(self, var_table, label_table):
+        # First find the opcode byte
+
+        # Check the opcode is valid
+        if self.opcode_mnemonic not in OPCODE_NAMES:
+            raise ValueError("Unsupported opcode mnemonic: {}".format(self.opcode_mnemonic))
+
+        # Is this the type of opcode that has no subtypes?
+        if self.opcode_mnemonic in OPCODES.keys():
+            opcode_num = OPCODES[self.opcode_mnemonic]
+
+        # Is it based on a data type?
+        elif self.opcode_mnemonic + "_" + self.data_type.name() in OPCODES.keys():
+            opcode_num = OPCODES[self.opcode_mnemonic + "_" + self.data_type.name()]
+
+        # If neither of those, then it might be size based
+        elif self.data_type in (DataType.char, DataType.uchar)\
+             and self.opcode_mnemonic + "_1B" in OPCODES.keys():
+            opcode_num = OPCODES[self.opcode_mnemonic + "_1B"]
+        elif self.data_type in (DataType.short, DataType.ushort)\
+             and self.opcode_mnemonic + "_2B" in OPCODES.keys():
+            opcode_num = OPCODES[self.opcode_mnemonic + "_2B"]
+        elif self.data_type in (DataType.int, DataType.uint, DataType.float)\
+             and self.opcode_mnemonic + "_4B" in OPCODES.keys():
+            opcode_num = OPCODES[self.opcode_mnemonic + "_4B"]
+
+        else:
+            raise ValueError("Mismatch between opcode {} and data type {}".format(self.opcode_mnemonic, self.data_type))
+
+        # Turn the opcode number into an opcode byte
+        opcode_byte = struct.pack(">B", opcode_num)
+
+        # Next, find the operand byte
+
 
 
 
@@ -517,6 +585,12 @@ def divide_and_contextualise(section_dict: dict):
         if parts[1].lower() in ("char", "uchar", "short", "ushort", "int", "uint", "float"):
             dtype = getattr(DataType, parts[1].lower())
             del parts[1]
+        elif parts[1].upper() == "1B":
+            dtype = DataType.char
+        elif parts[1].upper() == "2B":
+            dtype = DataType.short
+        elif parts[1].upper() == "4B":
+            dtype = DataType.int
 
         # If not then assume the data type is unspecified
         mnemonic = parts[0]
