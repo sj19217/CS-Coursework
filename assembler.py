@@ -744,6 +744,13 @@ def place_memory_addresses(mem_table, instruction_list):
             instr.operand2 = AddressOperand(mem_table[instr.operand2.addr])
 
 
+def print_bytes_as_hex(bytes_, rowlen):
+    for i, byte in enumerate(bytes_):
+        print(format(byte, ">02X") + " ", end="")
+        if (i+1) % rowlen == 0:
+            print()
+
+
 def main(asmfile):
     with open(asmfile, "rt") as file:
         text = file.read()
@@ -772,7 +779,7 @@ def main(asmfile):
     bytecode += encode_metadata(config_dict)
     bytecode += encode_instruction_list(instruction_list, mem_table)
 
-    print(bytecode)
+    print_bytes_as_hex(bytecode, 16)
 
 if __name__ == "__main__":
     import sys

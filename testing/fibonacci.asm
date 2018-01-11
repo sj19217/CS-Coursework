@@ -1,6 +1,6 @@
 ; Prints the fibonacci sequence up to 50 places
 section.meta
-mem_size=2
+mem_amt=2
 
 section.data
 temp VAR ushort 0
