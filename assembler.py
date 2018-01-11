@@ -35,7 +35,7 @@ OPCODES = {
 
     "MOV_1B": 0x10,
     "MOV_2B": 0x11,
-    "MOV_3B": 0x12,
+    "MOV_4B": 0x12,
 
     "LEA": 0x14,
 
@@ -189,7 +189,7 @@ class Instruction:
     def get_bytes_length(self):
         raise NotImplementedError("Must only use a subclass of Instruction")
 
-    def get_bytes(self):
+    def get_bytes(self, mem_table):
         raise NotImplementedError("Must only use a subclass of Instruction")
 
 
@@ -224,7 +224,7 @@ class DataInstruction(Instruction):
         # (Command (MOV) + Opcode data + Memory address = 6) + size of value
         return 6 + self._calculate_valsize()
 
-    def get_bytes(self):
+    def get_bytes(self, mem_table):
         # The instruction byte
         instr = struct.pack(">B", OPCODES["MOV_{}B".format(self._calculate_valsize())])
 
@@ -243,10 +243,10 @@ class DataInstruction(Instruction):
             raise ValueError("Illegal value size: {}".format(valsize))
 
         # The memory address
-        mem_addr = struct.pack(">I", var_table[self.name])              ## FIX: REMOVE DEPENDENCY ON VARIABLE TABLE
+        mem_addr = struct.pack(">I", mem_table[self.name])              ## FIX: REMOVE DEPENDENCY ON VARIABLE TABLE
 
         # The initial value
-        value_bytes = struct.pack(val_fmt_str, self.value)
+        value_bytes = struct.pack(val_fmt_str, int(self.value))
 
         # Put them all together and return
         return instr + operand_num + mem_addr + value_bytes
@@ -262,6 +262,20 @@ class TextInstruction(Instruction):
         self.operand2 = op2
         self.label = label
 
+        if dtype == 0:
+            # None was specified, so try to work it out based on the operands
+            op1_size = op1.get_required_length() if op1 is not None else 0
+            op2_size = op2.get_required_length() if op2 is not None else 0
+
+            max_op_size = max(op1_size, op2_size)
+
+            if max_op_size == 1:
+                self.data_type = "char"
+            elif max_op_size == 2:
+                self.data_type = "short"
+            elif max_op_size == 4:
+                self.data_type = "int"
+
     def get_bytes_length(self):
         # (Opcode byte + operand byte = 2) + operand 1 + operand 2
         length = 2
@@ -273,7 +287,7 @@ class TextInstruction(Instruction):
 
         return length
 
-    def get_bytes(self):
+    def get_bytes(self, mem_table):
         # First find the opcode byte
 
         # Check the opcode is valid
@@ -285,15 +299,15 @@ class TextInstruction(Instruction):
             opcode_num = OPCODES[self.opcode_mnemonic]
 
         # Is it based on a data type?
-        elif self.opcode_mnemonic + "_" + self.data_type.name() in OPCODES.keys():
-            opcode_num = OPCODES[self.opcode_mnemonic + "_" + self.data_type.name()]
+        elif (self.opcode_mnemonic + "_" + self.data_type) in OPCODES.keys():
+            opcode_num = OPCODES[self.opcode_mnemonic + "_" + self.data_type]
 
         # If neither of those, then it might be size based
-        elif self.data_type in ("char", "uchar") and self.opcode_mnemonic + "_1B" in OPCODES.keys():
+        elif (self.data_type in ("char", "uchar")) and (self.opcode_mnemonic + "_1B" in OPCODES.keys()):
             opcode_num = OPCODES[self.opcode_mnemonic + "_1B"]
-        elif self.data_type in ("short", "ushort") and self.opcode_mnemonic + "_2B" in OPCODES.keys():
+        elif (self.data_type in ("short", "ushort")) and (self.opcode_mnemonic + "_2B" in OPCODES.keys()):
             opcode_num = OPCODES[self.opcode_mnemonic + "_2B"]
-        elif self.data_type in ("int", "uint", "float") and self.opcode_mnemonic + "_4B" in OPCODES.keys():
+        elif (self.data_type in ("int", "uint", "float")) and (self.opcode_mnemonic + "_4B" in OPCODES.keys()):
             opcode_num = OPCODES[self.opcode_mnemonic + "_4B"]
 
         else:
@@ -711,10 +725,10 @@ def encode_metadata(config_dict):
     return encoded
 
 
-def encode_instruction_list(instruction_list):
+def encode_instruction_list(instruction_list, memory_table):
     encoded = b""
     for instr in instruction_list:
-        encoded += instr.get_bytes()
+        encoded += instr.get_bytes(memory_table)
     return encoded
 
 
@@ -723,11 +737,11 @@ def place_memory_addresses(mem_table, instruction_list):
         if isinstance(instr, DataInstruction):
             continue    # These don't have operands
 
-        if isinstance(instr.operand1, str):
-            instr.operand1 = AddressOperand(mem_table[instr.operand1])
+        if isinstance(instr.operand1, AddressOperand) and isinstance(instr.operand1.addr, str):
+            instr.operand1 = AddressOperand(mem_table[instr.operand1.addr])
 
-        if isinstance(instr.operand2, str):
-            instr.operand2 = AddressOperand(mem_table[instr.operand2])
+        if isinstance(instr.operand2, AddressOperand) and isinstance(instr.operand2.addr, str):
+            instr.operand2 = AddressOperand(mem_table[instr.operand2.addr])
 
 
 def main(asmfile):
@@ -756,7 +770,7 @@ def main(asmfile):
 
     bytecode = b""
     bytecode += encode_metadata(config_dict)
-    bytecode += encode_instruction_list(instruction_list)
+    bytecode += encode_instruction_list(instruction_list, mem_table)
 
     print(bytecode)
 
