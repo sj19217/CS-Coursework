@@ -161,7 +161,10 @@ REGISTERS = {
     "al": 0xA3,
     "bl": 0xB3,
     "cl": 0xC3,
-    "dl": 0xD3
+    "dl": 0xD3,
+
+    "out": 0xF0,
+    "in": 0xF1
 }
 
 DataTypeMetadata = namedtuple("DataTypeMetadata", ["size"])
@@ -186,7 +189,7 @@ class Instruction:
     def get_bytes_length(self):
         raise NotImplementedError("Must only use a subclass of Instruction")
 
-    def get_bytes(self, var_table, label_table):
+    def get_bytes(self):
         raise NotImplementedError("Must only use a subclass of Instruction")
 
 
@@ -221,7 +224,7 @@ class DataInstruction(Instruction):
         # (Command (MOV) + Opcode data + Memory address = 6) + size of value
         return 6 + self._calculate_valsize()
 
-    def get_bytes(self, var_table, label_table):
+    def get_bytes(self):
         # The instruction byte
         instr = struct.pack(">B", OPCODES["MOV_{}B".format(self._calculate_valsize())])
 
@@ -240,7 +243,7 @@ class DataInstruction(Instruction):
             raise ValueError("Illegal value size: {}".format(valsize))
 
         # The memory address
-        mem_addr = struct.pack(">I", var_table[self.name])
+        mem_addr = struct.pack(">I", var_table[self.name])              ## FIX: REMOVE DEPENDENCY ON VARIABLE TABLE
 
         # The initial value
         value_bytes = struct.pack(val_fmt_str, self.value)
@@ -270,7 +273,7 @@ class TextInstruction(Instruction):
 
         return length
 
-    def get_bytes(self, var_table, label_table):
+    def get_bytes(self):
         # First find the opcode byte
 
         # Check the opcode is valid
@@ -325,10 +328,10 @@ class Operand:
         self._required_length = -1
 
     def get_bit_designation(self):
-        raise NotImplementedError("Must use a subclass of Operand")
+        return self._bit_designation
 
     def get_required_length(self):
-        raise NotImplementedError("Must use a subclass of Operand")
+        return self._required_length
 
     def get_bytes(self):
         raise NotImplementedError("Must use a subclass of Operand")
@@ -568,7 +571,6 @@ def divide_and_contextualise(section_dict: dict):
         label = ""
         if not parts[0].upper() in OPCODE_NAMES:
             # The first must be a label; check that the second is the opcode
-            assert parts[1].upper() in OPCODE_NAMES, "Either the first or second part must be an opcode mnemonic"
             label = parts[0]
             del parts[0]    # Remove the label from the list
 
@@ -611,7 +613,7 @@ def divide_and_contextualise(section_dict: dict):
                                                 op1=operand1,
                                                 op2=operand2))
         
-        return config_dict, instruction_list
+    return config_dict, instruction_list
 
 
 
@@ -693,7 +695,6 @@ def calculate_var_table_size(var_table):
 
     return size
 
-@lru_cache()
 def calculate_instr_start_address(instr_num, instruction_list):
     total = 0
     for instr in instruction_list[:instr_num]:
@@ -719,6 +720,9 @@ def encode_instruction_list(instruction_list):
 
 def place_memory_addresses(mem_table, instruction_list):
     for instr in instruction_list:
+        if isinstance(instr, DataInstruction):
+            continue    # These don't have operands
+
         if isinstance(instr.operand1, str):
             instr.operand1 = AddressOperand(mem_table[instr.operand1])
 
