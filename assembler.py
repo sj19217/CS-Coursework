@@ -321,7 +321,7 @@ class TextInstruction(Instruction):
 
         # Next, find the operand byte
         operand_num = self.operand1.get_bit_designation() if self.operand1 is not None else 0
-        operand_num << 4    # Shift the bits to the left to make space for the second
+        operand_num = operand_num << 4    # Shift the bits to the left to make space for the second
         operand_num += self.operand2.get_bit_designation() if self.operand2 is not None else 0
         operand_byte = struct.pack(">B", operand_num)
 
@@ -736,7 +736,8 @@ def encode_metadata(config_dict):
 def encode_instruction_list(instruction_list, memory_table):
     encoded = b""
     for instr in instruction_list:
-        encoded += instr.get_bytes(memory_table)
+        b = instr.get_bytes(memory_table)
+        encoded += b
     return encoded
 
 

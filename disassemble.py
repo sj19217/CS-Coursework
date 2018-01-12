@@ -36,7 +36,11 @@ DTYPE_STRUCT_FMT_STRINGS = {
     "ushort": ">H",
     "int": ">i",
     "uint": ">I",
-    "float": ">f"
+    "float": ">f",
+    "1B": ">B",
+    "2B": ">H",
+    "4B": ">I",
+    "": ""
 }
 
 Instruction = namedtuple("Instruction", "start_byte opcode dtype op1 op2")
@@ -67,7 +71,7 @@ def dis(bytecode):
     # Go on a loop. Consume the bytes as the interpreter would, generating a list of instructions.
     while True:
         # Calculate the starting byte of this instruction
-        start_byte = text.tell() + text_offset
+        start_byte = text.tell()
 
         # Making an instruction. First up should be an opcode.
         opcode_byte = text.read(1)[0]   # The [0] turns it into an int.
@@ -80,15 +84,24 @@ def dis(bytecode):
 
         # Read operand byte
         op_byte = text.read(1)[0]
-        op1_desc = op_byte & 0b00001111
-        op2_desc = (op_byte & 0x11110000) >> 4
+        op1_desc = (op_byte & 0b11110000) >> 4
+        op2_desc = op_byte & 0b00001111
 
         operand1 = interpret_operand(text, op1_desc, dtype)
         operand2 = interpret_operand(text, op2_desc, dtype)
 
         instruction_list.append(Instruction(start_byte, mnemonic, dtype, operand1, operand2))
 
-        if text.read(1) == b"":
+
+        #### THIS SHOULD BE TEMPORARY
+        dtype_str = "(" + dtype + ")" if dtype is not None else ""
+        print("\t{start_byte}\t{mnemonic} {dtype_str}\t{op1}\t{op2}".format(start_byte=start_byte,
+                                                                            mnemonic=mnemonic,
+                                                                            dtype_str=dtype_str,
+                                                                            op1=operand1,
+                                                                            op2=operand2))
+
+        if not len(text.getbuffer()):
             break
 
     # With the config dict and instruction list ready, do the printing

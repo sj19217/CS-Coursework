@@ -2,12 +2,10 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="ce6d4a90-30a5-4d92-ba6a-cc7910f37b5b" name="Default" comment="">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/output/fibonacci.bin" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/Assembler.iml" afterPath="$PROJECT_DIR$/.idea/Assembler.iml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/misc.xml" afterPath="$PROJECT_DIR$/.idea/misc.xml" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/dis.py" afterPath="$PROJECT_DIR$/disassemble.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/output/fibonacci.bin" afterPath="$PROJECT_DIR$/output/fibonacci.bin" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/assembler.py" afterPath="$PROJECT_DIR$/assembler.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/dis.py" afterPath="$PROJECT_DIR$/dis.py" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -17,9 +15,10 @@
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
   <component name="CoverageDataManager">
-    <SUITE FILE_PATH="coverage/Assembler$dis.coverage" NAME="dis Coverage Results" MODIFIED="1515760295632" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/Assembler$dis.coverage" NAME="dis Coverage Results" MODIFIED="1515771909799" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/Assembler$disassemble.coverage" NAME="disassemble Coverage Results" MODIFIED="1515779571110" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/Assembler$assembler.coverage" NAME="Assembler (with file for normalisation) Coverage Results" MODIFIED="1514838599418" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/Assembler$Assembler__make_ask_for_file_.coverage" NAME="Assembler (make ask for file) Coverage Results" MODIFIED="1515759936352" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/Assembler$Assembler__make_ask_for_file_.coverage" NAME="Assembler (make ask for file) Coverage Results" MODIFIED="1515779541203" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
   <component name="DatabaseView">
     <option name="SHOW_INTERMEDIATE" value="true" />
@@ -39,28 +38,38 @@
       <file leaf-file-name="assembler.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/assembler.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="464">
-              <caret line="800" column="0" lean-forward="true" selection-start-line="800" selection-start-column="0" selection-end-line="800" selection-end-column="0" />
+            <state relative-caret-position="236">
+              <caret line="326" column="0" lean-forward="true" selection-start-line="326" selection-start-column="0" selection-end-line="326" selection-end-column="0" />
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="fibonacci.bin" pinned="false" current-in-tab="false">
+      <file leaf-file-name="disassemble.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/disassemble.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="372">
+              <caret line="90" column="59" lean-forward="true" selection-start-line="90" selection-start-column="59" selection-end-line="90" selection-end-column="59" />
+              <folding>
+                <element signature="e#573#607#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="fibonacci.bin" pinned="false" current-in-tab="true">
         <entry file="deltahex://C:/Users/Stephen Jones/Backups/Sandisk Drive/Homework/Computer Science/Coursework/Assembler/output/fibonacci.bin">
           <provider selected="true" editor-type-id="org.exbin.deltahex">
             <state />
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="dis.py" pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/dis.py">
+      <file leaf-file-name="fibonacci.asm" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/testing/fibonacci.asm">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="189">
-              <caret line="73" column="0" lean-forward="false" selection-start-line="73" selection-start-column="0" selection-end-line="73" selection-end-column="0" />
-              <folding>
-                <element signature="e#573#607#0" expanded="true" />
-              </folding>
+            <state relative-caret-position="153">
+              <caret line="9" column="9" lean-forward="true" selection-start-line="9" selection-start-column="9" selection-end-line="9" selection-end-column="9" />
+              <folding />
             </state>
           </provider>
         </entry>
@@ -86,8 +95,9 @@
         <option value="$PROJECT_DIR$/testing/fibonacci.asm" />
         <option value="$PROJECT_DIR$/dev_tests.md" />
         <option value="$PROJECT_DIR$/ideas.md" />
-        <option value="$PROJECT_DIR$/assembler.py" />
         <option value="$PROJECT_DIR$/dis.py" />
+        <option value="$PROJECT_DIR$/disassemble.py" />
+        <option value="$PROJECT_DIR$/assembler.py" />
       </list>
     </option>
   </component>
@@ -182,7 +192,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Python.dis">
+  <component name="RunManager" selected="Python.disassemble">
     <configuration default="false" name="Assembler (make ask for file)" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -218,7 +228,26 @@
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <module name="Assembler" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" enabled="false" sample_coverage="true" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/dis.py" />
+      <option name="SCRIPT_NAME" value="C:\Users\Stephen Jones\Backups\Sandisk Drive\Homework\Computer Science\Coursework\Assembler\disassemble.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <method />
+    </configuration>
+    <configuration default="false" name="disassemble" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <module name="Assembler" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" enabled="false" sample_coverage="true" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/disassemble.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -372,16 +401,18 @@
       <option name="_new_targetType" value="&quot;PATH&quot;" />
       <method />
     </configuration>
-    <list size="3">
+    <list size="4">
       <item index="0" class="java.lang.String" itemvalue="Python.Assembler (make ask for file)" />
       <item index="1" class="java.lang.String" itemvalue="JavaScript Debug.Instruction Class Diagram.html" />
       <item index="2" class="java.lang.String" itemvalue="Python.dis" />
+      <item index="3" class="java.lang.String" itemvalue="Python.disassemble" />
     </list>
     <recent_temporary>
-      <list size="3">
-        <item index="0" class="java.lang.String" itemvalue="Python.dis" />
+      <list size="4">
+        <item index="0" class="java.lang.String" itemvalue="Python.disassemble" />
         <item index="1" class="java.lang.String" itemvalue="Python.Assembler (make ask for file)" />
-        <item index="2" class="java.lang.String" itemvalue="JavaScript Debug.Instruction Class Diagram.html" />
+        <item index="2" class="java.lang.String" itemvalue="Python.dis" />
+        <item index="3" class="java.lang.String" itemvalue="JavaScript Debug.Instruction Class Diagram.html" />
       </list>
     </recent_temporary>
   </component>
@@ -504,23 +535,30 @@
       <option name="project" value="LOCAL" />
       <updated>1515756297745</updated>
     </task>
-    <option name="localTasksCounter" value="16" />
+    <task id="LOCAL-00016" summary="Finished disassembler but not debugged">
+      <created>1515760364404</created>
+      <option name="number" value="00016" />
+      <option name="presentableId" value="LOCAL-00016" />
+      <option name="project" value="LOCAL" />
+      <updated>1515760364404</updated>
+    </task>
+    <option name="localTasksCounter" value="17" />
     <servers />
   </component>
   <component name="ToolWindowManager">
     <frame x="-8" y="-8" width="1936" height="1056" extended-state="6" />
     <layout>
-      <window_info id="Project" active="true" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.1641791" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.15085287" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32839224" sideWeight="0.5021482" order="7" side_tool="true" content_ui="tabs" />
       <window_info id="Database" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32975295" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32839224" sideWeight="0.49785176" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Python Console" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32936078" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32936078" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.32936078" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.16272825" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32839224" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
-      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.39869988" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.39869988" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Data View" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="SFDX" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
@@ -562,18 +600,27 @@
     <MESSAGE value="Print output in hex format" />
     <MESSAGE value="First half of disassembler" />
     <MESSAGE value="Slight alterations to the assembler and made part of interpret_operand in dis.py" />
-    <option name="LAST_COMMIT_MESSAGE" value="Slight alterations to the assembler and made part of interpret_operand in dis.py" />
+    <MESSAGE value="Finished disassembler but not debugged" />
+    <option name="LAST_COMMIT_MESSAGE" value="Finished disassembler but not debugged" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
       <breakpoints>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/dis.py</url>
-          <line>73</line>
-          <option name="timeStamp" value="1" />
+          <url>file://$PROJECT_DIR$/disassemble.py</url>
+          <line>138</line>
+          <option name="timeStamp" value="14" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/assembler.py</url>
+          <line>322</line>
+          <option name="timeStamp" value="16" />
         </line-breakpoint>
       </breakpoints>
-      <option name="time" value="2" />
+      <breakpoints-dialog>
+        <breakpoints-dialog />
+      </breakpoints-dialog>
+      <option name="time" value="17" />
     </breakpoint-manager>
     <watches-manager />
   </component>
@@ -586,7 +633,7 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/dis.py">
+    <entry file="file://$PROJECT_DIR$/disassemble.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="1836">
           <caret line="108" column="0" lean-forward="false" selection-start-line="108" selection-start-column="0" selection-end-line="108" selection-end-column="0" />
@@ -780,26 +827,33 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/testing/data_section.asm" />
     <entry file="file://$USER_HOME$/.PyCharm2017.3/system/python_stubs/1204724543/builtins.py" />
-    <entry file="file://$PROJECT_DIR$/testing/fibonacci.asm" />
     <entry file="file://$PROJECT_DIR$/dis.py___jb_old___" />
     <entry file="file://$PROJECT_DIR$/dev_tests.md" />
     <entry file="file://$PROJECT_DIR$/ideas.md" />
     <entry file="file://$PROJECT_DIR$/dis.py___jb_tmp___" />
     <entry file="file://$PROJECT_DIR$/assembler.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="464">
-          <caret line="800" column="0" lean-forward="true" selection-start-line="800" selection-start-column="0" selection-end-line="800" selection-end-column="0" />
+        <state relative-caret-position="236">
+          <caret line="326" column="0" lean-forward="true" selection-start-line="326" selection-start-column="0" selection-end-line="326" selection-end-column="0" />
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/dis.py">
+    <entry file="file://$PROJECT_DIR$/disassemble.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="189">
-          <caret line="73" column="0" lean-forward="false" selection-start-line="73" selection-start-column="0" selection-end-line="73" selection-end-column="0" />
+        <state relative-caret-position="372">
+          <caret line="90" column="59" lean-forward="true" selection-start-line="90" selection-start-column="59" selection-end-line="90" selection-end-column="59" />
           <folding>
             <element signature="e#573#607#0" expanded="true" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/testing/fibonacci.asm">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="153">
+          <caret line="9" column="9" lean-forward="true" selection-start-line="9" selection-start-column="9" selection-end-line="9" selection-end-column="9" />
+          <folding />
         </state>
       </provider>
     </entry>
