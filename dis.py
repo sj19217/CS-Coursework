@@ -4,6 +4,12 @@ The format of the output is the metadata then a list of commands.
 The metadata is in the format of key: value
 Each code line is formatted as:
 start_byte  opcode (dtype)  operand1    operand2
+
+The operands take the following formats:
+ * An immediate value is just printed as a base-10 int
+ * A register operand is printed as the name of the register
+ * An arithmetic operand is printed like the assembly input format
+ * A memory address is formatted with the letter M followed by the base-16 address
 """
 
 from collections import namedtuple
@@ -69,11 +75,38 @@ def dis(bytecode):
 
         if "_" in opcode_desc:
             mnemonic, dtype = opcode_desc.split("_")
+        else:
+            mnemonic, dtype = opcode_desc, ""
 
         # Read operand byte
         op_byte = text.read(1)[0]
         op1_desc = op_byte & 0b00001111
         op2_desc = (op_byte & 0x11110000) >> 4
+
+        operand1 = interpret_operand(text, op1_desc, dtype)
+        operand2 = interpret_operand(text, op2_desc, dtype)
+
+        instruction_list.append(Instruction(start_byte, mnemonic, dtype, operand1, operand2))
+
+        if text.read(1) == b"":
+            break
+
+    # With the config dict and instruction list ready, do the printing
+    print("Disassembling {} bytes\n".format(len(bytecode)))
+    print("Config dictionary (took {} bytes)".format(len(config)))
+    for key, value in config_dict.items():
+        print("    {key}\t\t{value}".format(key=key, value=value))
+
+    # Print all the instructions
+    print("\nInstructions (took {} bytes)".format(len(bytecode) - len(config) - 4))
+    for start_byte, mnemonic, dtype, op1, op2 in instruction_list:
+        dtype_str = "(" + dtype + ")" if dtype is not None else ""
+        print("\t{start_byte}\t{mnemonic} {dtype_str}\t{op1}\t{op2}".format(start_byte=start_byte,
+                                                                            mnemonic=mnemonic,
+                                                                            dtype_str=dtype_str,
+                                                                            op1=op1,
+                                                                            op2=op2))
+
 
 
 def interpret_operand(text_stream, desc, dtype):
@@ -86,15 +119,57 @@ def interpret_operand(text_stream, desc, dtype):
     elif desc == 2:
         # 8-bit immediate operand
         op_bytes = text_stream.read(1)
-        return struct.unpack(DTYPE_STRUCT_FMT_STRINGS[dtype], op_bytes)
+        return struct.unpack(DTYPE_STRUCT_FMT_STRINGS[dtype], op_bytes)[0]
     elif desc == 3:
         # 16-bit immediate operand
         op_bytes = text_stream.read(2)
-        return struct.unpack(">H", op_bytes)
+        return struct.unpack(DTYPE_STRUCT_FMT_STRINGS[dtype], op_bytes)[0]
+    elif desc == 4:
+        # 32-bit immediate operand
+        op_bytes = text_stream.read(4)
+        return struct.unpack(DTYPE_STRUCT_FMT_STRINGS[dtype], op_bytes)[0]
+    elif desc == 5:
+        # Memory address
+        op_bytes = text_stream.read(4)
+        return "M" + hex(struct.unpack(">I", op_bytes)[0])[2:]
+    elif desc == 6:
+        # Arithmetic operand in the form "a"
+        a = read_arithmetic_part(text_stream)
+        return "[" + a + "]"
+    elif desc == 7:
+        # Arithmetic operand in the form "a*b"
+        a = read_arithmetic_part(text_stream)
+        b = read_arithmetic_part(text_stream)
+        return "[" + a + "*" + b + "]"
+    elif desc == 8:
+        # Arithmetic operand in the form "a+b"
+        a = read_arithmetic_part(text_stream)
+        b = read_arithmetic_part(text_stream)
+        return "[" + a + "*" + b + "]"
+    elif desc == 9:
+        # Arithmetic operand in the form "a*b+c"
+        a = read_arithmetic_part(text_stream)
+        b = read_arithmetic_part(text_stream)
+        c = read_arithmetic_part(text_stream)
+        return "[" + a + "*" + b + "+" + c + "]"
+    elif desc == 10:
+        # Arithmetic operand in the form "a+b*c"
+        a = read_arithmetic_part(text_stream)
+        b = read_arithmetic_part(text_stream)
+        c = read_arithmetic_part(text_stream)
+        return "[" + a + "+" + b + "*" + c + "]"
+
+
+def read_arithmetic_part(text_stream):
+    num = text_stream.read(1)[0]
+    if num in REGISTERS.keys():
+        return REGISTERS[num]
+    else:
+        return str(num)
 
 
 if __name__ == "__main__":
-    if len(sys.argv) > 0:
+    if len(sys.argv) > 1:
         fname = sys.argv[1]
     else:
         fname = input("Bytecode file: ")

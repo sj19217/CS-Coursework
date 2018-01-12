@@ -759,7 +759,7 @@ def print_bytes_as_hex(bytes_, rowlen):
             print()
 
 
-def main(asmfile):
+def main(asmfile, out_format):
     with open(asmfile, "rt") as file:
         text = file.read()
 
@@ -787,7 +787,18 @@ def main(asmfile):
     bytecode += encode_metadata(config_dict)
     bytecode += encode_instruction_list(instruction_list, mem_table)
 
-    print_bytes_as_hex(bytecode, 16)
+    # Output it as the user wanted
+    if out_format == "hex":
+        print_bytes_as_hex(bytecode, 16)
+    elif out_format == "binstr":
+        print(bytecode)
+    elif out_format == "return":    # This one is for if the assembler.py module is loaded by another python file
+        return bytecode
+    elif out_format == "file":
+        fname = input("Name of output file: ")
+        with open(fname, "wb") as file:
+            file.write(bytecode)
+
 
 if __name__ == "__main__":
     import sys
@@ -798,6 +809,12 @@ if __name__ == "__main__":
         else:
             file = sys.argv[1]
 
-        main(file)
+        # Determine the output format
+        if len(sys.argv) > 2:
+            out_format = sys.argv[2]
+        else:
+            out_format = input("What output format (hex, binstr or file)? ")
+
+        main(file, out_format)
     else:
         print("Assembly file is unspecified")
