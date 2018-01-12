@@ -22,6 +22,17 @@ for regname, regnum in REGISTERS.items():
     REGISTERS[regnum] = regname
     del REGISTERS[regname]
 
+# A dict to map from the name of a data type to its struct designation
+DTYPE_STRUCT_FMT_STRINGS = {
+    "byte": ">b",
+    "ubyte": ">B",
+    "short": ">h",
+    "ushort": ">H",
+    "int": ">i",
+    "uint": ">I",
+    "float": ">f"
+}
+
 Instruction = namedtuple("Instruction", "start_byte opcode dtype op1 op2")
 
 def dis(bytecode):
@@ -65,7 +76,7 @@ def dis(bytecode):
         op2_desc = (op_byte & 0x11110000) >> 4
 
 
-def interpret_operand(text_stream, desc):
+def interpret_operand(text_stream, desc, dtype):
     if desc == 0:
         return ""
     elif desc == 1:
@@ -75,7 +86,7 @@ def interpret_operand(text_stream, desc):
     elif desc == 2:
         # 8-bit immediate operand
         op_bytes = text_stream.read(1)
-        return struct.unpack(">B", op_bytes)
+        return struct.unpack(DTYPE_STRUCT_FMT_STRINGS[dtype], op_bytes)
     elif desc == 3:
         # 16-bit immediate operand
         op_bytes = text_stream.read(2)

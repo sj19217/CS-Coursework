@@ -243,10 +243,13 @@ class DataInstruction(Instruction):
             raise ValueError("Illegal value size: {}".format(valsize))
 
         # The memory address
-        mem_addr = struct.pack(">I", mem_table[self.name])              ## FIX: REMOVE DEPENDENCY ON VARIABLE TABLE
+        mem_addr = struct.pack(">I", mem_table[self.name])
 
         # The initial value
-        value_bytes = struct.pack(val_fmt_str, int(self.value))
+        if self.data_type == "float":
+            value_bytes = struct.pack(val_fmt_str, float(self.value))
+        else:
+            value_bytes = struct.pack(val_fmt_str, int(self.value))
 
         # Put them all together and return
         return instr + operand_num + mem_addr + value_bytes
@@ -368,9 +371,12 @@ class RegisterOperand(Operand):
 class ImmediateOperand(Operand):
     def __init__(self, value):
         super().__init__()
-        self.value = int(value)
+        try:
+            self.value = int(value)
+        except ValueError:
+            self.value = float(value)
 
-        if self.value < -32768 or self.value > 65536:
+        if isinstance(self.value, float) or self.value < -32768 or self.value > 65536:
             self.size = 4
             self._bit_designation = 4
         elif self.value < -128 or self.value > 255:
@@ -384,7 +390,9 @@ class ImmediateOperand(Operand):
 
     def _get_value_format_string(self):
         # Find the formatting string to use to turn it into bytes
-        if self.value < -32768:
+        if isinstance(self.value, float):
+            return ">f"
+        elif self.value < -32768:
             return ">i"
         elif self.value < -128:
             return ">h"
