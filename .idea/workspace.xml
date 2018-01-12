@@ -2,10 +2,8 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="ce6d4a90-30a5-4d92-ba6a-cc7910f37b5b" name="Default" comment="">
-      <change beforePath="" afterPath="$PROJECT_DIR$/dis.py" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change beforePath="$PROJECT_DIR$/assembler.py" afterPath="$PROJECT_DIR$/assembler.py" />
-      <change beforePath="$PROJECT_DIR$/testing/fibonacci.asm" afterPath="$PROJECT_DIR$/testing/fibonacci.asm" />
+      <change beforePath="$PROJECT_DIR$/dis.py" afterPath="$PROJECT_DIR$/dis.py" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -32,11 +30,11 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="375">
-      <file leaf-file-name="assembler.py" pinned="false" current-in-tab="true">
+      <file leaf-file-name="assembler.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/assembler.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="152">
-              <caret line="779" column="17" lean-forward="false" selection-start-line="779" selection-start-column="17" selection-end-line="779" selection-end-column="17" />
+            <state relative-caret-position="173">
+              <caret line="780" column="0" lean-forward="false" selection-start-line="780" selection-start-column="0" selection-end-line="780" selection-end-column="0" />
               <folding>
                 <element signature="e#137#146#0" expanded="true" />
               </folding>
@@ -44,12 +42,14 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="dis.py" pinned="false" current-in-tab="false">
+      <file leaf-file-name="dis.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/dis.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="21">
-              <caret line="1" column="14" lean-forward="false" selection-start-line="1" selection-start-column="14" selection-end-line="1" selection-end-column="14" />
-              <folding />
+            <state relative-caret-position="488">
+              <caret line="81" column="44" lean-forward="false" selection-start-line="81" selection-start-column="44" selection-end-line="81" selection-end-column="44" />
+              <folding>
+                <element signature="e#265#299#0" expanded="true" />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -86,7 +86,7 @@
     <sorting>DEFINITION_ORDER</sorting>
   </component>
   <component name="ProjectFrameBounds" extendedState="6">
-    <option name="x" value="952" />
+    <option name="x" value="834" />
     <option name="width" value="976" />
     <option name="height" value="1038" />
   </component>
@@ -419,7 +419,14 @@
       <option name="project" value="LOCAL" />
       <updated>1515634597848</updated>
     </task>
-    <option name="localTasksCounter" value="13" />
+    <task id="LOCAL-00013" summary="Print output in hex format">
+      <created>1515708019759</created>
+      <option name="number" value="00013" />
+      <option name="presentableId" value="LOCAL-00013" />
+      <option name="project" value="LOCAL" />
+      <updated>1515708019760</updated>
+    </task>
+    <option name="localTasksCounter" value="14" />
     <servers />
   </component>
   <component name="ToolWindowManager">
@@ -431,7 +438,7 @@
       <window_info id="Python Console" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3295325" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.3295325" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32839224" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Project" active="true" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.16111708" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.16111708" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="Docker" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="false" weight="0.33" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
       <window_info id="Database" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32975295" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
       <window_info id="SciView" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
@@ -474,7 +481,8 @@
     <MESSAGE value="Added Operand and its subclasses, including logic" />
     <MESSAGE value="Implemented parsing of operands" />
     <MESSAGE value="Began implementing TextInstruction" />
-    <option name="LAST_COMMIT_MESSAGE" value="Began implementing TextInstruction" />
+    <MESSAGE value="Print output in hex format" />
+    <option name="LAST_COMMIT_MESSAGE" value="Print output in hex format" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -498,10 +506,7 @@
         <state split_layout="SPLIT">
           <first_editor relative-caret-position="0">
             <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-            <folding>
-              <marker date="1515706467431" expanded="true" signature="0:278" ph="h2: #### Possible tests to implement" />
-              <marker date="1515706467431" expanded="true" signature="0:391" ph="h2: #### Possible tests to implement" />
-            </folding>
+            <folding />
           </first_editor>
           <second_editor />
         </state>
@@ -538,10 +543,7 @@
         <state split_layout="SPLIT">
           <first_editor relative-caret-position="0">
             <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-            <folding>
-              <marker date="1515706467431" expanded="true" signature="0:278" ph="h2: #### Possible tests to implement" />
-              <marker date="1515706467431" expanded="true" signature="0:391" ph="h2: #### Possible tests to implement" />
-            </folding>
+            <folding />
           </first_editor>
           <second_editor />
         </state>
@@ -578,10 +580,7 @@
         <state split_layout="SPLIT">
           <first_editor relative-caret-position="0">
             <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-            <folding>
-              <marker date="1515706467431" expanded="true" signature="0:278" ph="h2: #### Possible tests to implement" />
-              <marker date="1515706467431" expanded="true" signature="0:391" ph="h2: #### Possible tests to implement" />
-            </folding>
+            <folding />
           </first_editor>
           <second_editor />
         </state>
@@ -617,10 +616,7 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="63">
           <caret line="3" column="30" lean-forward="false" selection-start-line="3" selection-start-column="30" selection-end-line="3" selection-end-column="30" />
-          <folding>
-            <marker date="1515706467431" expanded="true" signature="0:278" ph="h2: #### Possible tests to implement" />
-            <marker date="1515706467431" expanded="true" signature="0:391" ph="h2: #### Possible tests to implement" />
-          </folding>
+          <folding />
         </state>
       </provider>
     </entry>
@@ -745,29 +741,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/ideas.md">
-      <provider selected="true" editor-type-id="split-provider[text-editor;markdown-preview-editor]">
-        <state split_layout="FIRST">
-          <first_editor relative-caret-position="147">
-            <caret line="7" column="69" lean-forward="false" selection-start-line="7" selection-start-column="69" selection-end-line="7" selection-end-column="69" />
-            <folding>
-              <marker date="1515706467431" expanded="true" signature="0:278" ph="h2: #### Possible tests to implement" />
-              <marker date="1515706467431" expanded="true" signature="0:391" ph="h2: #### Possible tests to implement" />
-            </folding>
-          </first_editor>
-          <second_editor />
-        </state>
-      </provider>
-      <provider editor-type-id="text-editor">
-        <state relative-caret-position="63">
-          <caret line="3" column="30" lean-forward="false" selection-start-line="3" selection-start-column="30" selection-end-line="3" selection-end-column="30" />
-          <folding>
-            <marker date="1515706467431" expanded="true" signature="0:278" ph="h2: #### Possible tests to implement" />
-            <marker date="1515706467431" expanded="true" signature="0:391" ph="h2: #### Possible tests to implement" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$USER_HOME$/.PyCharm2017.3/system/python_stubs/1204724543/builtins.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="282">
@@ -795,20 +768,47 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/dis.py">
+    <entry file="file://$PROJECT_DIR$/ideas.md">
+      <provider selected="true" editor-type-id="split-provider[text-editor;markdown-preview-editor]">
+        <state split_layout="FIRST">
+          <first_editor relative-caret-position="147">
+            <caret line="7" column="69" lean-forward="false" selection-start-line="7" selection-start-column="69" selection-end-line="7" selection-end-column="69" />
+            <folding />
+          </first_editor>
+          <second_editor />
+        </state>
+      </provider>
+      <provider editor-type-id="text-editor">
+        <state relative-caret-position="63">
+          <caret line="3" column="30" lean-forward="false" selection-start-line="3" selection-start-column="30" selection-end-line="3" selection-end-column="30" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/dis.py___jb_old___">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="21">
-          <caret line="1" column="14" lean-forward="false" selection-start-line="1" selection-start-column="14" selection-end-line="1" selection-end-column="14" />
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/assembler.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="152">
-          <caret line="779" column="17" lean-forward="false" selection-start-line="779" selection-start-column="17" selection-end-line="779" selection-end-column="17" />
+        <state relative-caret-position="173">
+          <caret line="780" column="0" lean-forward="false" selection-start-line="780" selection-start-column="0" selection-end-line="780" selection-end-column="0" />
           <folding>
             <element signature="e#137#146#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/dis.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="488">
+          <caret line="81" column="44" lean-forward="false" selection-start-line="81" selection-start-column="44" selection-end-line="81" selection-end-column="44" />
+          <folding>
+            <element signature="e#265#299#0" expanded="true" />
           </folding>
         </state>
       </provider>
