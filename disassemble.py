@@ -20,13 +20,11 @@ import sys
 from assembler import OPCODES, REGISTERS
 
 # Get the OPCODES and REGISTERS dicts from the assembler file and swap everything round
-for mnemonic, opcode in OPCODES.items():
+for mnemonic, opcode in OPCODES.copy().items():
     OPCODES[opcode] = mnemonic
-    del OPCODES[mnemonic]
 
-for regname, regnum in REGISTERS.items():
+for regname, regnum in REGISTERS.copy().items():
     REGISTERS[regnum] = regname
-    del REGISTERS[regname]
 
 # A dict to map from the name of a data type to its struct designation
 DTYPE_STRUCT_FMT_STRINGS = {
