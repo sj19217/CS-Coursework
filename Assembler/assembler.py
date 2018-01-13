@@ -497,6 +497,14 @@ class ArithmeticOperand(Operand):
         return bytes_
 
 
+
+class AssemblyError(Exception):
+    def __init__(self, line_no, description):
+        super().__init__("Error on line {}: {}".format(line_no, description))
+        self.line_no = line_no
+        self.description = description
+
+
 # ---------- FUNCTIONS
 
 
@@ -528,7 +536,7 @@ def normalise_text(text):
         lines[i] = multiple_whitespace.sub(" ", line)
 
     # 1.6. Put the lines back together
-    normalised_text = "\n".join(lines)
+    normalised_text = "\n".join(line.strip() for line in lines)
 
     return normalised_text
 
@@ -549,7 +557,11 @@ def split_into_sections(text):
         if title.strip() == "" and len(other) == 0:
             continue
 
-        sections_dict[title] = other[0] if len(other) > 0 else ""
+        sections_dict[title] = (other[0] if len(other) > 0 else "").strip()
+
+    for section in ("meta", "data", "text"):
+        if section not in sections_dict.keys():
+            raise AssemblyError(-1, "No {} section".format(section))
 
     return sections_dict
 
