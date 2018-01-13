@@ -176,7 +176,10 @@ DTYPE_META = {
     "ushort": DataTypeMetadata(2),
     "int": DataTypeMetadata(4),
     "uint": DataTypeMetadata(4),
-    "float": DataTypeMetadata(4)
+    "float": DataTypeMetadata(4),
+    "1B": DataTypeMetadata(1),
+    "2B": DataTypeMetadata(2),
+    "4B": DataTypeMetadata(4)
 }
 
 # ---------- CLASSES

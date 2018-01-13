@@ -17,7 +17,7 @@ import io
 import struct
 import sys
 
-from assembler import OPCODES, REGISTERS
+from assembler import OPCODES, REGISTERS, DTYPE_META
 
 # Get the OPCODES and REGISTERS dicts from the assembler file and swap everything round
 for mnemonic, opcode in OPCODES.copy().items():
@@ -71,6 +71,10 @@ def dis(bytecode):
         # Calculate the starting byte of this instruction
         start_byte = text.tell()
 
+        # At the end of the stream
+        if start_byte == len(bytecode) - 4 - len(config.encode()):
+            break
+
         # Making an instruction. First up should be an opcode.
         opcode_byte = text.read(1)[0]   # The [0] turns it into an int.
         opcode_desc = OPCODES[opcode_byte]
@@ -91,17 +95,6 @@ def dis(bytecode):
         instruction_list.append(Instruction(start_byte, mnemonic, dtype, operand1, operand2))
 
 
-        #### THIS SHOULD BE TEMPORARY
-        dtype_str = "(" + dtype + ")" if dtype is not None else ""
-        print("\t{start_byte}\t{mnemonic} {dtype_str}\t{op1}\t{op2}".format(start_byte=start_byte,
-                                                                            mnemonic=mnemonic,
-                                                                            dtype_str=dtype_str,
-                                                                            op1=operand1,
-                                                                            op2=operand2))
-
-        if not len(text.getbuffer()):
-            break
-
     # With the config dict and instruction list ready, do the printing
     print("Disassembling {} bytes\n".format(len(bytecode)))
     print("Config dictionary (took {} bytes)".format(len(config)))
@@ -111,7 +104,7 @@ def dis(bytecode):
     # Print all the instructions
     print("\nInstructions (took {} bytes)".format(len(bytecode) - len(config) - 4))
     for start_byte, mnemonic, dtype, op1, op2 in instruction_list:
-        dtype_str = "(" + dtype + ")" if dtype is not None else ""
+        dtype_str = "(" + dtype + ")" if dtype else "     "
         print("\t{start_byte}\t{mnemonic} {dtype_str}\t{op1}\t{op2}".format(start_byte=start_byte,
                                                                             mnemonic=mnemonic,
                                                                             dtype_str=dtype_str,
@@ -130,10 +123,12 @@ def interpret_operand(text_stream, desc, dtype):
     elif desc == 2:
         # 8-bit immediate operand
         op_bytes = text_stream.read(1)
+        op_bytes = (b"\x00" * (DTYPE_META[dtype].size - 1)) + op_bytes
         return struct.unpack(DTYPE_STRUCT_FMT_STRINGS[dtype], op_bytes)[0]
     elif desc == 3:
         # 16-bit immediate operand
         op_bytes = text_stream.read(2)
+        op_bytes = (b"\x00" * (DTYPE_META[dtype].size - 2)) + op_bytes
         return struct.unpack(DTYPE_STRUCT_FMT_STRINGS[dtype], op_bytes)[0]
     elif desc == 4:
         # 32-bit immediate operand
@@ -142,7 +137,7 @@ def interpret_operand(text_stream, desc, dtype):
     elif desc == 5:
         # Memory address
         op_bytes = text_stream.read(4)
-        return "M" + hex(struct.unpack(">I", op_bytes)[0])[2:]
+        return "M" + str(struct.unpack(">I", op_bytes)[0])
     elif desc == 6:
         # Arithmetic operand in the form "a"
         a = read_arithmetic_part(text_stream)
