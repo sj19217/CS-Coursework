@@ -17,7 +17,7 @@ import io
 import struct
 import sys
 
-from assembler import OPCODES, REGISTERS, DTYPE_META
+from .assembler import OPCODES, REGISTERS, DTYPE_META
 
 # Get the OPCODES and REGISTERS dicts from the assembler file and swap everything round
 for mnemonic, opcode in OPCODES.copy().items():
@@ -45,9 +45,6 @@ Instruction = namedtuple("Instruction", "start_byte opcode dtype op1 op2")
 
 def dis(bytecode):
     config, text = bytecode.split(b"\x00\x00\x00\x00", maxsplit=1)
-
-    # Calculate the number of bytes into the file the text section is offset
-    text_offset = len(config) + 4
 
     # Config section should be able to be interpreted as text
     config = config.decode()

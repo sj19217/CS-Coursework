@@ -7,7 +7,6 @@ import re
 from pprint import pprint
 import struct
 from collections import namedtuple
-from functools import lru_cache
 
 META_CONFIG_DEFAULT = {
     "mem_amt": 4
@@ -208,6 +207,15 @@ class DataInstruction(Instruction):
         self.value = value
         self.data_type = dtype
 
+    def __eq__(self, other):
+        return (self.name == other.name) \
+               and (self.value == other.value) \
+               and (self.data_type == other.data_type) \
+               and (self.instruction_num == other.instruction_num)
+
+    def __repr__(self):
+        return "DataInstruction({0.instruction_num}, {0.name}, {0.value}, {0.data_type})".format(self)
+
     def _calculate_valsize(self):
         """Calculate the number of bytes in the value"""
         if self.data_type == "float":
@@ -260,7 +268,7 @@ class DataInstruction(Instruction):
 
 
 class TextInstruction(Instruction):
-    def __init__(self, instr_num, opcode: str, dtype: str, op1, op2, label: str):
+    def __init__(self, instr_num, opcode: str, dtype: str, op1, op2, label=""):
         super().__init__(instr_num)
         self.opcode_mnemonic = opcode
         self.data_type = dtype
@@ -281,6 +289,20 @@ class TextInstruction(Instruction):
                 self.data_type = "short"
             elif max_op_size == 4:
                 self.data_type = "int"
+
+    def __eq__(self, other):
+        return self.instruction_num == other.instruction_num \
+                and self.opcode_mnemonic == other.opcode_mnemonic \
+                and self.data_type == other.data_type \
+                and self.operand1 == other.operand1 \
+                and self.operand2 == other.operand2 \
+                and self.label == other.label
+
+    def __repr__(self):
+        return "TextInstruction({0.instruction_num}, {0.opcode_mnemonic}, {0.data_type}, {op1}, {op2}, {0.label}".format(self,
+                op1=str(self.operand1),
+                op2=str(self.operand2))
+
 
     def get_bytes_length(self):
         # (Opcode byte + operand byte = 2) + operand 1 + operand 2
@@ -366,6 +388,19 @@ class RegisterOperand(Operand):
         self._bit_designation = 1
         self._required_length = 1
 
+    def __eq__(self, other):
+        return isinstance(other, RegisterOperand) \
+                and self.name == other.name \
+                and self.numerical == other.numerical \
+                and self._bit_designation == other._bit_designation \
+                and self._required_length == other._required_length
+
+    def __repr__(self):
+        return "RegisterOperand({0.regname})".format(0)
+
+    def __str__(self):
+        return "\"{0.name}\"".format(self)
+
     def get_bytes(self):
         # Basically turn the numerical register number into a byte
         return struct.pack(">B", self.numerical)
@@ -390,6 +425,18 @@ class ImmediateOperand(Operand):
             self._bit_designation = 2
 
         self._required_length = self.size
+
+    def __eq__(self, other):
+        return isinstance(other, ImmediateOperand) \
+                and self.value == other.value \
+                and self.size == other.size \
+                and self._required_length == other._required_length
+
+    def __repr__(self):
+        return "ImmediateOperand({0.value})".format(self)
+
+    def __str__(self):
+        return str(self.value)
 
     def _get_value_format_string(self):
         # Find the formatting string to use to turn it into bytes
@@ -418,6 +465,15 @@ class AddressOperand(Operand):
         self._bit_designation = 5
         self._required_length = 4
 
+    def __eq__(self, other):
+        return isinstance(other, AddressOperand) \
+                and self.addr == other.addr \
+                and self._bit_designation == other._bit_designation \
+                and self._required_length == other._required_length
+
+    def __repr__(self):
+        return "AddressOperand({0.addr})".format(self)
+
     def get_bytes(self):
         return struct.pack(">I", self.addr)
 
@@ -432,6 +488,9 @@ class ArithmeticOperand(Operand):
     def __init__(self, asm_str):
         super().__init__()
         self.asm_str = asm_str
+
+        if not asm_str.strip():
+            raise ValueError("Cannot process empty operand")
 
         # See which type of operand this is and set everything accordingly
         if re.search(self.type_6, asm_str) is not None:
@@ -469,7 +528,20 @@ class ArithmeticOperand(Operand):
             self.b = m.group("b")
             self.c = m.group("c")
         else:
-            raise ValueError("Incorrect format for arithmetic operand: {}".format(asm_str))
+            raise AssemblyError(-1, "Incorrect format for arithmetic operand: {}".format(asm_str))
+
+    def __eq__(self, other):
+        return isinstance(other, ArithmeticOperand) \
+                and self.a == other.a \
+                and self.b == other.b \
+                and self.c == other.c \
+                and self.asm_str == other.asm_str
+
+    def __repr__(self):
+        return "ArithmeticOperand({0.asm_str})".format(self)
+
+    def __str__(self):
+        return self.asm_str
 
     def _interpret_value(self, value) -> int:
         # The values in arithmetic expressions can be immediate or a register name. Either way it has to be encoded.
@@ -663,6 +735,9 @@ def interpret_operand(string: str) -> Operand:
 
     string = string.strip() # Just to make sure
 
+    if not string:
+        raise ValueError("Cannot interpret an empty operand")
+
     # Is it a register name?
     if string.lower() in REGISTERS.keys():
         # Yes it is
@@ -673,7 +748,12 @@ def interpret_operand(string: str) -> Operand:
         val = int(string)
         return ImmediateOperand(val)
     except ValueError:
-        pass   # it isn't an immediate value
+        # it could be an immediate float
+        try:
+            val = float(string)
+            return ImmediateOperand(val)
+        except ValueError:
+            pass        # Not an immediate value
 
     # Is it an address label/variable?
     if string.isalnum():
@@ -681,7 +761,7 @@ def interpret_operand(string: str) -> Operand:
 
     # Is it an arithmetic expression?
     if string[0] == "[" and string[-1] == "]":
-        return ArithmeticOperand(string[1: -2])
+        return ArithmeticOperand(string[1: -1])
 
     # If it was none of those then it is invalid
     raise ValueError("Invalid operand: {}".format(string))
