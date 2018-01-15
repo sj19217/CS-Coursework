@@ -299,7 +299,7 @@ class TextInstruction(Instruction):
                 and self.label == other.label
 
     def __repr__(self):
-        return "TextInstruction({0.instruction_num}, {0.opcode_mnemonic}, {0.data_type}, {op1}, {op2}, {0.label}".format(self,
+        return "TextInstruction({0.instruction_num}, {0.opcode_mnemonic}, {0.data_type}, {op1}, {op2}, {0.label})".format(self,
                 op1=str(self.operand1),
                 op2=str(self.operand2))
 
