@@ -786,7 +786,8 @@ def record_labels_and_variables(instruction_list):
 
         # If it was neither of these types, what's it doing here?
         else:
-            raise ValueError("Item in instruction list is neither DataInstruction nor TextInstruction: {}".format(instruction))
+            raise ValueError("Item in instruction list is neither \
+            DataInstruction nor TextInstruction: {}".format(instruction))
 
 
     # Calculate the total size of the text section
