@@ -1,0 +1,11 @@
+"C:\Users\Stephen Jones\AppData\Local\JetBrains\Toolbox\apps\CLion\ch-0\173.4127.32\bin\cmake\bin\cmake.exe" -DCMAKE_BUILD_TYPE=Debug -G "CodeBlocks - MinGW Makefiles" "C:\Users\Stephen Jones\Google Drive\Homework\Computer Science\Coursework\Repository\Code\Interpreter"
+-- The C compiler identification is GNU 6.3.0
+-- Check for working C compiler: C:/Program Files (x86)/mingw-w64/i686-6.3.0-win32-dwarf-rt_v5-rev1/mingw32/bin/gcc.exe
+-- Check for working C compiler: C:/Program Files (x86)/mingw-w64/i686-6.3.0-win32-dwarf-rt_v5-rev1/mingw32/bin/gcc.exe -- works
+-- Detecting C compiler ABI info
+-- Detecting C compiler ABI info - done
+-- Detecting C compile features
+-- Detecting C compile features - done
+-- Configuring done
+-- Generating done
+-- Build files have been written to: C:/Users/Stephen Jones/Google Drive/Homework/Computer Science/Coursework/Repository/Code/Interpreter/cmake-build-debug

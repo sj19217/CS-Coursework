@@ -258,7 +258,7 @@ class DataInstruction(Instruction):
 
         # The initial value
         if self.data_type == "float":
-            value_bytes = struct.pack(val_fmt_str, float(self.value))
+            value_bytes = struct.pack(">F", float(self.value))
         else:
             value_bytes = struct.pack(val_fmt_str, int(self.value))
 
@@ -712,7 +712,7 @@ def divide_and_contextualise(section_dict: dict):
             operand1 = interpret_operand(parts[0])
             operand2 = interpret_operand(parts[1])
         else:
-            raise Exception("Invalid length of ")
+            raise Exception("Invalid length of {}".format(len(parts)))
 
         # We now have both operands; that's everything
         instruction_list.append(TextInstruction(instr_num=len(instruction_list),

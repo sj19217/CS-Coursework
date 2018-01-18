@@ -1,0 +1,16 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+C:/Users/Stephen Jones/Google Drive/Homework/Computer Science/Coursework/Repository/Code/Interpreter/main.c
+stdio.h
+-
+unistd.h
+-
+malloc.h
+-
+
