@@ -1,4 +1,4 @@
-# Install script for directory: C:/Users/Stephen Jones/Google Drive/Homework/Computer Science/Coursework/Repository/Code/Interpreter
+# Install script for directory: C:/Users/Stephen/Google Drive/Homework/Computer Science/Coursework/Repository/Code/Interpreter
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -35,5 +35,5 @@ endif()
 
 string(REPLACE ";" "\n" CMAKE_INSTALL_MANIFEST_CONTENT
        "${CMAKE_INSTALL_MANIFEST_FILES}")
-file(WRITE "C:/Users/Stephen Jones/Google Drive/Homework/Computer Science/Coursework/Repository/Code/Interpreter/cmake-build-debug/${CMAKE_INSTALL_MANIFEST}"
+file(WRITE "C:/Users/Stephen/Google Drive/Homework/Computer Science/Coursework/Repository/Code/Interpreter/cmake-build-debug/${CMAKE_INSTALL_MANIFEST}"
      "${CMAKE_INSTALL_MANIFEST_CONTENT}")

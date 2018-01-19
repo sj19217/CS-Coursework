@@ -4,12 +4,48 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <malloc.h>
+#include <mem.h>
+
+#define MAX_META_SECTION_LENGTH 100
+
+struct Config {
+    int memorykb;
+} config;
+
+void run(const char* bytecode, int iflag, int length)
+{
+    printf("Executing run()\n");
+
+    // Begin the process of running the bytecode
+    // Keep running until 4 nulls are reached
+    int num_nulls = 0;
+    int i = 0;
+    char config_str[MAX_META_SECTION_LENGTH];
+    while (i < length)
+    {
+        if (bytecode[i] == 0) {
+            num_nulls++;
+            if (num_nulls == 4) {
+                break;
+            }
+        }
+
+        config_str[i] = bytecode[i];
+        i++;
+    }
+    // Add a null character to the end
+    config_str[i] = '\0';
 
 
-int main(int argc, char** argv) {
+    printf("Config: %s\n", config_str);
+}
+
+int main(int argc, char** argv)
+{
     // Process command line arguments
     int iflag = 0;
-    char* fname = NULL;
+    char fname[100];
+    int has_fname = 0;
 
     int c;
     while ((c = getopt(argc, argv, "if:")) != -1)
@@ -19,32 +55,49 @@ int main(int argc, char** argv) {
                 iflag = 1;
                 break;
             case 'f':
-                fname = optarg;
+                strcpy(fname, optarg);
+                has_fname = 1;
             default:
                 break;
         }
     }
 
     // Check that a filename was given
-    if (fname == NULL) {
-        printf("Must provide a filename");
+    if (has_fname == 0) {
+        // Ask for the filename now
+        printf("File name: ");
+        scanf("%s", fname);
     }
 
     // Read the file
     FILE* fileptr;
-    char* buffer;
+    char* content;
     long filelen;
 
     fileptr = fopen(fname, "rb");
+
+    if (fileptr == NULL) {
+        printf("Cannot find file %s\n", fname);
+        return 1;
+    }
+
     fseek(fileptr, 0, SEEK_END);
     filelen = ftell(fileptr);
     rewind(fileptr);
 
-    buffer = (char*)malloc(filelen*sizeof(char));
-    fread(buffer, (size_t) filelen, 1, fileptr);
+
+    content = (char*)malloc(filelen*sizeof(char));
+    fread(content, (size_t) filelen, 1, fileptr);
     fclose(fileptr);
 
+    run(content, iflag, filelen);
 
 
     return 0;
 }
+
+/*
+ * Error codes:
+ * 0 - Completed fine
+ * 1 - Could not find file
+ */
