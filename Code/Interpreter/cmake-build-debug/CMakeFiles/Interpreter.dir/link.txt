@@ -1,3 +1,0 @@
-C:\Users\Stephen\AppData\Local\JetBrains\Toolbox\apps\CLion\ch-0\173.4127.32\bin\cmake\bin\cmake.exe -E remove -f CMakeFiles\Interpreter.dir/objects.a
-C:\MinGW\bin\ar.exe cr CMakeFiles\Interpreter.dir/objects.a @CMakeFiles\Interpreter.dir\objects1.rsp
-C:\MinGW\bin\gcc.exe -g   -Wl,--whole-archive CMakeFiles\Interpreter.dir/objects.a -Wl,--no-whole-archive  -o Interpreter.exe -Wl,--out-implib,libInterpreter.dll.a -Wl,--major-image-version,0,--minor-image-version,0 @CMakeFiles\Interpreter.dir\linklibs.rsp
