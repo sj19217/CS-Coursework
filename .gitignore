@@ -1,0 +1,8 @@
+# Compiled files
+*.exe
+
+# CMake stuff
+*cmake-build-debug*
+
+# JetBrains config 
+*.idea*
