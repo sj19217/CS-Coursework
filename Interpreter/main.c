@@ -7,12 +7,36 @@
 #include <mem.h>
 
 #define MAX_META_SECTION_LENGTH 100
+#define MAX_CONFIG_KEY_LENGTH 10
 
 // GLOBAL STRUCTURES
 
-struct Config {
+// Stores the config information
+struct {
     int memorykb;
 } config;
+
+// Contains everything about the environment; registers, etc.
+struct {
+    // The general registers. Smaller ones are contained within these.
+    long eax;
+    long ebx;
+    long ecx;
+    long edx;
+    long esi;
+    long edi;
+    long ebp;
+    long esp;
+
+    // The special registers
+    long pc;
+    long mar;
+    long mdr;
+    long cir;
+
+    // The memory
+    char memory[];
+} env;
 
 
 
@@ -41,7 +65,46 @@ void process_config(const char* bytecode, int length)
 
     printf("Config string: %s\n", config_str);
 
+    // Split the string at a & sign
+    char* cfg_str = strdup(config_str);
+    char* pair = strtok(cfg_str, "&");
 
+    while (pair != NULL)
+    {
+        char key[MAX_CONFIG_KEY_LENGTH];
+        int key_len = 0;
+        char val[10];
+        int at_value = 0;
+
+        // Loop through the characters in the pair
+        for (i = 0; i < strlen(pair); i++) {
+            // If still processing the value, act like it.
+            if (at_value == 0) {
+                // When an = sign is reached, switch to value mode
+                if (pair[i] == '=') {
+                    at_value = 1;
+                    key[i] = '\0';
+                    key_len = strlen(key);
+                } else {
+                    key[i] = pair[i];
+                }
+            } else {
+                // (key_len+1) is the number of characters in pair before val starts
+                val[i - key_len - 1] = pair[i];
+            }
+        }
+
+        // Process it
+        if (strcmp(key, "mem_amt") == 0) {
+            // Convert to int and put into dict
+            config.memorykb = strtol(val, NULL, 10);
+        }
+
+        pair = strtok(NULL, "&");
+    }
+
+    // Print out the config struct
+    printf("config.memorykb = %i", config.memorykb);
 }
 
 void run(const char* bytecode, int iflag, int length)
@@ -53,6 +116,10 @@ void run(const char* bytecode, int iflag, int length)
     process_config(bytecode, length);
 
     // Initialise the environment
+    char memory[config.memorykb*1024];
+    env.memory = memory;
+
+    //
 }
 
 int main(int argc, char** argv)
