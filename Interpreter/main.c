@@ -8,15 +8,18 @@
 
 #define MAX_META_SECTION_LENGTH 100
 
+// GLOBAL STRUCTURES
+
 struct Config {
     int memorykb;
 } config;
 
-void run(const char* bytecode, int iflag, int length)
-{
-    printf("Executing run()\n");
 
-    // Begin the process of running the bytecode
+
+// FUNCTIONS
+
+void process_config(const char* bytecode, int length)
+{
     // Keep running until 4 nulls are reached
     int num_nulls = 0;
     int i = 0;
@@ -36,8 +39,20 @@ void run(const char* bytecode, int iflag, int length)
     // Add a null character to the end
     config_str[i] = '\0';
 
+    printf("Config string: %s\n", config_str);
 
-    printf("Config: %s\n", config_str);
+
+}
+
+void run(const char* bytecode, int iflag, int length)
+{
+    printf("Executing run()\n");
+
+    // Begin the process of running the bytecode
+    // Start by loading all of the configuration data
+    process_config(bytecode, length);
+
+    // Initialise the environment
 }
 
 int main(int argc, char** argv)
