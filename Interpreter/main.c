@@ -6,6 +6,8 @@
 #include <malloc.h>
 #include <mem.h>
 
+#include "instructions.h"
+
 #define MAX_META_SECTION_LENGTH 100
 #define MAX_CONFIG_KEY_LENGTH 10
 
