@@ -18,11 +18,6 @@ struct {
     int memorykb;
 } config;
 
-struct DecodedInfo {
-    int dtype;
-    int op1_type;
-    int op2_type;
-};
 
 // Contains everything about the environment; registers, etc.
 struct {
@@ -38,9 +33,9 @@ struct {
 
     // The special registers
     unsigned long pc;
-    unsigned long mar;
-    unsigned long mdr;
-    unsigned long cir;
+    //unsigned long mar;
+    //unsigned long mdr;
+    //unsigned long cir; // This won't actually be used for these
 
     // The memory
     unsigned char* memory;
