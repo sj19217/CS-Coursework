@@ -6,7 +6,9 @@
 #include <malloc.h>
 #include <mem.h>
 
-#include "instructions.h"
+#include "headers/main.h"
+#include "headers/instructions.h"
+#include "headers/commands.h"
 
 #define MAX_META_SECTION_LENGTH 100
 #define MAX_CONFIG_KEY_LENGTH 10
@@ -17,29 +19,6 @@
 struct {
     int memorykb;
 } config;
-
-
-// Contains everything about the environment; registers, etc.
-struct {
-    // The general registers. Smaller ones are contained within these.
-    unsigned long eax;
-    unsigned long ebx;
-    unsigned long ecx;
-    unsigned long edx;
-    unsigned long esi;
-    unsigned long edi;
-    unsigned long ebp;
-    unsigned long esp;
-
-    // The special registers
-    unsigned long pc;
-    //unsigned long mar;
-    //unsigned long mdr;
-    //unsigned long cir; // This won't actually be used for these
-
-    // The memory
-    unsigned char* memory;
-} env;
 
 
 
@@ -142,13 +121,20 @@ int get_op_len(int type)
     }
 }
 
+void execute(unsigned char opcode, char dtype,
+                int op1_type, int op1_len, unsigned char* op1_str,
+                int op2_type, int op2_len, unsigned char* op2_str)
+{
+    // Actually executes the command
+}
+
 void run_loop()
 {
     // Executes the instructions
     while (1)
     {
         // Fetch
-        char opcode = env.memory[env.pc];
+        unsigned char opcode = env.memory[env.pc];
 
         // If a HLT instruction, exit the loop
         if (opcode == 0) {
@@ -161,7 +147,7 @@ void run_loop()
         if (opcode == CMP_char |
                 opcode == ADD_char | opcode == SUB_char |
                 opcode == MUL_char | opcode == IDIV_char |
-                opcode == MOD_CHAR | opcode == EDIV_char) {
+                opcode == MOD_char | opcode == EDIV_char) {
             dtype = 'b';
         } else if (opcode == CMP_uchar |
                 opcode == ADD_uchar | opcode == SUB_uchar |
@@ -257,6 +243,9 @@ void run_loop()
             printf("%x ", op2_str[i]);
         }
         printf("\n");
+
+        // Execute
+        execute(opcode, dtype, op1_type, op1_len, op1_str, op2_type, op2_len, op2_str);
     }
 }
 

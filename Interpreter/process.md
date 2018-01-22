@@ -55,3 +55,8 @@ for (int i = config_length; i < length - config_length; i++) {
 * Changed i<length-config_length to i<length, because this was cutting it off short
 * This now works
 * Wrote instructions.h and used its definitions to make the giant wall of opcodes easier to read
+* Remembered to add the comparison registers
+* Created the execute function and commands.c
+* Created header files for main.c and commands.c
+* Did some research (https://stackoverflow.com/questions/16522341/pseudo-generics-in-c) and decided to use a macro to simplify commands.c
+* Moved definition of Environment to main.h to allow it to be visible in commands.c
