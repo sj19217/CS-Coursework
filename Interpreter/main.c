@@ -158,39 +158,40 @@ void run_loop()
         // Decode
         char dtype = 'u';
         int op1_type, op2_type;
-        if (opcode == 0x01 |
-                opcode == 0x20 | opcode == 0x28 |
-                opcode == 0x30 | opcode == 0x38 |
-                opcode == 0x40 | opcode == 0x48) {
+        if (opcode == CMP_char |
+                opcode == ADD_char | opcode == SUB_char |
+                opcode == MUL_char | opcode == IDIV_char |
+                opcode == MOD_CHAR | opcode == EDIV_char) {
             dtype = 'b';
-        } else if (opcode == 0x02 |
-                opcode == 0x21 | opcode == 0x29 |
-                opcode == 0x31 | opcode == 0x39 |
-                opcode == 0x41 | opcode == 0x49) {
+        } else if (opcode == CMP_uchar |
+                opcode == ADD_uchar | opcode == SUB_uchar |
+                opcode == MUL_uchar | opcode == IDIV_uchar |
+                opcode == MOD_uchar | opcode == EDIV_uchar) {
             dtype = 'B';
-        } else if (opcode == 0x03 |
-                opcode == 0x22 | opcode == 0x2A |
-                opcode == 0x32 | opcode == 0x3A |
-                opcode == 0x42 | opcode == 0x4A) {
+        } else if (opcode == CMP_short |
+                opcode == ADD_short | opcode == SUB_short |
+                opcode == MUL_short | opcode == IDIV_short |
+                opcode == MOD_short | opcode == EDIV_short) {
             dtype = 'h';
-        } else if (opcode == 0x04 |
-                opcode == 0x23 | opcode == 0x2B |
-                opcode == 0x33 | opcode == 0x3B |
-                opcode == 0x43 | opcode == 0x4B) {
+        } else if (opcode == CMP_ushort |
+                opcode == ADD_ushort | opcode == SUB_ushort |
+                opcode == MUL_ushort | opcode == IDIV_ushort |
+                opcode == MOD_ushort | opcode == EDIV_ushort) {
             dtype = 'H';
-        } else if (opcode == 0x05 |
-                opcode == 0x24 | opcode == 0x2C |
-                opcode == 0x34 | opcode == 0x3C) {
+        } else if (opcode == CMP_int |
+                opcode == ADD_int | opcode == SUB_int |
+                opcode == MUL_int | opcode == IDIV_int |
+                opcode == MOD_int | opcode == EDIV_int) {
             dtype = 'i';
-        } else if (opcode == 0x06 |
-                opcode == 0x25 | opcode == 0x2D |
-                opcode == 0x36 | opcode == 0x3D |
-                opcode == 0x46 | opcode == 0x4D) {
+        } else if (opcode == CMP_uint |
+                opcode == ADD_uint | opcode == SUB_uint |
+                opcode == MUL_uint | opcode == IDIV_uint |
+                opcode == MOD_uint | opcode == EDIV_uint) {
             dtype = 'I';
-        } else if (opcode == 0x07 |
-                opcode == 0x26 | opcode == 0x2E |
-                opcode == 0x36 | opcode == 0x3D |
-                opcode == 0x46 | opcode == 0x4D) {
+        } else if (opcode == CMP_float |
+                opcode == ADD_float | opcode == SUB_float |
+                opcode == MUL_float | opcode == IDIV_float |
+                opcode == MOD_float | opcode == EDIV_float) {
             dtype = 'f';
         } else if ((opcode & 0b11110000) == 80 |
                 (opcode & 0b11110000) == 96) {
@@ -202,15 +203,16 @@ void run_loop()
             } else if ((opcode & 0b00001111) == 2) {
                 dtype = '4';
             }
-        } else if (opcode == 0x10) {
+        } else if (opcode == MOV_1B) {
             dtype = '1';
-        } else if (opcode == 0x11) {
+        } else if (opcode == MOV_2B) {
             dtype = '2';
-        } else if (opcode == 0x12) {
+        } else if (opcode == MOV_4B) {
             dtype = '4';
-        } else if ((opcode > 0x08) & (opcode < 0x0E)) {
+        } else if ((opcode > JMP) & (opcode < JGE)) {
+            // One of the jump commands
             dtype = 'n';
-        } else if (opcode == 0x14) {
+        } else if (opcode == LEA) {
             dtype = 'n';
         }
 

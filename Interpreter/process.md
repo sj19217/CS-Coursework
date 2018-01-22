@@ -53,3 +53,5 @@ for (int i = config_length; i < length - config_length; i++) {
 * Added memory dump to the loop and saw that the memory stops at address 49, meaning not all of the bytecode is placed
   into the memory
 * Changed i<length-config_length to i<length, because this was cutting it off short
+* This now works
+* Wrote instructions.h and used its definitions to make the giant wall of opcodes easier to read
