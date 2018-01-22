@@ -29,3 +29,54 @@ def_CMP(uint16_t, ushort);
 def_CMP(int, int);
 def_CMP(unsigned int, uint);
 def_CMP(float, float);
+
+
+
+// Jump instructions
+
+void exec_JMP(unsigned int addr)
+{
+    env.pc = addr;
+}
+
+void exec_JE(unsigned int addr)
+{
+    if (env.cmp_e) {
+        env.pc = addr;
+    }
+}
+
+void exec_JNE(unsigned int addr)
+{
+    if (!env.cmp_e) {
+        env.pc = addr;
+    }
+}
+
+void exec_JLT(unsigned int addr)
+{
+    if (env.cmp_n) {
+        env.pc = addr;
+    }
+}
+
+void exec_JLE(unsigned int addr)
+{
+    if (env.cmp_n || env.cmp_e) {
+        env.pc = addr;
+    }
+}
+
+void exec_JGT(unsigned int addr)
+{
+    if (env.cmp_p) {
+        env.pc = addr;
+    }
+}
+
+void exec_JGE(unsigned int addr)
+{
+    if (env.cmp_p || env.cmp_e) {
+        env.pc = addr;
+    }
+}

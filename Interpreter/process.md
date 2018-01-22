@@ -60,3 +60,5 @@ for (int i = config_length; i < length - config_length; i++) {
 * Created header files for main.c and commands.c
 * Did some research (https://stackoverflow.com/questions/16522341/pseudo-generics-in-c) and decided to use a macro to simplify commands.c
 * Moved definition of Environment to main.h to allow it to be visible in commands.c
+* Added CMP and JMP intructions
+* Started writing execute() and made get_operand_value()

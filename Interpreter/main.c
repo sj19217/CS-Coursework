@@ -121,11 +121,31 @@ int get_op_len(int type)
     }
 }
 
+void* get_operand_value(int type, int len, unsigned char* str)
+{
+    // Gets the value represented by this, including (e.g.) dereferencing the memory address getting a register's value
+    switch (type) {
+        case 0:
+            return NULL;
+        case 1:
+            // A register
+        default:
+            printf("Unknown type in get_operand_value: 0x%x", type);
+    }
+}
+
 void execute(unsigned char opcode, char dtype,
                 int op1_type, int op1_len, unsigned char* op1_str,
                 int op2_type, int op2_len, unsigned char* op2_str)
 {
     // Actually executes the command
+    switch (opcode) {
+        case CMP_char:
+            break;
+        default:
+            printf("Unknown opode: %i", opcode);
+            return;
+    }
 }
 
 void run_loop()
