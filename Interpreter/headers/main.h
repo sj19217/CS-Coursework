@@ -31,7 +31,7 @@ struct Environment{
 
 int process_config(const unsigned char* bytecode, int length);
 int get_op_len(int type);
-void execute(unsigned char opcode, char dtype,
+void execute(unsigned char opcode,
              int op1_type, int op1_len, unsigned char* op1_str,
              int op2_type, int op2_len, unsigned char* op2_str);
 void run_loop();

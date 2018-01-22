@@ -134,7 +134,7 @@ void* get_operand_value(int type, int len, unsigned char* str)
     }
 }
 
-void execute(unsigned char opcode, char dtype,
+void execute(unsigned char opcode,
                 int op1_type, int op1_len, unsigned char* op1_str,
                 int op2_type, int op2_len, unsigned char* op2_str)
 {
@@ -162,65 +162,65 @@ void run_loop()
         }
 
         // Decode
-        char dtype = 'u';
+//        char dtype = 'u';
         int op1_type, op2_type;
-        if (opcode == CMP_char |
-                opcode == ADD_char | opcode == SUB_char |
-                opcode == MUL_char | opcode == IDIV_char |
-                opcode == MOD_char | opcode == EDIV_char) {
-            dtype = 'b';
-        } else if (opcode == CMP_uchar |
-                opcode == ADD_uchar | opcode == SUB_uchar |
-                opcode == MUL_uchar | opcode == IDIV_uchar |
-                opcode == MOD_uchar | opcode == EDIV_uchar) {
-            dtype = 'B';
-        } else if (opcode == CMP_short |
-                opcode == ADD_short | opcode == SUB_short |
-                opcode == MUL_short | opcode == IDIV_short |
-                opcode == MOD_short | opcode == EDIV_short) {
-            dtype = 'h';
-        } else if (opcode == CMP_ushort |
-                opcode == ADD_ushort | opcode == SUB_ushort |
-                opcode == MUL_ushort | opcode == IDIV_ushort |
-                opcode == MOD_ushort | opcode == EDIV_ushort) {
-            dtype = 'H';
-        } else if (opcode == CMP_int |
-                opcode == ADD_int | opcode == SUB_int |
-                opcode == MUL_int | opcode == IDIV_int |
-                opcode == MOD_int | opcode == EDIV_int) {
-            dtype = 'i';
-        } else if (opcode == CMP_uint |
-                opcode == ADD_uint | opcode == SUB_uint |
-                opcode == MUL_uint | opcode == IDIV_uint |
-                opcode == MOD_uint | opcode == EDIV_uint) {
-            dtype = 'I';
-        } else if (opcode == CMP_float |
-                opcode == ADD_float | opcode == SUB_float |
-                opcode == MUL_float | opcode == IDIV_float |
-                opcode == MOD_float | opcode == EDIV_float) {
-            dtype = 'f';
-        } else if ((opcode & 0b11110000) == 80 |
-                (opcode & 0b11110000) == 96) {
-            // One of the size-based commands
-            if ((opcode & 0b00001111) == 0) {
-                dtype = '1';
-            } else if ((opcode & 0b00001111) == 1) {
-                dtype = '2';
-            } else if ((opcode & 0b00001111) == 2) {
-                dtype = '4';
-            }
-        } else if (opcode == MOV_1B) {
-            dtype = '1';
-        } else if (opcode == MOV_2B) {
-            dtype = '2';
-        } else if (opcode == MOV_4B) {
-            dtype = '4';
-        } else if ((opcode > JMP) & (opcode < JGE)) {
-            // One of the jump commands
-            dtype = 'n';
-        } else if (opcode == LEA) {
-            dtype = 'n';
-        }
+//        if (opcode == CMP_char |
+//                opcode == ADD_char | opcode == SUB_char |
+//                opcode == MUL_char | opcode == IDIV_char |
+//                opcode == MOD_char | opcode == EDIV_char) {
+//            dtype = 'b';
+//        } else if (opcode == CMP_uchar |
+//                opcode == ADD_uchar | opcode == SUB_uchar |
+//                opcode == MUL_uchar | opcode == IDIV_uchar |
+//                opcode == MOD_uchar | opcode == EDIV_uchar) {
+//            dtype = 'B';
+//        } else if (opcode == CMP_short |
+//                opcode == ADD_short | opcode == SUB_short |
+//                opcode == MUL_short | opcode == IDIV_short |
+//                opcode == MOD_short | opcode == EDIV_short) {
+//            dtype = 'h';
+//        } else if (opcode == CMP_ushort |
+//                opcode == ADD_ushort | opcode == SUB_ushort |
+//                opcode == MUL_ushort | opcode == IDIV_ushort |
+//                opcode == MOD_ushort | opcode == EDIV_ushort) {
+//            dtype = 'H';
+//        } else if (opcode == CMP_int |
+//                opcode == ADD_int | opcode == SUB_int |
+//                opcode == MUL_int | opcode == IDIV_int |
+//                opcode == MOD_int | opcode == EDIV_int) {
+//            dtype = 'i';
+//        } else if (opcode == CMP_uint |
+//                opcode == ADD_uint | opcode == SUB_uint |
+//                opcode == MUL_uint | opcode == IDIV_uint |
+//                opcode == MOD_uint | opcode == EDIV_uint) {
+//            dtype = 'I';
+//        } else if (opcode == CMP_float |
+//                opcode == ADD_float | opcode == SUB_float |
+//                opcode == MUL_float | opcode == IDIV_float |
+//                opcode == MOD_float | opcode == EDIV_float) {
+//            dtype = 'f';
+//        } else if ((opcode & 0b11110000) == 80 |
+//                (opcode & 0b11110000) == 96) {
+//            // One of the size-based commands
+//            if ((opcode & 0b00001111) == 0) {
+//                dtype = '1';
+//            } else if ((opcode & 0b00001111) == 1) {
+//                dtype = '2';
+//            } else if ((opcode & 0b00001111) == 2) {
+//                dtype = '4';
+//            }
+//        } else if (opcode == MOV_1B) {
+//            dtype = '1';
+//        } else if (opcode == MOV_2B) {
+//            dtype = '2';
+//        } else if (opcode == MOV_4B) {
+//            dtype = '4';
+//        } else if ((opcode > JMP) & (opcode < JGE)) {
+//            // One of the jump commands
+//            dtype = 'n';
+//        } else if (opcode == LEA) {
+//            dtype = 'n';
+//        }
 
         // Interpret the operand type
         op1_type = (env.memory[env.pc+1] & 0b11110000) >> 4;
@@ -253,7 +253,7 @@ void run_loop()
         env.pc += op2_len;
 
         // Print out info
-        printf("opcode=0x%x, dtype=%c, op1_type=%i, op2_type=%i\n", opcode, dtype, op1_type, op2_type);
+        printf("opcode=0x%x, op1_type=%i, op2_type=%i\n", opcode, op1_type, op2_type);
         printf("\tOperand 1: ");
         for (int i = 0; i < op1_len; i++) {
             printf("%x ", op1_str[i]);
@@ -265,7 +265,7 @@ void run_loop()
         printf("\n");
 
         // Execute
-        execute(opcode, dtype, op1_type, op1_len, op1_str, op2_type, op2_len, op2_str);
+        execute(opcode, op1_type, op1_len, op1_str, op2_type, op2_len, op2_str);
     }
 }
 

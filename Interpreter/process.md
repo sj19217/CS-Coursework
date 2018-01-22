@@ -62,3 +62,4 @@ for (int i = config_length; i < length - config_length; i++) {
 * Moved definition of Environment to main.h to allow it to be visible in commands.c
 * Added CMP and JMP intructions
 * Started writing execute() and made get_operand_value()
+* Realised that the wall of if statements finding the data type is probably unnecessary. Commented it out/deprecated.
