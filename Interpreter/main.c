@@ -188,7 +188,7 @@ unsigned long interpret_arithmetic_item(unsigned char val)
     }
 }
 
-void* get_operand_value(int type, int len, unsigned char* str)
+void* get_operand_value(int type, unsigned char* str)
 {
     // Gets the value represented by this, including (e.g.) dereferencing the memory address or getting a register's value
     unsigned char maddr;
@@ -247,13 +247,21 @@ void execute(unsigned char opcode,
                 int op2_type, int op2_len, unsigned char* op2_str)
 {
     // Actually executes the command
-    switch (opcode) {
-        case CMP_char:
-            break;
-        default:
-            printf("Unknown opode: %i", opcode);
-            return;
-    }
+//    switch (opcode) {
+//        case CMP_char:
+//            break;
+//        default:
+//            printf("Unknown opode: %i", opcode);
+//            return;
+//    }
+
+    printf("Opcode: 0x%x\n", opcode);
+    printf("\tOperand 1: 1B=0x%x, 2B=0x%x, 4B=0x%x\n", *(unsigned char*) get_operand_value(op1_type, op1_str),
+                                                       *(uint16_t*) get_operand_value(op1_type, op1_str),
+                                                       *(unsigned int*) get_operand_value(op1_type, op1_str));
+    printf("\tOperand 2: 1B=0x%x, 2B=0x%x, 4B=0x%x\n", *(unsigned char*) get_operand_value(op2_type, op2_str),
+                                                       *(uint16_t*) get_operand_value(op2_type, op2_str),
+                                                       *(unsigned int*) get_operand_value(op2_type, op2_str));
 }
 
 void run_loop()
