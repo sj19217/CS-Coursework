@@ -5,12 +5,54 @@
 #ifndef INTERPRETER_MAIN_H
 #define INTERPRETER_MAIN_H
 
+#include <stdint.h>
+
 struct Environment{
     // The general registers. Smaller ones are contained within these.
-    unsigned long eax;
-    unsigned long ebx;
-    unsigned long ecx;
-    unsigned long edx;
+    union {
+        unsigned long eax;
+        struct {
+            uint16_t ax;
+            union {
+                unsigned char ah;
+                unsigned char al;
+            } a;
+        } div;
+    } eax;
+
+    union {
+        unsigned long ebx;
+        struct {
+            uint16_t bx;
+            union {
+                unsigned char bh;
+                unsigned char bl;
+            } b;
+        } div;
+    } ebx;
+
+    union {
+        unsigned long ecx;
+        struct {
+            uint16_t cx;
+            union {
+                unsigned char ch;
+                unsigned char cl;
+            } c;
+        } div;
+    } ecx;
+
+    union {
+        unsigned long edx;
+        struct {
+            uint16_t dx;
+            union {
+                unsigned char dh;
+                unsigned char dl;
+            } d;
+        } div;
+    } edx;
+    
     unsigned long esi;
     unsigned long edi;
     unsigned long ebp;
