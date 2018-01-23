@@ -63,3 +63,8 @@ for (int i = config_length; i < length - config_length; i++) {
 * Added CMP and JMP intructions
 * Started writing execute() and made get_operand_value()
 * Realised that the wall of if statements finding the data type is probably unnecessary. Commented it out/deprecated.
+* Made get_register_value
+* Changed some of the registers to be unions
+* Completed get_operand_value (with help froma function to interpret arithmetic)
+* Research done on void pointers
+* Wrote some testing statements in execute()
