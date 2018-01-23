@@ -68,3 +68,5 @@ for (int i = config_length; i < length - config_length; i++) {
 * Completed get_operand_value (with help froma function to interpret arithmetic)
 * Research done on void pointers
 * Wrote some testing statements in execute()
+* As expected, it didn't work. Crashing issue turned out to be dereferencing NULL pointers ಠ_ರೃ
+* Fixed this, but difficult to say at present if get_operand_value really works. It seems to.

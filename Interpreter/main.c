@@ -20,6 +20,11 @@ struct {
     int memorykb;
 } config;
 
+// Used to store the current opcode string being worked on
+struct {
+    unsigned char* str;
+} current;
+
 
 
 // FUNCTIONS
@@ -172,9 +177,9 @@ void* get_register_value(unsigned char regnum)
             return (void*) retval;
         case 0xF0:
             printf("Cannot get value from output register");
-            return NULL;
+            return (void*) &env.memory[0];
         default:
-            printf("Unknown register number in get_register_value: 0x%x", regnum);
+            printf("Unknown register number in get_register_value: 0x%x\n", regnum);
             return 0;
     }
 }
@@ -191,28 +196,29 @@ unsigned long interpret_arithmetic_item(unsigned char val)
 void* get_operand_value(int type, unsigned char* str)
 {
     // Gets the value represented by this, including (e.g.) dereferencing the memory address or getting a register's value
-    unsigned char maddr;
+    unsigned long maddr;
     unsigned long a;
     unsigned long b;
     unsigned long c;
     switch (type) {
         case 0:
-            return NULL;
+            //return NULL;
+            return (void*) &env.memory[0];
         case 1: // A register
             // Take one byte
             return get_register_value(str[0]);
         case 2: // 1-byte immediate
-            return (void*) str;
+            return (void*) current.str;
         case 3: // 2-byte immediate
-            return (void*) str;
+            return (void*) current.str;
         case 4: //4-byte immediate
-            return (void*) str;
+            return (void*) current.str;
         case 5: // Memory address
             maddr = 0;
-            maddr += str[0] << 24;
-            maddr += str[1] << 16;
-            maddr += str[2] << 8;
-            maddr += str[3];
+            maddr += current.str[0] << 24;
+            maddr += current.str[1] << 16;
+            maddr += current.str[2] << 8;
+            maddr += current.str[3];
             // Copy 4 bytes from memory into a separate variable
             return (void*) &env.memory[maddr];
         case 6: // "a"-form arithmetic
@@ -243,8 +249,8 @@ void* get_operand_value(int type, unsigned char* str)
 }
 
 void execute(unsigned char opcode,
-                int op1_type, int op1_len, unsigned char* op1_str,
-                int op2_type, int op2_len, unsigned char* op2_str)
+             int op1_type, int op1_len, unsigned char* op1_str,
+             int op2_type, int op2_len, unsigned char* op2_str)
 {
     // Actually executes the command
 //    switch (opcode) {
@@ -255,13 +261,15 @@ void execute(unsigned char opcode,
 //            return;
 //    }
 
-    printf("Opcode: 0x%x\n", opcode);
+    printf("Opcode: 0x%x, op1_type=%i, op2_type=%i\n", opcode, op1_type, op2_type);
+    current.str = op1_str;
     printf("\tOperand 1: 1B=0x%x, 2B=0x%x, 4B=0x%x\n", *(unsigned char*) get_operand_value(op1_type, op1_str),
-                                                       *(uint16_t*) get_operand_value(op1_type, op1_str),
-                                                       *(unsigned int*) get_operand_value(op1_type, op1_str));
+           *(uint16_t*) get_operand_value(op1_type, op1_str),
+           *(unsigned int*) get_operand_value(op1_type, op1_str));
+    current.str = op2_str;
     printf("\tOperand 2: 1B=0x%x, 2B=0x%x, 4B=0x%x\n", *(unsigned char*) get_operand_value(op2_type, op2_str),
-                                                       *(uint16_t*) get_operand_value(op2_type, op2_str),
-                                                       *(unsigned int*) get_operand_value(op2_type, op2_str));
+           *(uint16_t*) get_operand_value(op2_type, op2_str),
+           *(unsigned int*) get_operand_value(op2_type, op2_str));
 }
 
 void run_loop()
@@ -367,18 +375,6 @@ void run_loop()
 
         // Move the PC past the second operand (should be to the next opcode byte)
         env.pc += op2_len;
-
-        // Print out info
-        printf("opcode=0x%x, op1_type=%i, op2_type=%i\n", opcode, op1_type, op2_type);
-        printf("\tOperand 1: ");
-        for (int i = 0; i < op1_len; i++) {
-            printf("%x ", op1_str[i]);
-        }
-        printf("\n\tOperand 2: ");
-        for (int i = 0; i < op2_len; i++) {
-            printf("%x ", op2_str[i]);
-        }
-        printf("\n");
 
         // Execute
         execute(opcode, op1_type, op1_len, op1_str, op2_type, op2_len, op2_str);
