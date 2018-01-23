@@ -179,10 +179,22 @@ void* get_register_value(unsigned char regnum)
     }
 }
 
+unsigned long interpret_arithmetic_item(unsigned char val)
+{
+    if (val == 2 || val == 4 || val == 8) {
+        return val;
+    } else {
+        return *(unsigned long*) get_register_value(val);
+    }
+}
+
 void* get_operand_value(int type, int len, unsigned char* str)
 {
     // Gets the value represented by this, including (e.g.) dereferencing the memory address or getting a register's value
-    unsigned char regnum;
+    unsigned char maddr;
+    unsigned long a;
+    unsigned long b;
+    unsigned long c;
     switch (type) {
         case 0:
             return NULL;
@@ -195,8 +207,38 @@ void* get_operand_value(int type, int len, unsigned char* str)
             return (void*) str;
         case 4: //4-byte immediate
             return (void*) str;
+        case 5: // Memory address
+            maddr = 0;
+            maddr += str[0] << 24;
+            maddr += str[1] << 16;
+            maddr += str[2] << 8;
+            maddr += str[3];
+            // Copy 4 bytes from memory into a separate variable
+            return (void*) &env.memory[maddr];
+        case 6: // "a"-form arithmetic
+            a = interpret_arithmetic_item(str[0]);
+            return (void*) &env.memory[a];
+        case 7: // "a*b"-form arithmetic
+            a = interpret_arithmetic_item(str[0]);
+            b = interpret_arithmetic_item(str[1]);
+            return (void*) &env.memory[a*b];
+        case 8: // "a+b"-form arithmetic
+            a = interpret_arithmetic_item(str[0]);
+            b = interpret_arithmetic_item(str[1]);
+            return (void*) &env.memory[a+b];
+        case 9: // "a*b+c"-style arithmetic
+            a = interpret_arithmetic_item(str[0]);
+            b = interpret_arithmetic_item(str[1]);
+            c = interpret_arithmetic_item(str[2]);
+            return (void*) &env.memory[(a*b)+c];
+        case 10: // "a+b*c"-form arithmetic
+            a = interpret_arithmetic_item(str[0]);
+            b = interpret_arithmetic_item(str[1]);
+            c = interpret_arithmetic_item(str[2]);
+            return (void*) &env.memory[a+(b*c)];
         default:
             printf("Unknown type in get_operand_value: 0x%x", type);
+            break;
     }
 }
 
