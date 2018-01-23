@@ -252,24 +252,39 @@ void execute(unsigned char opcode,
              int op1_type, int op1_len, unsigned char* op1_str,
              int op2_type, int op2_len, unsigned char* op2_str)
 {
-    // Actually executes the command
-//    switch (opcode) {
-//        case CMP_char:
-//            break;
-//        default:
-//            printf("Unknown opode: %i", opcode);
-//            return;
-//    }
-
-    printf("Opcode: 0x%x, op1_type=%i, op2_type=%i\n", opcode, op1_type, op2_type);
-    current.str = op1_str;
-    printf("\tOperand 1: 1B=0x%x, 2B=0x%x, 4B=0x%x\n", *(unsigned char*) get_operand_value(op1_type, op1_str),
-           *(uint16_t*) get_operand_value(op1_type, op1_str),
-           *(unsigned int*) get_operand_value(op1_type, op1_str));
-    current.str = op2_str;
-    printf("\tOperand 2: 1B=0x%x, 2B=0x%x, 4B=0x%x\n", *(unsigned char*) get_operand_value(op2_type, op2_str),
-           *(uint16_t*) get_operand_value(op2_type, op2_str),
-           *(unsigned int*) get_operand_value(op2_type, op2_str));
+    switch (opcode) {
+        case CMP_char:
+            // CMP takes 2 values
+            exec_CMP_char(*(char*) get_operand_value(op1_type, op1_str),
+                          *(char*) get_operand_value(op2_type, op2_str));
+            break;
+        case CMP_uchar:
+            exec_CMP_uchar(*(unsigned char*) get_operand_value(op1_type, op1_str),
+                          *(unsigned char*) get_operand_value(op2_type, op2_str));
+            break;
+        case CMP_short:
+            exec_CMP_short(*(int16_t*) get_operand_value(op1_type, op1_str),
+                          *(int16_t*) get_operand_value(op2_type, op2_str));
+            break;
+        case CMP_ushort:
+            exec_CMP_ushort(*(uint16_t*) get_operand_value(op1_type, op1_str),
+                          *(uint16_t*) get_operand_value(op2_type, op2_str));
+            break;
+        case CMP_int:
+            exec_CMP_int(*(int*) get_operand_value(op1_type, op1_str),
+                          *(int*) get_operand_value(op2_type, op2_str));
+            break;
+        case CMP_uint:
+            exec_CMP_uint(*(unsigned int*) get_operand_value(op1_type, op1_str),
+                          *(unsigned int*) get_operand_value(op2_type, op2_str));
+            break;
+        case CMP_float:
+            exec_CMP_float(*(float*) get_operand_value(op1_type, op1_str),
+                          *(float*) get_operand_value(op2_type, op2_str));
+        default:
+            printf("Unknown opode: %i", opcode);
+            return;
+    }
 }
 
 void run_loop()
