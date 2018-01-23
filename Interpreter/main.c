@@ -121,14 +121,80 @@ int get_op_len(int type)
     }
 }
 
+void* get_register_value(unsigned char regnum)
+{
+    unsigned long retval;
+    switch (regnum) {
+        case 0xA0: // eax
+            return (void*) &env.eax;
+        case 0xB0: // ebx
+            return (void*) &env.ebx;
+        case 0xC0: // ecx
+            return (void*) &env.ecx;
+        case 0xD0: // edx
+            return (void*) &env.edx;
+        case 0xE1: // esi
+            return (void*) &env.esi;
+        case 0xE2: // edi
+            return (void*) &env.edi;
+        case 0xE3: // ebp
+            return (void*) &env.ebp;
+        case 0xE4: // esp
+            return (void*) &env.esp;
+        case 0xA1: // ax
+            return (void*) &env.eax.div.ax;
+        case 0xB1: // bx
+            return (void*) &env.ebx.div.bx;
+        case 0xC1: // cx
+            return (void*) &env.ecx.div.cx;
+        case 0xD1: // dx
+            return (void*) &env.edx.div.dx;
+        case 0xA2: // ah
+            return (void*) &env.eax.div.a.ah;
+        case 0xB2: // bh
+            return (void*) &env.ebx.div.b.bh;
+        case 0xC2: // ch
+            return (void*) &env.ecx.div.c.ch;
+        case 0xD2: // dh
+            return (void*) &env.edx.div.d.dh;
+        case 0xA3: // al
+            return (void*) &env.eax.div.a.al;
+        case 0xB3: // bl
+            return (void*) &env.ebx.div.b.bl;
+        case 0xC3: // cl
+            return (void*) &env.ecx.div.c.cl;
+        case 0xD3: // dl
+            return (void*) &env.edx.div.d.dl;
+        case 0xF1:
+            printf("> ");
+            scanf("%lu", &retval);
+            printf("\n");
+            return (void*) retval;
+        case 0xF0:
+            printf("Cannot get value from output register");
+            return NULL;
+        default:
+            printf("Unknown register number in get_register_value: 0x%x", regnum);
+            return 0;
+    }
+}
+
 void* get_operand_value(int type, int len, unsigned char* str)
 {
-    // Gets the value represented by this, including (e.g.) dereferencing the memory address getting a register's value
+    // Gets the value represented by this, including (e.g.) dereferencing the memory address or getting a register's value
+    unsigned char regnum;
     switch (type) {
         case 0:
             return NULL;
-        case 1:
-            // A register
+        case 1: // A register
+            // Take one byte
+            return get_register_value(str[0]);
+        case 2: // 1-byte immediate
+            return (void*) str;
+        case 3: // 2-byte immediate
+            return (void*) str;
+        case 4: //4-byte immediate
+            return (void*) str;
         default:
             printf("Unknown type in get_operand_value: 0x%x", type);
     }

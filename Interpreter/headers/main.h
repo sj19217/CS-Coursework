@@ -52,7 +52,7 @@ struct Environment{
             } d;
         } div;
     } edx;
-    
+
     unsigned long esi;
     unsigned long edi;
     unsigned long ebp;
