@@ -24,5 +24,7 @@ void exec_JLE(unsigned int addr);
 void exec_JGT(unsigned int addr);
 void exec_JGE(unsigned int addr);
 
+void exec_MOV_reg(unsigned char regnum, int length, unsigned char* str);
+void exec_MOV_mem(unsigned char maddr, int length, unsigned char* str);
 
 #endif //INTERPRETER_COMMANDS_H
