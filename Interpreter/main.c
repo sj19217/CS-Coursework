@@ -136,6 +136,24 @@ int get_op_len(int type)
     }
 }
 
+unsigned char get_register_size(unsigned char regnum)
+{
+    if ((regnum >= 0xE1 && regnum <= 0xE4) || (regnum >> 4 >= 10 && regnum >> 4 <= 13)) {
+        return 4;
+    } else if ((regnum >> 4) >= 10 && (regnum >> 4) <= 13) {
+        if ((regnum & 0x0F) == 1) {
+            return 2;
+        } else if ((regnum & 0x0F) == 2 || (regnum & 0x0F) == 3) {
+            return 1;
+        }
+    } else if (regnum == 0xF0 || regnum == 0xF1) {
+        return 4;
+    } else {
+        printf("Unknown register number in get_register_size: 0x%x", regnum);
+        return 0;
+    }
+}
+
 void set_register_value(unsigned char regnum, void* data)
 {
     switch (regnum) {
