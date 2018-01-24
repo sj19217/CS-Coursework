@@ -386,7 +386,32 @@ void execute(unsigned char opcode,
             shield_exec_jump(exec_JGE, 5, 4);
             break;
         case MOV_1B:
-
+            if (op1_type == 1) {
+                exec_MOV_reg(op1_str[0], 1, (unsigned char*) get_operand_value(op2_type, op2_str));
+            } else if (op1_type == 5) {
+                exec_MOV_mem(op1_str[0], 1, (unsigned char*) get_operand_value(op2_type, op2_str));
+            } else {
+                printf("Cannot move content to form %i\n", op1_type);
+            }
+            break;
+        case MOV_2B:
+            if (op1_type == 1) {
+                exec_MOV_reg(op1_str[0], 2, (unsigned char*) get_operand_value(op2_type, op2_str));
+            } else if (op1_type == 5) {
+                exec_MOV_mem(op1_str[0], 2, (unsigned char*) get_operand_value(op2_type, op2_str));
+            } else {
+                printf("Cannot move content to form %i\n", op1_type);
+            }
+            break;
+        case MOV_4B:
+            if (op1_type == 1) {
+                exec_MOV_reg(op1_str[0], 4, (unsigned char*) get_operand_value(op2_type, op2_str));
+            } else if (op1_type == 5) {
+                exec_MOV_mem(op1_str[0], 4, (unsigned char*) get_operand_value(op2_type, op2_str));
+            } else {
+                printf("Cannot move content to form %i\n", op1_type);
+            }
+            break;
         default:
             printf("Unknown opode: %i", opcode);
             return;

@@ -75,3 +75,5 @@ for (int i = config_length; i < length - config_length; i++) {
 * Wrote jump instructions using preprocessor macro
 * Began to write command for MOV and made set_register_name; needed to work out how to only transfer a number of bytes
   (i.e. to pad with zeroes if the size of the movement and size of the register do not match)
+* Worked that out and implemented the switch statements in main.c. Realised I might have to add code to the assembler
+  to check that the right type of operands are paired with commands (e.g. can't move data into an immediate value)
