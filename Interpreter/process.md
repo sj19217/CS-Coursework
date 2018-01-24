@@ -60,7 +60,7 @@ for (int i = config_length; i < length - config_length; i++) {
 * Created header files for main.c and commands.c
 * Did some research (https://stackoverflow.com/questions/16522341/pseudo-generics-in-c) and decided to use a macro to simplify commands.c
 * Moved definition of Environment to main.h to allow it to be visible in commands.c
-* Added CMP and JMP intructions
+* Added CMP and JMP intructions to commands.c
 * Started writing execute() and made get_operand_value()
 * Realised that the wall of if statements finding the data type is probably unnecessary. Commented it out/deprecated.
 * Made get_register_value
@@ -70,3 +70,6 @@ for (int i = config_length; i < length - config_length; i++) {
 * Wrote some testing statements in execute()
 * As expected, it didn't work. Crashing issue turned out to be dereferencing NULL pointers ಠ_ರೃ
 * Fixed this, but difficult to say at present if get_operand_value really works. It seems to.
+* Got rid of the testing statements (causing the crashing). Made a switch statement.
+* Wrote CMP instructions in switch statement
+* Wrote jump instructions using preprocessor macro

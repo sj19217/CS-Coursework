@@ -13,6 +13,14 @@
 #define MAX_META_SECTION_LENGTH 100
 #define MAX_CONFIG_KEY_LENGTH 10
 
+#define shield_exec_jump(cmd, type, len) \
+if (op1_type == type && op1_len == len) { \
+    cmp (*(unsigned int*) op1_str);\
+} else { \
+    printf("Unable to execute cmd statement with op1_type=%i, op1_len=%i", \
+                                op1_type, op1_len);\
+}
+
 // GLOBAL STRUCTURES
 
 // Stores the config information
@@ -281,6 +289,15 @@ void execute(unsigned char opcode,
         case CMP_float:
             exec_CMP_float(*(float*) get_operand_value(op1_type, op1_str),
                           *(float*) get_operand_value(op2_type, op2_str));
+        case JMP:
+            if (op1_type == 5 && op1_len == 4) {
+                exec_JMP(*(unsigned int*) op1_str);
+            } else {
+                printf("Unable to execute JMP statement with op1_type=%i, op1_len=%i",
+                                op1_type, op1_len);
+            }
+        case JE:
+            i
         default:
             printf("Unknown opode: %i", opcode);
             return;
