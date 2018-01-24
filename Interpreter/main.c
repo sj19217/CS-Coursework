@@ -13,9 +13,11 @@
 #define MAX_META_SECTION_LENGTH 100
 #define MAX_CONFIG_KEY_LENGTH 10
 
-#define shield_exec_jump(cmd, type, len) \
-if (op1_type == type && op1_len == len) { \
-    cmp (*(unsigned int*) op1_str);\
+// This is a bit of code that checks the type and length of an operand are correct
+// It is a macro, meaning that wherever shield_exec_jump appears elsewhere this will be pasted in
+#define shield_exec_jump(C, T, L) \
+if (op1_type == (T) && op1_len == (L)) { \
+    C (*(unsigned int*) op1_str);\
 } else { \
     printf("Unable to execute cmd statement with op1_type=%i, op1_len=%i", \
                                 op1_type, op1_len);\
@@ -131,6 +133,61 @@ int get_op_len(int type)
             return 3;
         default: // Invalid
             return -1;
+    }
+}
+
+void set_register_value(unsigned char regnum, void* data)
+{
+    switch (regnum) {
+        case 0xA0: // eax
+            env.eax.eax = *(unsigned int*) data;
+            //return (void *) &env.eax;
+        case 0xB0: // ebx
+            env.ebx.ebx = *(unsigned int*) data;
+        case 0xC0: // ecx
+            env.ebx.ebx = *(unsigned int*) data;
+        case 0xD0: // edx
+            env.ebx.ebx = *(unsigned int*) data;
+        case 0xE1: // esi
+            env.esi = *(unsigned int*) data;
+        case 0xE2: // edi
+            env.edi = *(unsigned int*) data;
+        case 0xE3: // ebp
+            env.ebp = *(unsigned int*) data;
+        case 0xE4: // esp
+            env.esp = *(unsigned int*) data;
+        case 0xA1: // ax
+            env.eax.div.ax = *(uint16_t*) data;
+            //return (void *) &env.eax.div.ax;
+        case 0xB1: // bx
+            env.ebx.div.bx = *(uint16_t*) data;
+        case 0xC1: // cx
+            env.ecx.div.cx = *(uint16_t*) data;
+        case 0xD1: // dx
+            env.edx.div.dx = *(uint16_t*) data;
+        case 0xA2: // ah
+            env.eax.div.a.ah = *(unsigned char*) data;
+        case 0xB2: // bh
+            env.ebx.div.b.bh = *(unsigned char*) data;
+        case 0xC2: // ch
+            env.ecx.div.c.ch = *(unsigned char*) data;
+        case 0xD2: // dh
+            env.edx.div.d.dh = *(unsigned char*) data;
+        case 0xA3: // al
+            env.eax.div.a.al = *(unsigned char*) data;
+        case 0xB3: // bl
+            env.ebx.div.b.bl = *(unsigned char*) data;
+        case 0xC3: // cl
+            env.ecx.div.c.cl = *(unsigned char*) data;
+        case 0xD3: // dl
+            env.edx.div.d.dl = *(unsigned char*) data;
+        case 0xF1:
+            printf("Cannot set input value as a register\n");
+        case 0xF0:
+            printf("%c", *(unsigned char*) data);
+            break;
+        default:
+            printf("Unknown register number in set_register_value: 0x%x\n", regnum);
     }
 }
 
@@ -289,15 +346,29 @@ void execute(unsigned char opcode,
         case CMP_float:
             exec_CMP_float(*(float*) get_operand_value(op1_type, op1_str),
                           *(float*) get_operand_value(op2_type, op2_str));
+            break;
         case JMP:
-            if (op1_type == 5 && op1_len == 4) {
-                exec_JMP(*(unsigned int*) op1_str);
-            } else {
-                printf("Unable to execute JMP statement with op1_type=%i, op1_len=%i",
-                                op1_type, op1_len);
-            }
+            shield_exec_jump(exec_JMP, 5, 4)
+            break;
         case JE:
-            i
+            shield_exec_jump(exec_JE, 5, 4);
+        case JNE:
+            shield_exec_jump(exec_JNE, 5, 4);
+            break;
+        case JLT:
+            shield_exec_jump(exec_JLT, 5, 4);
+            break;
+        case JLE:
+            shield_exec_jump(exec_JLE, 5, 4);
+            break;
+        case JGT:
+            shield_exec_jump(exec_JGT, 5, 4);
+            break;
+        case JGE:
+            shield_exec_jump(exec_JGE, 5, 4);
+            break;
+        case MOV_1B:
+
         default:
             printf("Unknown opode: %i", opcode);
             return;

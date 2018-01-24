@@ -80,3 +80,13 @@ void exec_JGE(unsigned int addr)
         env.pc = addr;
     }
 }
+
+
+// The MOV commands. 1B, 2B and 4B all have the same function and just get the length passed in as an argument.
+// However, there are different functions depending on whether the destination is a register or a memory address.
+void exec_MOV_reg(unsigned char regnum, int length, unsigned char* str)
+{
+    if (length == 1) { // MOV 1B
+
+    }
+}

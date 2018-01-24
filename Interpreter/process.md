@@ -73,3 +73,5 @@ for (int i = config_length; i < length - config_length; i++) {
 * Got rid of the testing statements (causing the crashing). Made a switch statement.
 * Wrote CMP instructions in switch statement
 * Wrote jump instructions using preprocessor macro
+* Began to write command for MOV and made set_register_name; needed to work out how to only transfer a number of bytes
+  (i.e. to pad with zeroes if the size of the movement and size of the register do not match)
