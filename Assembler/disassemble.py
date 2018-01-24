@@ -17,7 +17,7 @@ import io
 import struct
 import sys
 
-from .assembler import OPCODES, REGISTERS, DTYPE_META
+from assembler import OPCODES, REGISTERS, DTYPE_META
 
 # Get the OPCODES and REGISTERS dicts from the assembler file and swap everything round
 for mnemonic, opcode in OPCODES.copy().items():
