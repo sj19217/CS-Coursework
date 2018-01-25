@@ -1,3 +1,5 @@
+#include "headers/main.h"
+
 // Takes a char* and reads 4 bytes from it, turning them into an integer
 unsigned int convert_to_uint(const unsigned char* str)
 {
@@ -8,4 +10,11 @@ unsigned int convert_to_uint(const unsigned char* str)
     result += str[3];
 
     return result;
+}
+
+void setMemory(unsigned int maddr, int length, const unsigned char* value)
+{
+    for (int i = 0; i < length; i++) {
+        env.memory[maddr+i] = value[i];
+    }
 }
