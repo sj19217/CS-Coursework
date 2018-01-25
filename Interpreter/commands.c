@@ -5,6 +5,7 @@
 #include <stdint.h>
 #include <stdio.h>
 #include "headers/main.h"
+#include "headers/util.h"
 
 // HLT has no actions, it just breaks the loop
 
@@ -147,4 +148,29 @@ void exec_LEA_mem(unsigned long maddr_to, unsigned long pointer)
     env.memory[maddr_to+1] = bytes[1];
     env.memory[maddr_to+2] = bytes[2];
     env.memory[maddr_to+3] = bytes[3];
+}
+
+// Arithmetic commands begin here. Rather than having two versions, they are included in the same function to make
+// the macro technique already used for CMP
+
+void exec_ADD_char(unsigned char* op1, int op1_type, unsigned char* op2, int op2_type)
+{
+    // The first can be a register, a memory address or an arithmetic operand
+    unsigned char val1 = *(unsigned char*) get_operand_value(op1_type, op1);
+    unsigned char val2 = *(unsigned char*) get_operand_value(op2_type, op2);
+    unsigned char total = val1 + val2;
+    unsigned int expanded_total = total;
+    if (op1_type == 1) {
+        // Destination is a register
+        unsigned char regnum = op1[0];
+        set_register_value(op1[0], (void*) &expanded_total);
+    } else if (op1_type == 5) {
+        // Destination is a memory address
+        unsigned int maddr = convert_to_uint(op1);
+        setMemory(maddr, 1, &((unsigned char*) &expanded_total)[4-1]);
+    } else if (op1_type >= 6 && op1_type <= 10) {
+        // Destination is an arithmetic expression
+        unsigned int maddr = get_maddr_from_arithmetic(op1_type, op1);
+        setMemory(maddr, 1, &((unsigned char*) &expanded_total)[4-1]);
+    }
 }
