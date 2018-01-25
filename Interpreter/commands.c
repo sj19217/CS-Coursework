@@ -117,9 +117,16 @@ void exec_MOV_reg(unsigned char regnum, int length, const unsigned char* str)
     }
 }
 
-void exec_MOV_mem(unsigned int maddr, int length, const unsigned char* str)
+void exec_MOV_mem(unsigned long maddr, int length, const unsigned char* str)
 {
     for (int i = 0; i < length; i++) {
         env.memory[maddr + i] = str[i];
     }
+}
+
+
+// The LEA commands take any settable first operand and
+void exec_LEA_reg(unsigned char regnum, const unsigned char* str)
+{
+    // Move
 }
