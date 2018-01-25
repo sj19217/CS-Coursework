@@ -80,3 +80,4 @@ for (int i = config_length; i < length - config_length; i++) {
 * In preparation for making LEA function, moved interpreting arithmetic expressions into a function to separate
   calculating the address from finding the value there.
 * Changed things in the execute() switch statement to make MOV-ing stuff to an arithmetic operand work
+* Implemented the LEA function in the switch statement and commands.c

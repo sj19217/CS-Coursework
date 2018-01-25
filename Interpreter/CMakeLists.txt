@@ -3,4 +3,4 @@ project(Interpreter C)
 
 set(CMAKE_C_STANDARD 99)
 
-add_executable(Interpreter main.c headers/instructions.h commands.c headers/main.h headers/commands.h)
+add_executable(Interpreter main.c headers/instructions.h commands.c headers/main.h headers/commands.h util.c headers/util.h)

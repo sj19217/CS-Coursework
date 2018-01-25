@@ -9,6 +9,7 @@
 #include "headers/main.h"
 #include "headers/instructions.h"
 #include "headers/commands.h"
+#include "headers/util.h"
 
 #define MAX_META_SECTION_LENGTH 100
 #define MAX_CONFIG_KEY_LENGTH 10
@@ -437,6 +438,28 @@ void execute(unsigned char opcode,
                 printf("Cannot move content to form %i\n", op1_type);
             }
             break;
+        case LEA:
+            if (op1_type == 1) {
+                // Load effective address into register
+                if (op2_type == 5) {
+                    // Memory address -> Register
+                    exec_LEA_reg(op1_str[0], convert_to_uint(op2_str));
+                } else if (op2_type >= 6 && op2_type <= 10) {
+                    // Arithmetic -> Register
+                    exec_LEA_reg(op1_str[0], get_maddr_from_arithmetic(op2_type, op2_str));
+                }
+            } else if (op1_type == 5) {
+                // Load effective address into a memory location
+                if (op2_type == 5) {
+                    // Memory address -> Memory
+                    exec_LEA_mem(convert_to_uint(op1_str), convert_to_uint(op1_str));
+                } else if (op2_type >= 6 && op2_type <= 10) {
+                    // Arithmetic -> Memory
+                    exec_LEA_mem(convert_to_uint(op1_str), get_maddr_from_arithmetic(op2_type, op2_str));
+                }
+            } else {
+                printf("Invalid combination of operand types for LEA: 0x%x and 0x%x", op1_type, op2_type);
+            }
         default:
             printf("Unknown opode: %i", opcode);
             return;

@@ -125,8 +125,26 @@ void exec_MOV_mem(unsigned long maddr, int length, const unsigned char* str)
 }
 
 
-// The LEA commands take any settable first operand and
-void exec_LEA_reg(unsigned char regnum, const unsigned char* str)
+// The LEA commands take any settable first operand and either a memory address or arithmetic second operand
+void exec_LEA_reg(unsigned char regnum, unsigned long maddr)
 {
-    // Move
+    // This one is given the memory address as an int and stores that number in the destination register
+    unsigned char reg_size = get_register_size(regnum);
+    char* bytes = (char*) &maddr;
+    if (reg_size == 1) {
+        set_register_value(regnum, (void*) &bytes[3]);
+    } else if (reg_size == 2) {
+        set_register_value(regnum, (void*) &bytes[2]);
+    } else if (reg_size == 4) {
+        set_register_value(regnum, (void*) bytes);
+    }
+}
+
+void exec_LEA_mem(unsigned long maddr_to, unsigned long pointer)
+{
+    unsigned char* bytes = (unsigned char*) &pointer;
+    env.memory[maddr_to] = bytes[0];
+    env.memory[maddr_to+1] = bytes[1];
+    env.memory[maddr_to+2] = bytes[2];
+    env.memory[maddr_to+3] = bytes[3];
 }
