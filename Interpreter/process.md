@@ -60,7 +60,7 @@ for (int i = config_length; i < length - config_length; i++) {
 * Created header files for main.c and commands.c
 * Did some research (https://stackoverflow.com/questions/16522341/pseudo-generics-in-c) and decided to use a macro to simplify commands.c
 * Moved definition of Environment to main.h to allow it to be visible in commands.c
-* Added CMP and JMP intructions to commands.c
+* Added CMP and JMP instructions to commands.c
 * Started writing execute() and made get_operand_value()
 * Realised that the wall of if statements finding the data type is probably unnecessary. Commented it out/deprecated.
 * Made get_register_value
@@ -77,3 +77,5 @@ for (int i = config_length; i < length - config_length; i++) {
   (i.e. to pad with zeroes if the size of the movement and size of the register do not match)
 * Worked that out and implemented the switch statements in main.c. Realised I might have to add code to the assembler
   to check that the right type of operands are paired with commands (e.g. can't move data into an immediate value)
+* In preparation for making LEA function, moved interpreting arithmetic expressions into a function to separate
+  calculating the address from finding the value there.

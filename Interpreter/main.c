@@ -276,13 +276,42 @@ unsigned long interpret_arithmetic_item(unsigned char val)
     }
 }
 
+unsigned long get_maddr_from_arithmetic(int type, unsigned char* str)
+{
+    unsigned long a;
+    unsigned long b;
+    unsigned long c;
+    switch (type) {
+        case 6: // "a"-form arithmetic
+            a = interpret_arithmetic_item(str[0]);
+            return a;
+        case 7: // "a*b"-form arithmetic
+            a = interpret_arithmetic_item(str[0]);
+            b = interpret_arithmetic_item(str[1]);
+            return a*b;
+        case 8: // "a+b"-form arithmetic
+            a = interpret_arithmetic_item(str[0]);
+            b = interpret_arithmetic_item(str[1]);
+            return a+b;
+        case 9: // "a*b+c"-style arithmetic
+            a = interpret_arithmetic_item(str[0]);
+            b = interpret_arithmetic_item(str[1]);
+            c = interpret_arithmetic_item(str[2]);
+            return (a*b)+c;
+        case 10: // "a+b*c"-form arithmetic
+            a = interpret_arithmetic_item(str[0]);
+            b = interpret_arithmetic_item(str[1]);
+            c = interpret_arithmetic_item(str[2]);
+            return a+(b*c);
+        default:
+            printf("Invalid arithmetic type: %i", type);
+    }
+}
+
 void* get_operand_value(int type, unsigned char* str)
 {
     // Gets the value represented by this, including (e.g.) dereferencing the memory address or getting a register's value
     unsigned long maddr;
-    unsigned long a;
-    unsigned long b;
-    unsigned long c;
     switch (type) {
         case 0:
             //return NULL;
@@ -304,28 +333,12 @@ void* get_operand_value(int type, unsigned char* str)
             maddr += current.str[3];
             // Copy 4 bytes from memory into a separate variable
             return (void*) &env.memory[maddr];
-        case 6: // "a"-form arithmetic
-            a = interpret_arithmetic_item(str[0]);
-            return (void*) &env.memory[a];
-        case 7: // "a*b"-form arithmetic
-            a = interpret_arithmetic_item(str[0]);
-            b = interpret_arithmetic_item(str[1]);
-            return (void*) &env.memory[a*b];
-        case 8: // "a+b"-form arithmetic
-            a = interpret_arithmetic_item(str[0]);
-            b = interpret_arithmetic_item(str[1]);
-            return (void*) &env.memory[a+b];
-        case 9: // "a*b+c"-style arithmetic
-            a = interpret_arithmetic_item(str[0]);
-            b = interpret_arithmetic_item(str[1]);
-            c = interpret_arithmetic_item(str[2]);
-            return (void*) &env.memory[(a*b)+c];
-        case 10: // "a+b*c"-form arithmetic
-            a = interpret_arithmetic_item(str[0]);
-            b = interpret_arithmetic_item(str[1]);
-            c = interpret_arithmetic_item(str[2]);
-            return (void*) &env.memory[a+(b*c)];
         default:
+            if (type >= 6 && type <= 10) {
+                // Arithmetic type
+                maddr = get_maddr_from_arithmetic(type, str);
+                return (void*) &env.memory[maddr];
+            }
             printf("Unknown type in get_operand_value: 0x%x", type);
             break;
     }
