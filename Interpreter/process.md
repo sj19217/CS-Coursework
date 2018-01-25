@@ -82,4 +82,5 @@ for (int i = config_length; i < length - config_length; i++) {
 * Changed things in the execute() switch statement to make MOV-ing stuff to an arithmetic operand work
 * Implemented the LEA function in the switch statement and commands.c
 * Renamed functions to use camelCase
-* Wrote ADD function for char then turned it into a macro and repeated
+* Wrote ADD function for char then turned it into a macro
+* Abandoned macro idea because it produced a million errors

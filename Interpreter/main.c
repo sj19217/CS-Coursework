@@ -460,6 +460,20 @@ void execute(unsigned char opcode,
             } else {
                 printf("Invalid combination of operand types for LEA: 0x%x and 0x%x", op1_type, op2_type);
             }
+        case ADD_char:
+            exec_ADD_char(op1_str, op1_type, op2_str, op2_type);
+        case ADD_uchar:
+            exec_ADD_uchar(op1_str, op1_type, op2_str, op2_type);
+        case ADD_short:
+            exec_ADD_short(op1_str, op1_type, op2_str, op2_type);
+        case ADD_ushort:
+            exec_ADD_ushort(op1_str, op1_type, op2_str, op2_type);
+        case ADD_int:
+            exec_ADD_int(op1_str, op1_type, op2_str, op2_type);
+        case ADD_uint:
+            exec_ADD_uint(op1_str, op1_type, op2_str, op2_type);
+        case ADD_float:
+            exec_ADD_float(op1_str, op1_type, op2_str, op2_type);
         default:
             printf("Unknown opode: %i", opcode);
             return;

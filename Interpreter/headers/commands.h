@@ -30,6 +30,14 @@ void exec_MOV_mem(unsigned long maddr, int length, unsigned char* str);
 void exec_LEA_reg(unsigned char regnum, unsigned long maddr);
 void exec_LEA_mem(unsigned long maddr_to, unsigned long maddr_from);
 
+void exec_ADD_char(unsigned char* op1, int op1_type, unsigned char* op2, int op2_type);
+void exec_ADD_uchar(unsigned char* op1, int op1_type, unsigned char* op2, int op2_type);
+void exec_ADD_short(unsigned char* op1, int op1_type, unsigned char* op2, int op2_type);
+void exec_ADD_ushort(unsigned char* op1, int op1_type, unsigned char* op2, int op2_type);
+void exec_ADD_int(unsigned char* op1, int op1_type, unsigned char* op2, int op2_type);
+void exec_ADD_uint(unsigned char* op1, int op1_type, unsigned char* op2, int op2_type);
+void exec_ADD_float(unsigned char* op1, int op1_type, unsigned char* op2, int op2_type);
+
 
 
 #endif //INTERPRETER_COMMANDS_H
