@@ -403,6 +403,10 @@ void execute(unsigned char opcode,
                 exec_MOV_reg(op1_str[0], 1, (unsigned char*) get_operand_value(op2_type, op2_str));
             } else if (op1_type == 5) {
                 exec_MOV_mem(op1_str[0], 1, (unsigned char*) get_operand_value(op2_type, op2_str));
+            } else if (op1_type >= 6 && op1_type <= 10) {
+                exec_MOV_mem(get_maddr_from_arithmetic(op1_type, op1_str),
+                             1,
+                             (unsigned char*) get_operand_value(op2_type, op2_str));
             } else {
                 printf("Cannot move content to form %i\n", op1_type);
             }
@@ -412,6 +416,10 @@ void execute(unsigned char opcode,
                 exec_MOV_reg(op1_str[0], 2, (unsigned char*) get_operand_value(op2_type, op2_str));
             } else if (op1_type == 5) {
                 exec_MOV_mem(op1_str[0], 2, (unsigned char*) get_operand_value(op2_type, op2_str));
+            } else if (op1_type >= 6 && op1_type <= 10) {
+                exec_MOV_mem(get_maddr_from_arithmetic(op1_type, op1_str),
+                             2,
+                             (unsigned char*) get_operand_value(op2_type, op2_str));
             } else {
                 printf("Cannot move content to form %i\n", op1_type);
             }
@@ -421,6 +429,10 @@ void execute(unsigned char opcode,
                 exec_MOV_reg(op1_str[0], 4, (unsigned char*) get_operand_value(op2_type, op2_str));
             } else if (op1_type == 5) {
                 exec_MOV_mem(op1_str[0], 4, (unsigned char*) get_operand_value(op2_type, op2_str));
+            } else if (op1_type >= 6 && op1_type <= 10) {
+                exec_MOV_mem(get_maddr_from_arithmetic(op1_type, op1_str),
+                             4,
+                             (unsigned char*) get_operand_value(op2_type, op2_str));
             } else {
                 printf("Cannot move content to form %i\n", op1_type);
             }
