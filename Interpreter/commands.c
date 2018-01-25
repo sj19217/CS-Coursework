@@ -88,7 +88,7 @@ void exec_JGE(unsigned int addr)
 // However, there are different functions depending on whether the destination is a register or a memory address.
 void exec_MOV_reg(unsigned char regnum, int length, const unsigned char* str)
 {
-    unsigned char reg_size = get_register_size(regnum);
+    unsigned char reg_size = getRegisterSize(regnum);
 
     if (reg_size < length) {
         printf("Warning: moving %i bytes to register number %i results in chopping off of bytes\n", length, reg_size);
@@ -110,11 +110,11 @@ void exec_MOV_reg(unsigned char regnum, int length, const unsigned char* str)
     // Turn it into an array of chars so that the right amount can be extracted
     char* bytes = (char*) &full;
     if (reg_size == 1) {
-        set_register_value(regnum, (void*) &bytes[3]);
+        setRegisterValue(regnum, (void *) &bytes[3]);
     } else if (reg_size == 2) {
-        set_register_value(regnum, (void*) &bytes[2]);
+        setRegisterValue(regnum, (void *) &bytes[2]);
     } else if (reg_size == 4) {
-        set_register_value(regnum, (void*) bytes);
+        setRegisterValue(regnum, (void *) bytes);
     }
 }
 
@@ -130,14 +130,14 @@ void exec_MOV_mem(unsigned long maddr, int length, const unsigned char* str)
 void exec_LEA_reg(unsigned char regnum, unsigned long maddr)
 {
     // This one is given the memory address as an int and stores that number in the destination register
-    unsigned char reg_size = get_register_size(regnum);
+    unsigned char reg_size = getRegisterSize(regnum);
     char* bytes = (char*) &maddr;
     if (reg_size == 1) {
-        set_register_value(regnum, (void*) &bytes[3]);
+        setRegisterValue(regnum, (void *) &bytes[3]);
     } else if (reg_size == 2) {
-        set_register_value(regnum, (void*) &bytes[2]);
+        setRegisterValue(regnum, (void *) &bytes[2]);
     } else if (reg_size == 4) {
-        set_register_value(regnum, (void*) bytes);
+        setRegisterValue(regnum, (void *) bytes);
     }
 }
 
@@ -156,21 +156,21 @@ void exec_LEA_mem(unsigned long maddr_to, unsigned long pointer)
 void exec_ADD_char(unsigned char* op1, int op1_type, unsigned char* op2, int op2_type)
 {
     // The first can be a register, a memory address or an arithmetic operand
-    unsigned char val1 = *(unsigned char*) get_operand_value(op1_type, op1);
-    unsigned char val2 = *(unsigned char*) get_operand_value(op2_type, op2);
+    unsigned char val1 = *(unsigned char*) getOperandValue(op1_type, op1);
+    unsigned char val2 = *(unsigned char*) getOperandValue(op2_type, op2);
     unsigned char total = val1 + val2;
     unsigned int expanded_total = total;
     if (op1_type == 1) {
         // Destination is a register
         unsigned char regnum = op1[0];
-        set_register_value(op1[0], (void*) &expanded_total);
+        setRegisterValue(op1[0], (void *) &expanded_total);
     } else if (op1_type == 5) {
         // Destination is a memory address
-        unsigned int maddr = convert_to_uint(op1);
+        unsigned int maddr = convertTo_uint(op1);
         setMemory(maddr, 1, &((unsigned char*) &expanded_total)[4-1]);
     } else if (op1_type >= 6 && op1_type <= 10) {
         // Destination is an arithmetic expression
-        unsigned int maddr = get_maddr_from_arithmetic(op1_type, op1);
+        unsigned int maddr = getMAddrFromArithmetic(op1_type, op1);
         setMemory(maddr, 1, &((unsigned char*) &expanded_total)[4-1]);
     }
 }

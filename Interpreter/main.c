@@ -40,7 +40,7 @@ struct {
 
 // FUNCTIONS
 
-int process_config(const unsigned char* bytecode, int length)
+int processConfig(const unsigned char *bytecode, int length)
 {
     // Keep running until 4 nulls are reached
     int num_nulls = 0;
@@ -107,7 +107,7 @@ int process_config(const unsigned char* bytecode, int length)
     return strlen(config_str);
 }
 
-int get_op_len(int type)
+int getOpLen(int type)
 {
     switch (type) {
         case 0: // None
@@ -137,7 +137,7 @@ int get_op_len(int type)
     }
 }
 
-unsigned char get_register_size(unsigned char regnum)
+unsigned char getRegisterSize(unsigned char regnum)
 {
     if ((regnum >= 0xE1 && regnum <= 0xE4) || (regnum >> 4 >= 10 && regnum >> 4 <= 13)) {
         return 4;
@@ -150,12 +150,12 @@ unsigned char get_register_size(unsigned char regnum)
     } else if (regnum == 0xF0 || regnum == 0xF1) {
         return 4;
     } else {
-        printf("Unknown register number in get_register_size: 0x%x", regnum);
+        printf("Unknown register number in getRegisterSize: 0x%x", regnum);
         return 0;
     }
 }
 
-void set_register_value(unsigned char regnum, void* data)
+void setRegisterValue(unsigned char regnum, void *data)
 {
     switch (regnum) {
         case 0xA0: // eax
@@ -206,11 +206,11 @@ void set_register_value(unsigned char regnum, void* data)
             printf("%c", *(unsigned char*) data);
             break;
         default:
-            printf("Unknown register number in set_register_value: 0x%x\n", regnum);
+            printf("Unknown register number in setRegisterValue: 0x%x\n", regnum);
     }
 }
 
-void* get_register_value(unsigned char regnum)
+void* getRegisterValue(unsigned char regnum)
 {
     unsigned long retval;
     switch (regnum) {
@@ -263,53 +263,53 @@ void* get_register_value(unsigned char regnum)
             printf("Cannot get value from output register");
             return (void*) &env.memory[0];
         default:
-            printf("Unknown register number in get_register_value: 0x%x\n", regnum);
+            printf("Unknown register number in getRegisterValue: 0x%x\n", regnum);
             return 0;
     }
 }
 
-unsigned long interpret_arithmetic_item(unsigned char val)
+unsigned long interpretArithmeticVariable(unsigned char val)
 {
     if (val == 2 || val == 4 || val == 8) {
         return val;
     } else {
-        return *(unsigned long*) get_register_value(val);
+        return *(unsigned long*) getRegisterValue(val);
     }
 }
 
-unsigned long get_maddr_from_arithmetic(int type, unsigned char* str)
+unsigned long getMAddrFromArithmetic(int type, unsigned char *str)
 {
     unsigned long a;
     unsigned long b;
     unsigned long c;
     switch (type) {
         case 6: // "a"-form arithmetic
-            a = interpret_arithmetic_item(str[0]);
+            a = interpretArithmeticVariable(str[0]);
             return a;
         case 7: // "a*b"-form arithmetic
-            a = interpret_arithmetic_item(str[0]);
-            b = interpret_arithmetic_item(str[1]);
+            a = interpretArithmeticVariable(str[0]);
+            b = interpretArithmeticVariable(str[1]);
             return a*b;
         case 8: // "a+b"-form arithmetic
-            a = interpret_arithmetic_item(str[0]);
-            b = interpret_arithmetic_item(str[1]);
+            a = interpretArithmeticVariable(str[0]);
+            b = interpretArithmeticVariable(str[1]);
             return a+b;
         case 9: // "a*b+c"-style arithmetic
-            a = interpret_arithmetic_item(str[0]);
-            b = interpret_arithmetic_item(str[1]);
-            c = interpret_arithmetic_item(str[2]);
+            a = interpretArithmeticVariable(str[0]);
+            b = interpretArithmeticVariable(str[1]);
+            c = interpretArithmeticVariable(str[2]);
             return (a*b)+c;
         case 10: // "a+b*c"-form arithmetic
-            a = interpret_arithmetic_item(str[0]);
-            b = interpret_arithmetic_item(str[1]);
-            c = interpret_arithmetic_item(str[2]);
+            a = interpretArithmeticVariable(str[0]);
+            b = interpretArithmeticVariable(str[1]);
+            c = interpretArithmeticVariable(str[2]);
             return a+(b*c);
         default:
             printf("Invalid arithmetic type: %i", type);
     }
 }
 
-void* get_operand_value(int type, unsigned char* str)
+void* getOperandValue(int type, unsigned char *str)
 {
     // Gets the value represented by this, including (e.g.) dereferencing the memory address or getting a register's value
     unsigned long maddr;
@@ -319,7 +319,7 @@ void* get_operand_value(int type, unsigned char* str)
             return (void*) &env.memory[0];
         case 1: // A register
             // Take one byte
-            return get_register_value(str[0]);
+            return getRegisterValue(str[0]);
         case 2: // 1-byte immediate
             return (void*) current.str;
         case 3: // 2-byte immediate
@@ -337,10 +337,10 @@ void* get_operand_value(int type, unsigned char* str)
         default:
             if (type >= 6 && type <= 10) {
                 // Arithmetic type
-                maddr = get_maddr_from_arithmetic(type, str);
+                maddr = getMAddrFromArithmetic(type, str);
                 return (void*) &env.memory[maddr];
             }
-            printf("Unknown type in get_operand_value: 0x%x", type);
+            printf("Unknown type in getOperandValue: 0x%x", type);
             break;
     }
 }
@@ -352,32 +352,32 @@ void execute(unsigned char opcode,
     switch (opcode) {
         case CMP_char:
             // CMP takes 2 values
-            exec_CMP_char(*(char*) get_operand_value(op1_type, op1_str),
-                          *(char*) get_operand_value(op2_type, op2_str));
+            exec_CMP_char(*(char*) getOperandValue(op1_type, op1_str),
+                          *(char*) getOperandValue(op2_type, op2_str));
             break;
         case CMP_uchar:
-            exec_CMP_uchar(*(unsigned char*) get_operand_value(op1_type, op1_str),
-                          *(unsigned char*) get_operand_value(op2_type, op2_str));
+            exec_CMP_uchar(*(unsigned char*) getOperandValue(op1_type, op1_str),
+                          *(unsigned char*) getOperandValue(op2_type, op2_str));
             break;
         case CMP_short:
-            exec_CMP_short(*(int16_t*) get_operand_value(op1_type, op1_str),
-                          *(int16_t*) get_operand_value(op2_type, op2_str));
+            exec_CMP_short(*(int16_t*) getOperandValue(op1_type, op1_str),
+                          *(int16_t*) getOperandValue(op2_type, op2_str));
             break;
         case CMP_ushort:
-            exec_CMP_ushort(*(uint16_t*) get_operand_value(op1_type, op1_str),
-                          *(uint16_t*) get_operand_value(op2_type, op2_str));
+            exec_CMP_ushort(*(uint16_t*) getOperandValue(op1_type, op1_str),
+                          *(uint16_t*) getOperandValue(op2_type, op2_str));
             break;
         case CMP_int:
-            exec_CMP_int(*(int*) get_operand_value(op1_type, op1_str),
-                          *(int*) get_operand_value(op2_type, op2_str));
+            exec_CMP_int(*(int*) getOperandValue(op1_type, op1_str),
+                          *(int*) getOperandValue(op2_type, op2_str));
             break;
         case CMP_uint:
-            exec_CMP_uint(*(unsigned int*) get_operand_value(op1_type, op1_str),
-                          *(unsigned int*) get_operand_value(op2_type, op2_str));
+            exec_CMP_uint(*(unsigned int*) getOperandValue(op1_type, op1_str),
+                          *(unsigned int*) getOperandValue(op2_type, op2_str));
             break;
         case CMP_float:
-            exec_CMP_float(*(float*) get_operand_value(op1_type, op1_str),
-                          *(float*) get_operand_value(op2_type, op2_str));
+            exec_CMP_float(*(float*) getOperandValue(op1_type, op1_str),
+                          *(float*) getOperandValue(op2_type, op2_str));
             break;
         case JMP:
             shield_exec_jump(exec_JMP, 5, 4)
@@ -401,39 +401,39 @@ void execute(unsigned char opcode,
             break;
         case MOV_1B:
             if (op1_type == 1) {
-                exec_MOV_reg(op1_str[0], 1, (unsigned char*) get_operand_value(op2_type, op2_str));
+                exec_MOV_reg(op1_str[0], 1, (unsigned char*) getOperandValue(op2_type, op2_str));
             } else if (op1_type == 5) {
-                exec_MOV_mem(op1_str[0], 1, (unsigned char*) get_operand_value(op2_type, op2_str));
+                exec_MOV_mem(op1_str[0], 1, (unsigned char*) getOperandValue(op2_type, op2_str));
             } else if (op1_type >= 6 && op1_type <= 10) {
-                exec_MOV_mem(get_maddr_from_arithmetic(op1_type, op1_str),
+                exec_MOV_mem(getMAddrFromArithmetic(op1_type, op1_str),
                              1,
-                             (unsigned char*) get_operand_value(op2_type, op2_str));
+                             (unsigned char*) getOperandValue(op2_type, op2_str));
             } else {
                 printf("Cannot move content to form %i\n", op1_type);
             }
             break;
         case MOV_2B:
             if (op1_type == 1) {
-                exec_MOV_reg(op1_str[0], 2, (unsigned char*) get_operand_value(op2_type, op2_str));
+                exec_MOV_reg(op1_str[0], 2, (unsigned char*) getOperandValue(op2_type, op2_str));
             } else if (op1_type == 5) {
-                exec_MOV_mem(op1_str[0], 2, (unsigned char*) get_operand_value(op2_type, op2_str));
+                exec_MOV_mem(op1_str[0], 2, (unsigned char*) getOperandValue(op2_type, op2_str));
             } else if (op1_type >= 6 && op1_type <= 10) {
-                exec_MOV_mem(get_maddr_from_arithmetic(op1_type, op1_str),
+                exec_MOV_mem(getMAddrFromArithmetic(op1_type, op1_str),
                              2,
-                             (unsigned char*) get_operand_value(op2_type, op2_str));
+                             (unsigned char*) getOperandValue(op2_type, op2_str));
             } else {
                 printf("Cannot move content to form %i\n", op1_type);
             }
             break;
         case MOV_4B:
             if (op1_type == 1) {
-                exec_MOV_reg(op1_str[0], 4, (unsigned char*) get_operand_value(op2_type, op2_str));
+                exec_MOV_reg(op1_str[0], 4, (unsigned char*) getOperandValue(op2_type, op2_str));
             } else if (op1_type == 5) {
-                exec_MOV_mem(op1_str[0], 4, (unsigned char*) get_operand_value(op2_type, op2_str));
+                exec_MOV_mem(op1_str[0], 4, (unsigned char*) getOperandValue(op2_type, op2_str));
             } else if (op1_type >= 6 && op1_type <= 10) {
-                exec_MOV_mem(get_maddr_from_arithmetic(op1_type, op1_str),
+                exec_MOV_mem(getMAddrFromArithmetic(op1_type, op1_str),
                              4,
-                             (unsigned char*) get_operand_value(op2_type, op2_str));
+                             (unsigned char*) getOperandValue(op2_type, op2_str));
             } else {
                 printf("Cannot move content to form %i\n", op1_type);
             }
@@ -443,19 +443,19 @@ void execute(unsigned char opcode,
                 // Load effective address into register
                 if (op2_type == 5) {
                     // Memory address -> Register
-                    exec_LEA_reg(op1_str[0], convert_to_uint(op2_str));
+                    exec_LEA_reg(op1_str[0], convertTo_uint(op2_str));
                 } else if (op2_type >= 6 && op2_type <= 10) {
                     // Arithmetic -> Register
-                    exec_LEA_reg(op1_str[0], get_maddr_from_arithmetic(op2_type, op2_str));
+                    exec_LEA_reg(op1_str[0], getMAddrFromArithmetic(op2_type, op2_str));
                 }
             } else if (op1_type == 5) {
                 // Load effective address into a memory location
                 if (op2_type == 5) {
                     // Memory address -> Memory
-                    exec_LEA_mem(convert_to_uint(op1_str), convert_to_uint(op1_str));
+                    exec_LEA_mem(convertTo_uint(op1_str), convertTo_uint(op1_str));
                 } else if (op2_type >= 6 && op2_type <= 10) {
                     // Arithmetic -> Memory
-                    exec_LEA_mem(convert_to_uint(op1_str), get_maddr_from_arithmetic(op2_type, op2_str));
+                    exec_LEA_mem(convertTo_uint(op1_str), getMAddrFromArithmetic(op2_type, op2_str));
                 }
             } else {
                 printf("Invalid combination of operand types for LEA: 0x%x and 0x%x", op1_type, op2_type);
@@ -466,7 +466,7 @@ void execute(unsigned char opcode,
     }
 }
 
-void run_loop()
+void runLoop()
 {
     // Executes the instructions
     while (1)
@@ -544,14 +544,14 @@ void run_loop()
         op1_type = (env.memory[env.pc+1] & 0b11110000) >> 4;
         op2_type = env.memory[env.pc+1] & 0b00001111;
 
-        if (get_op_len(op1_type) == -1 | get_op_len(op2_type) == -1) {
+        if (getOpLen(op1_type) == -1 | getOpLen(op2_type) == -1) {
             // One of them is invalid
             printf("Invalid operand byte 0x%x at PC %lu", env.memory[env.pc+1], env.pc+1);
         }
 
         // Pull the first operand as a char[]
-        int op1_len = get_op_len(op1_type);
-        int op2_len = get_op_len(op2_type);
+        int op1_len = getOpLen(op1_type);
+        int op2_len = getOpLen(op2_type);
         unsigned char op1_str[op1_len];
         unsigned char op2_str[op2_len];
 
@@ -586,7 +586,7 @@ void run(unsigned char* bytecode, int iflag, int length)
 
     // Begin the process of running the bytecode
     // Start by loading all of the configuration data
-    int config_length = process_config(bytecode, length) + 4;
+    int config_length = processConfig(bytecode, length) + 4;
 
     // Initialise the environment
     const int memsize = config.memorykb * 1024;
@@ -600,7 +600,7 @@ void run(unsigned char* bytecode, int iflag, int length)
 
 
     // Start running instructions
-    run_loop();
+    runLoop();
 }
 
 int main(int argc, char** argv)

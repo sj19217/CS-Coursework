@@ -4,7 +4,7 @@
 * Went back and changed from throwing an error if no file is given to asking for a file
 * Made run function
 * Find config string
-* Moved config string stuff into process_config
+* Moved config string stuff into processConfig
 * Looked up strtok and wrote processing of config info (http://www.tutorialspoint.com/ansi_c/c_strtok.htm)
 * Looked up how to interpret an int from the value string (http://en.cppreference.com/w/c/string/byte/strtol)
 * Looked up how to compare strings (https://www.tutorialspoint.com/c_standard_library/c_function_strcmp.htm)
@@ -43,8 +43,8 @@ for (int i = config_length; i < length - config_length; i++) {
     }
 ```
 
-* That seemed to work, but run_loop stayed on char 1 and didn't iterate
-* Added ability to consume operands into a char[]; created get_op_len
+* That seemed to work, but runLoop stayed on char 1 and didn't iterate
+* Added ability to consume operands into a char[]; created getOpLen
 * Wrote code and wrote text to output data about each opcode and operand (printing raw operand hex)
 * Got a very strange error where everything printed fine until memory address 51, when suddenly it broke and contained
   bytes not present in the original bytecode
@@ -63,13 +63,13 @@ for (int i = config_length; i < length - config_length; i++) {
 * Added CMP and JMP instructions to commands.c
 * Started writing execute() and made get_operand_value()
 * Realised that the wall of if statements finding the data type is probably unnecessary. Commented it out/deprecated.
-* Made get_register_value
+* Made getRegisterValue
 * Changed some of the registers to be unions
 * Completed get_operand_value (with help froma function to interpret arithmetic)
 * Research done on void pointers
 * Wrote some testing statements in execute()
 * As expected, it didn't work. Crashing issue turned out to be dereferencing NULL pointers ಠ_ರೃ
-* Fixed this, but difficult to say at present if get_operand_value really works. It seems to.
+* Fixed this, but difficult to say at present if getOperandValue really works. It seems to.
 * Got rid of the testing statements (causing the crashing). Made a switch statement.
 * Wrote CMP instructions in switch statement
 * Wrote jump instructions using preprocessor macro
@@ -81,3 +81,5 @@ for (int i = config_length; i < length - config_length; i++) {
   calculating the address from finding the value there.
 * Changed things in the execute() switch statement to make MOV-ing stuff to an arithmetic operand work
 * Implemented the LEA function in the switch statement and commands.c
+* Renamed functions to use camelCase
+* Wrote ADD function for char then turned it into a macro and repeated

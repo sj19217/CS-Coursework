@@ -71,18 +71,18 @@ struct Environment{
     unsigned char* memory;
 } env;
 
-int process_config(const unsigned char* bytecode, int length);
-int get_op_len(int type);
-unsigned char get_register_size(unsigned char regnum);
-void set_register_value(unsigned char regnum, void* data);
-void* get_register_value(unsigned char regnum);
-unsigned long interpret_arithmetic_item(unsigned char val);
-unsigned long get_maddr_from_arithmetic(int type, unsigned char* str);
-void* get_operand_value(int type, unsigned char* str);
+int processConfig(const unsigned char *bytecode, int length);
+int getOpLen(int type);
+unsigned char getRegisterSize(unsigned char regnum);
+void setRegisterValue(unsigned char regnum, void *data);
+void* getRegisterValue(unsigned char regnum);
+unsigned long interpretArithmeticVariable(unsigned char val);
+unsigned long getMAddrFromArithmetic(int type, unsigned char *str);
+void* getOperandValue(int type, unsigned char *str);
 void execute(unsigned char opcode,
              int op1_type, int op1_len, unsigned char* op1_str,
              int op2_type, int op2_len, unsigned char* op2_str);
-void run_loop();
+void runLoop();
 void run(unsigned char* bytecode, int iflag, int length);
 int main(int argc, char** argv);
 
