@@ -24,12 +24,6 @@ if (op1_type == (T) && op1_len == (L)) { \
                                 op1_type, op1_len);\
 }
 
-// GLOBAL STRUCTURES
-
-// Stores the config information
-struct {
-    int memorykb;
-} config;
 
 // Used to store the current opcode string being worked on
 struct {
@@ -609,12 +603,15 @@ void run(unsigned char* bytecode, int iflag, int length)
     // Fill up the memory with the instructions
     for (int i = config_length; i < length; i++) {
         env.memory[i - config_length] = bytecode[i];
-        printf("0x%x: %x\n", i - config_length, env.memory[i - config_length]);
+        //printf("0x%x: %x\n", i - config_length, env.memory[i - config_length]);
     }
+
+    // Dump out the memory
+    memdump(200, 1, 16);
 
 
     // Start running instructions
-    runLoop();
+    //runLoop();
 }
 
 int main(int argc, char** argv)

@@ -1,4 +1,5 @@
 #include "headers/main.h"
+#include "headers/log.h"
 
 // Takes a char* and reads 4 bytes from it, turning them into an integer
 unsigned int convertTo_uint(const unsigned char *str)
@@ -14,7 +15,37 @@ unsigned int convertTo_uint(const unsigned char *str)
 
 void setMemory(unsigned int maddr, int length, const unsigned char* value)
 {
-    for (int i = 0; i < length; i++) {
+    for (int i = 0; i < length; i++)
+    {
         env.memory[maddr+i] = value[i];
+    }
+}
+
+// Dumps the contents of memory onto the screen
+void memdump(int len, _Bool headings, int columns)
+{
+    if (len > config.memorykb * 1024) {
+        len = config.memorykb * 1024;
+        log_warn("Size of data to print is larger than memory (%i > %i)", len, config.memorykb*1024);
+    }
+
+    if (headings) {
+        printf("       ");  // Get the alignment right
+        for (int i = 0; i < columns; i++) {
+            printf("%02x ", i);
+        }
+    }
+
+    for (int i = 0; i < len; i++)
+    {
+        if (i % columns == 0) {
+            // Print out a newline and heading (if headings are requested)
+            printf("\n");
+            if (headings) {
+                printf("%06x", i / columns);
+            }
+        }
+
+        printf(" %02x", env.memory[i]);
     }
 }

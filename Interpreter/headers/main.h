@@ -71,6 +71,11 @@ struct Environment{
     unsigned char* memory;
 } env;
 
+// Stores the config information
+struct {
+    int memorykb;
+} config;
+
 int processConfig(const unsigned char *bytecode, int length);
 int getOpLen(int type);
 unsigned char getRegisterSize(unsigned char regnum);

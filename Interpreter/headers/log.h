@@ -1,8 +1,36 @@
-//
-// Created by sj.19217 on 26/01/2018.
-//
+/**
+ * Copyright (c) 2017 rxi
+ *
+ * This library is free software; you can redistribute it and/or modify it
+ * under the terms of the MIT license. See `log.c` for details.
+ */
 
-#ifndef INTERPRETER_LOG_H
-#define INTERPRETER_LOG_H
+#ifndef LOG_H
+#define LOG_H
 
-#endif //INTERPRETER_LOG_H
+#include <stdio.h>
+#include <stdarg.h>
+
+#define LOG_VERSION "0.1.0"
+
+typedef void (*log_LockFn)(void *udata, int lock);
+
+enum { LOG_TRACE, LOG_DEBUG, LOG_INFO, LOG_WARN, LOG_ERROR, LOG_FATAL };
+
+#define log_trace(...) log_log(LOG_TRACE, __FILE__, __LINE__, __VA_ARGS__)      // Announcing when a bit of code is run
+#define log_debug(...) log_log(LOG_DEBUG, __FILE__, __LINE__, __VA_ARGS__)      // Debugging info, like printing a variable's contents
+#define log_info(...)  log_log(LOG_INFO,  __FILE__, __LINE__, __VA_ARGS__)      // General information of interest but no consequence
+#define log_warn(...)  log_log(LOG_WARN,  __FILE__, __LINE__, __VA_ARGS__)      // Something out of the ordinary
+#define log_error(...) log_log(LOG_ERROR, __FILE__, __LINE__, __VA_ARGS__)      // Something definitely wrong
+#define log_fatal(...) log_log(LOG_FATAL, __FILE__, __LINE__, __VA_ARGS__)      // Something critically wrong
+
+void log_set_udata(void *udata);
+void log_set_lock(log_LockFn fn);
+void log_set_fp(FILE *fp);
+void log_set_level(int level);
+void log_set_quiet(int enable);
+
+void log_log(int level, const char *file, int line, const char *fmt, ...);
+
+#endif
+
