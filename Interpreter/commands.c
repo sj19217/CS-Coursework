@@ -334,5 +334,17 @@ void exec_arithmetic(char* function, unsigned char* op1, int op1_type, unsigned 
         total = *(int*) &exact;
     }
 
-
+    // Convert the int to 4 chars
+    char* bytes = (char*) &total;
+    if (op1_type == 1) {
+        // Register
+        setRegisterValue(op1[0], (void*) bytes);
+    } else if (op1_type == 5) {
+        // Memory location
+        setMemory(*(unsigned int*) op1, 1, (unsigned char*) bytes+3);
+    } else if (op1_type >= 6 && op1_type <= 10) {
+        setMemory(getMAddrFromArithmetic(op1_type, op1), 1, (unsigned char*) bytes+3);
+    } else {    // Add arithmetic expressions too
+        log_error("Cannot move result of arithmetic to location of type %i", op1_type);
+    }
 }
