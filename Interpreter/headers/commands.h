@@ -8,6 +8,16 @@
 #ifndef INTERPRETER_COMMANDS_H
 #define INTERPRETER_COMMANDS_H
 
+union OperandValue {
+    char b;
+    unsigned char B;
+    int16_t h;
+    uint16_t H;
+    int i;
+    unsigned int I;
+    float f;
+};
+
 void exec_CMP_char(char op1_val, char op2_val);
 void exec_CMP_uchar(unsigned char op1_val, unsigned char op2_val);
 void exec_CMP_short(int16_t op1_val, int16_t op2_val);

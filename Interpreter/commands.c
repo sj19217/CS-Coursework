@@ -8,6 +8,7 @@
 #include "headers/main.h"
 #include "headers/util.h"
 #include "headers/log.h"
+#include "headers/commands.h"
 
 // HLT has no actions, it just breaks the loop
 
@@ -311,27 +312,107 @@ void exec_ADD_float(unsigned char* op1, int op1_type, unsigned char* op2, int op
     }
 }
 
+// The complicated, ugly code needed to get the value of an operand and place it in the right version of the union
+#define SET_OPERANDS(D, T) operand1.b = *(T*) getOperandValue(op1_type, (void*) op1); \
+operand2.##D = *(T*) getOperandValue(op2_type, (void*) op2);
+
+// The still complicated, though slightly less ugly, code for performing the given operation on all possible versions.
+#define CALCULATE_TOTAL(O) switch (dtype) { \
+case 'b':\
+    total.i = operand1.b O operand2.b;\
+case 'B':\
+    total.i = operand1.B O operand2.B; \
+case 'h': \
+    total.i = operand1.h O operand2.h;\
+case 'H': \
+    total.i = operand1.H O operand2.H; \
+case 'i': \
+    total.i = operand1.i O operand2.i; \
+case 'I': \
+    total.i = operand1.I O operand2.I; \
+case 'f': \
+    total.i = operand1.f O operand2.f; \
+default: \
+    log_error("Unknown type: %c", dtype);\
+}
 
 // The prototype function that will replace almost anything
-void exec_arithmetic(char* function, unsigned char* op1, int op1_type, unsigned char* op2, int op2_type)
+void exec_arithmetic(char* function, char dtype, unsigned char* op1, int op1_type, unsigned char* op2, int op2_type)
 {
-    char val1 = *(char*) getOperandValue(op1_type, (void*) op1);
-    char val2 = *(char*) getOperandValue(op2_type, (void*) op2);
-    int total;
+    union OperandValue operand1;
+    union OperandValue operand2;
+
+    // Set the operands to have the correct value, written in their correct data type
+    switch (dtype)
+    {
+        case 'b':
+            SET_OPERANDS(b, char)
+        case 'B':
+            SET_OPERANDS(B, unsigned char)
+        case 'h':
+            SET_OPERANDS(h, int16_t)
+        case 'H':
+            SET_OPERANDS(H, uint16_t)
+        case 'i':
+            SET_OPERANDS(i, int)
+        case 'I':
+            SET_OPERANDS(I, unsigned int)
+        case 'f':
+            SET_OPERANDS(f, float)
+        default:
+            log_error("Unknown data type: %c", dtype);
+    }
+
+    union {
+        int i;
+        float f;
+    } total;
 
     if (strcmp(function, "ADD") == 0) {
-        total = val1 + val2;
+        CALCULATE_TOTAL(+)
     } else if (strcmp(function, "SUB") == 0) {
-        total = val1 - val2;
+        CALCULATE_TOTAL(-)
     } else if (strcmp(function, "MUL") == 0) {
-        total = val1 * val2;
+        CALCULATE_TOTAL(*)
     } else if (strcmp(function, "IDIV") == 0) {
-        total = val1 / val2;
+        CALCULATE_TOTAL(/)
     } else if (strcmp(function, "MOD") == 0) {
-        total = val1 % val2;
+        switch (dtype) {
+            case 'b':
+                total.i = operand1.b % operand2.b;
+            case 'B':
+                total.i = operand1.B % operand2.B;
+            case 'h':
+                total.i = operand1.h % operand2.h;
+            case 'H':
+                total.i = operand1.H % operand2.H;
+            case 'i':
+                total.i = operand1.i % operand2.i;
+            case 'I':
+                total.i = operand1.I % operand2.I;
+            default:
+                log_error("Unknown type: %c", dtype);
+        }
     } else if (strcmp(function, "EDIV") == 0) {
-        float exact = (float) val1 / (float) val2;
-        total = *(int*) &exact;
+        switch (dtype) {
+            case 'b':
+                total.f = (float) operand1.b / (float) operand2.b;
+            case 'B':
+                total.f = (float) operand1.B / (float) operand2.B;
+            case 'h':
+                total.f = (float) operand1.h / (float) operand2.h;
+            case 'H':
+                total.f = (float) operand1.H / (float) operand2.H;
+            case 'i':
+                total.f = (float) operand1.i / (float) operand2.i;
+            case 'I':
+                total.f = (float) operand1.I / (float) operand2.I;
+            case 'f':
+                total.f = operand1.f / operand2.f;
+            default:
+                log_error("Unknown type: %c", dtype);
+                return;
+        }
     }
 
     // Convert the int to 4 chars
