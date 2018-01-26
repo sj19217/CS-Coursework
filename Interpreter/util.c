@@ -1,3 +1,4 @@
+#include <mem.h>
 #include "headers/main.h"
 #include "headers/log.h"
 
@@ -51,4 +52,10 @@ void memdump(int len, _Bool headings, int columns)
 
         printf(" %02x", env.memory[i]);
     }
+}
+
+_Bool startsWith(const char* a, const char* b)
+{
+    if (strncmp(a, b, strlen(b)) == 0) return 1;
+    return 0;
 }

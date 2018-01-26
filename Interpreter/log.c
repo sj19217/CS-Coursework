@@ -27,6 +27,7 @@
 #include <time.h>
 
 #include "headers/log.h"
+#include "headers/util.h"
 
 static struct {
     void *udata;
@@ -92,6 +93,11 @@ void log_log(int level, const char *file, int line, const char *fmt, ...) {
         return;
     }
 
+    // Remove the annoying, overly long start of the filename (assuming it is a known one)
+    if (startsWith(file, "C:\\Users\\Stephen\\Documents\\Programming\\CS-Coursework\\Interpreter\\")) {
+        file += 65;
+    }
+
     /* Acquire lock */
     lock();
 
@@ -114,7 +120,7 @@ void log_log(int level, const char *file, int line, const char *fmt, ...) {
         va_start(args, fmt);
         vfprintf(stderr, fmt, args);
         va_end(args);
-        fprintf(stderr, "\n");
+        //fprintf(stderr, "\n"); // Putting the \n in myself
     }
 
     /* Log to file */
