@@ -7,6 +7,7 @@
 #include <mem.h>
 #include "headers/main.h"
 #include "headers/util.h"
+#include "headers/log.h"
 
 // HLT has no actions, it just breaks the loop
 
@@ -39,11 +40,13 @@ def_CMP(float, float);
 
 void exec_JMP(unsigned int addr)
 {
+    log_trace("exec_JMP(addr=0x%x)", addr);
     env.pc = addr;
 }
 
 void exec_JE(unsigned int addr)
 {
+    log_trace("exec_JE(addr=0x%x)", addr);
     if (env.cmp_e) {
         env.pc = addr;
     }
@@ -51,6 +54,7 @@ void exec_JE(unsigned int addr)
 
 void exec_JNE(unsigned int addr)
 {
+    log_trace("exec_JNE(addr=0x%x)", addr);
     if (!env.cmp_e) {
         env.pc = addr;
     }
@@ -58,6 +62,7 @@ void exec_JNE(unsigned int addr)
 
 void exec_JLT(unsigned int addr)
 {
+    log_trace("exec_JLT(addr=0x%x)", addr);
     if (env.cmp_n) {
         env.pc = addr;
     }
@@ -65,6 +70,7 @@ void exec_JLT(unsigned int addr)
 
 void exec_JLE(unsigned int addr)
 {
+    log_trace("exec_JLE(addr=0x%x)", addr);
     if (env.cmp_n || env.cmp_e) {
         env.pc = addr;
     }
@@ -72,6 +78,7 @@ void exec_JLE(unsigned int addr)
 
 void exec_JGT(unsigned int addr)
 {
+    log_trace("exec_JGT(addr=0x%x)", addr);
     if (env.cmp_p) {
         env.pc = addr;
     }
@@ -79,6 +86,7 @@ void exec_JGT(unsigned int addr)
 
 void exec_JGE(unsigned int addr)
 {
+    log_trace("exec_JGE(addr=0x%x)", addr);
     if (env.cmp_p || env.cmp_e) {
         env.pc = addr;
     }
@@ -89,6 +97,7 @@ void exec_JGE(unsigned int addr)
 // However, there are different functions depending on whether the destination is a register or a memory address.
 void exec_MOV_reg(unsigned char regnum, int length, const unsigned char* str)
 {
+    log_trace("exec_MOV_reg(regnum=0x%02x, length=%i, str[0]=0x%02x", regnum, length, str[0]);
     unsigned char reg_size = getRegisterSize(regnum);
 
     if (reg_size < length) {
@@ -121,6 +130,7 @@ void exec_MOV_reg(unsigned char regnum, int length, const unsigned char* str)
 
 void exec_MOV_mem(unsigned long maddr, int length, const unsigned char* str)
 {
+    log_trace("exec_MOV_mem(maddr=0x%x, length=%i, str[0]=0x%02x", maddr, length, str[0]);
     for (int i = 0; i < length; i++) {
         env.memory[maddr + i] = str[i];
     }
@@ -130,6 +140,7 @@ void exec_MOV_mem(unsigned long maddr, int length, const unsigned char* str)
 // The LEA commands take any settable first operand and either a memory address or arithmetic second operand
 void exec_LEA_reg(unsigned char regnum, unsigned long maddr)
 {
+    log_trace("exec_LEA_reg(regnum=0x%02x, maddr=0x%x)", regnum, maddr);
     // This one is given the memory address as an int and stores that number in the destination register
     unsigned char reg_size = getRegisterSize(regnum);
     char* bytes = (char*) &maddr;
@@ -144,6 +155,7 @@ void exec_LEA_reg(unsigned char regnum, unsigned long maddr)
 
 void exec_LEA_mem(unsigned long maddr_to, unsigned long pointer)
 {
+    log_trace("exec_LEA_mem(maddr_to=0x%x, pointer=0x%x", maddr_to, pointer);
     unsigned char* bytes = (unsigned char*) &pointer;
     env.memory[maddr_to] = bytes[0];
     env.memory[maddr_to+1] = bytes[1];

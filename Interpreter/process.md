@@ -84,3 +84,5 @@ for (int i = config_length; i < length - config_length; i++) {
 * Renamed functions to use camelCase
 * Wrote ADD function for char then turned it into a macro
 * Abandoned macro idea because it produced a million errors
+* Implemented logging library (https://github.com/rxi/log.c) and made memdump function
+* Added logging statements around the program, including replacing existing print statements

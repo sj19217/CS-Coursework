@@ -10,6 +10,7 @@
 #include "headers/instructions.h"
 #include "headers/commands.h"
 #include "headers/util.h"
+#include "headers/log.h"
 
 #define MAX_META_SECTION_LENGTH 100
 #define MAX_CONFIG_KEY_LENGTH 10
@@ -55,7 +56,7 @@ int processConfig(const unsigned char *bytecode, int length)
     // Add a null character to the end
     config_str[i] = '\0';
 
-    printf("Config string: %s\n", config_str);
+    log_info("Config string: %s\n", config_str);
 
     // Split the string at a & sign
     char* cfg_str = strdup(config_str);
@@ -96,13 +97,14 @@ int processConfig(const unsigned char *bytecode, int length)
     }
 
     // Print out the config struct
-    printf("config.memorykb = %i\n", config.memorykb);
+    log_info("config.memorykb = %i\n", config.memorykb);
 
     return strlen(config_str);
 }
 
 int getOpLen(int type)
 {
+    log_trace("getOpLen(type=%i)\n", type);
     switch (type) {
         case 0: // None
             return 0;
@@ -133,6 +135,7 @@ int getOpLen(int type)
 
 unsigned char getRegisterSize(unsigned char regnum)
 {
+    log_trace("getRegisterSize(regnum=0x%i)", regnum);
     if ((regnum >= 0xE1 && regnum <= 0xE4) || (regnum >> 4 >= 10 && regnum >> 4 <= 13)) {
         return 4;
     } else if ((regnum >> 4) >= 10 && (regnum >> 4) <= 13) {
@@ -149,8 +152,9 @@ unsigned char getRegisterSize(unsigned char regnum)
     }
 }
 
-void setRegisterValue(unsigned char regnum, void *data)
+void setRegisterValue(unsigned char regnum, void* data)
 {
+    log_trace("setRegisterValue(regnum=0x%i, void* data)");
     switch (regnum) {
         case 0xA0: // eax
             env.eax.eax = *(unsigned int*) data;
@@ -195,17 +199,18 @@ void setRegisterValue(unsigned char regnum, void *data)
         case 0xD3: // dl
             env.edx.div.d.dl = *(unsigned char*) data;
         case 0xF1:
-            printf("Cannot set input value as a register\n");
+            log_error("Cannot set input value as a register\n");
         case 0xF0:
             printf("%c", *(unsigned char*) data);
             break;
         default:
-            printf("Unknown register number in setRegisterValue: 0x%x\n", regnum);
+            log_error("Unknown register number in setRegisterValue: 0x%x\n", regnum);
     }
 }
 
 void* getRegisterValue(unsigned char regnum)
 {
+    log_trace("getRegisterValue(regnum=0x%x)", regnum);
     unsigned long retval;
     switch (regnum) {
         case 0xA0: // eax
@@ -264,6 +269,7 @@ void* getRegisterValue(unsigned char regnum)
 
 unsigned long interpretArithmeticVariable(unsigned char val)
 {
+    log_trace("interpretArithmeticVariable(val=0x%x)", val);
     if (val == 2 || val == 4 || val == 8) {
         return val;
     } else {
@@ -273,6 +279,7 @@ unsigned long interpretArithmeticVariable(unsigned char val)
 
 unsigned long getMAddrFromArithmetic(int type, unsigned char *str)
 {
+    log_trace("getMAddrFromArithmetic(type=%i, str[0]=0x%x)", type, str[0]);
     unsigned long a;
     unsigned long b;
     unsigned long c;
@@ -299,13 +306,14 @@ unsigned long getMAddrFromArithmetic(int type, unsigned char *str)
             c = interpretArithmeticVariable(str[2]);
             return a+(b*c);
         default:
-            printf("Invalid arithmetic type: %i", type);
+            log_error("Invalid arithmetic type: %i", type);
     }
 }
 
 void* getOperandValue(int type, unsigned char *str)
 {
     // Gets the value represented by this, including (e.g.) dereferencing the memory address or getting a register's value
+    log_trace("getOperandValue(type=%i, str[0]=0x%x)", type, str[0]);
     unsigned long maddr;
     switch (type) {
         case 0:
@@ -343,6 +351,9 @@ void execute(unsigned char opcode,
              int op1_type, int op1_len, unsigned char* op1_str,
              int op2_type, int op2_len, unsigned char* op2_str)
 {
+    log_trace("execute(opcode=0x%02x, op1_type=%i, op1_len=%i, op1_str[0]=0x%02x, " \
+                "op2_type=%i, op2_len=%i, op2_str[0]=0x%02x", opcode, op1_type, op1_len, op1_str[0],
+                op2_type, op2_len, op2_str[0]);
     switch (opcode) {
         case CMP_char:
             // CMP takes 2 values
@@ -469,13 +480,14 @@ void execute(unsigned char opcode,
         case ADD_float:
             exec_ADD_float(op1_str, op1_type, op2_str, op2_type);
         default:
-            printf("Unknown opode: %i", opcode);
+            log_error("Unknown opode: %i", opcode);
             return;
     }
 }
 
 void runLoop()
 {
+    log_trace("runLoop()");
     // Executes the instructions
     while (1)
     {
@@ -554,7 +566,7 @@ void runLoop()
 
         if (getOpLen(op1_type) == -1 | getOpLen(op2_type) == -1) {
             // One of them is invalid
-            printf("Invalid operand byte 0x%x at PC %lu", env.memory[env.pc+1], env.pc+1);
+            log_error("Invalid operand byte 0x%x at PC %lu", env.memory[env.pc+1], env.pc+1);
         }
 
         // Pull the first operand as a char[]
@@ -585,12 +597,7 @@ void runLoop()
 
 void run(unsigned char* bytecode, int iflag, int length)
 {
-    printf("Executing run()\n");
-
-    int bi;
-    for (bi = 0; bi < length; bi++) {
-        printf("%x ", bytecode[bi]);
-    }
+    log_trace("run(bytecode[0]=%02x, iflag=%i, length=%i)", bytecode[0], iflag, length);
 
     // Begin the process of running the bytecode
     // Start by loading all of the configuration data
@@ -611,11 +618,13 @@ void run(unsigned char* bytecode, int iflag, int length)
 
 
     // Start running instructions
-    //runLoop();
+    runLoop();
 }
 
 int main(int argc, char** argv)
 {
+    log_trace("main(argc=%i, char** argv)", argc);
+
     // Process command line arguments
     int iflag = 0;
     char fname[100];
