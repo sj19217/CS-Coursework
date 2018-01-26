@@ -87,3 +87,5 @@ for (int i = config_length; i < length - config_length; i++) {
 * Implemented logging library (https://github.com/rxi/log.c) and made memdump function
 * Added logging statements around the program, including replacing existing print statements
 * Wrote one function to replace all of the other arithmetic ones
+* Stopped commenting out the data type code in runLoop() and now pass the result to execute()
+* Implemented arithmetic in the execute() switch statement (though to avoid repetitiveness it is all placed in default)
