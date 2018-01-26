@@ -4,6 +4,7 @@
 
 #include <stdint.h>
 #include <stdio.h>
+#include <mem.h>
 #include "headers/main.h"
 #include "headers/util.h"
 
@@ -296,4 +297,30 @@ void exec_ADD_float(unsigned char* op1, int op1_type, unsigned char* op2, int op
         unsigned int maddr = getMAddrFromArithmetic(op1_type, op1);
         setMemory(maddr, 4, (unsigned char*) &total);
     }
+}
+
+
+// The prototype function that will replace almost anything
+void exec_arithmetic(char* function, unsigned char* op1, int op1_type, unsigned char* op2, int op2_type)
+{
+    char val1 = *(char*) getOperandValue(op1_type, (void*) op1);
+    char val2 = *(char*) getOperandValue(op2_type, (void*) op2);
+    int total;
+
+    if (strcmp(function, "ADD") == 0) {
+        total = val1 + val2;
+    } else if (strcmp(function, "SUB") == 0) {
+        total = val1 - val2;
+    } else if (strcmp(function, "MUL") == 0) {
+        total = val1 * val2;
+    } else if (strcmp(function, "IDIV") == 0) {
+        total = val1 / val2;
+    } else if (strcmp(function, "MOD") == 0) {
+        total = val1 % val2;
+    } else if (strcmp(function, "EDIV") == 0) {
+        float exact = (float) val1 / (float) val2;
+        total = *(int*) &exact;
+    }
+
+
 }
