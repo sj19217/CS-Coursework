@@ -276,7 +276,7 @@ class TextInstruction(Instruction):
         self.operand2 = op2
         self.label = label
 
-        if dtype == 0:
+        if not dtype:
             # None was specified, so try to work it out based on the operands
             op1_size = op1.get_required_length() if op1 is not None else 0
             op2_size = op2.get_required_length() if op2 is not None else 0
@@ -396,7 +396,7 @@ class RegisterOperand(Operand):
                 and self._required_length == other._required_length
 
     def __repr__(self):
-        return "RegisterOperand({0.regname})".format(0)
+        return "RegisterOperand({0.name})".format(self)
 
     def __str__(self):
         return "\"{0.name}\"".format(self)
@@ -493,26 +493,13 @@ class ArithmeticOperand(Operand):
             raise ValueError("Cannot process empty operand")
 
         # See which type of operand this is and set everything accordingly
-        if re.search(self.type_6, asm_str) is not None:
-            m = re.match(self.type_6, asm_str)
-            self._bit_designation = 6
-            self._required_length = 1
-            self.a = m.group("a")
-            self.b = None; self.c = None
-        elif re.search(self.type_7, asm_str) is not None:
-            m = re.match(self.type_7, asm_str)
-            self._bit_designation = 7
-            self._required_length = 2
+        if re.search(self.type_10, asm_str) is not None:
+            m = re.match(self.type_10, asm_str)
+            self._bit_designation = 10
+            self._required_length = 3
             self.a = m.group("a")
             self.b = m.group("b")
-            self.c = None
-        elif re.search(self.type_8, asm_str) is not None:
-            m = re.match(self.type_8, asm_str)
-            self._bit_designation = 8
-            self._required_length = 2
-            self.a = m.group("a")
-            self.b = m.group("b")
-            self.c = None
+            self.c = m.group("c")
         elif re.search(self.type_9, asm_str) is not None:
             m = re.match(self.type_9, asm_str)
             self._bit_designation = 9
@@ -520,13 +507,27 @@ class ArithmeticOperand(Operand):
             self.a = m.group("a")
             self.b = m.group("b")
             self.c = m.group("c")
-        elif re.search(self.type_10, asm_str) is not None:
-            m = re.match(self.type_10, asm_str)
-            self._bit_designation = 10
-            self._required_length = 3
+        elif re.search(self.type_8, asm_str) is not None:
+            m = re.match(self.type_8, asm_str)
+            self._bit_designation = 8
+            self._required_length = 2
             self.a = m.group("a")
             self.b = m.group("b")
-            self.c = m.group("c")
+            self.c = None
+        elif re.search(self.type_7, asm_str) is not None:
+            m = re.match(self.type_7, asm_str)
+            self._bit_designation = 7
+            self._required_length = 2
+            self.a = m.group("a")
+            self.b = m.group("b")
+            self.c = None
+        elif re.search(self.type_6, asm_str) is not None:
+            m = re.match(self.type_6, asm_str)
+            self._bit_designation = 6
+            self._required_length = 1
+            self.a = m.group("a")
+            self.b = None
+            self.c = None
         else:
             raise AssemblyError(-1, "Incorrect format for arithmetic operand: {}".format(asm_str))
 
@@ -550,11 +551,11 @@ class ArithmeticOperand(Operand):
             try:
                 return REGISTERS[value]
             except KeyError as err:
-                raise ValueError("Invalid register name: {}".format(value)) from err
+                pass    # It's probably just an immediate value
 
         # It is just an immediate value
         numval = int(value)
-        if numval in (2, 4, 8):
+        if numval in (1, 2, 4, 8):
             return numval
         else:
             raise ValueError("Only 2, 4 and 8 are permitted for multiplication in arithmetic operands")

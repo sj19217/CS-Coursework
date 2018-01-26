@@ -1,6 +1,6 @@
 import unittest
 
-from ..assembler import *
+from assembler import *
 
 class Test_normalise_text(unittest.TestCase):
     def test_A101(self):

@@ -1,6 +1,6 @@
 import unittest
 
-from ..assembler import *
+from assembler import *
 
 class Test_place_memory_address(unittest.TestCase):
     def test_A501(self):

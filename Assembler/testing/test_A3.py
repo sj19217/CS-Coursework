@@ -1,6 +1,6 @@
 import unittest
 
-from ..assembler import *
+from assembler import *
 
 class Test_divide_and_contextualise(unittest.TestCase):
     def test_A301(self):

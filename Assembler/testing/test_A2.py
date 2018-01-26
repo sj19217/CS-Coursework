@@ -1,6 +1,6 @@
 import unittest
 
-from ..assembler import *
+from assembler import *
 
 class Test_split_into_sections(unittest.TestCase):
     def test_A201(self):

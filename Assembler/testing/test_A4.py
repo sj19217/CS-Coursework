@@ -1,6 +1,6 @@
 import unittest
 
-from ..assembler import *
+from assembler import *
 
 class Test_record_labels_and_variables(unittest.TestCase):
     def test_A401(self):

@@ -50,25 +50,25 @@ class Test_Instruction(unittest.TestCase):
 
     def test_A622(self):
         instructions = [
-            [["MOV", "int", RegisterOperand("eax"), RegisterOperand("ebx")], 0x12],
-            [["SUB", "int", AddressOperand("i"), ImmediateOperand("1"), "loop"], 0x28],
-            [["HLT", "", "", ""], 0x00],
-            [["MOV", "1B", AddressOperand("a"), AddressOperand("b")], 0x10],
-            [["ADD", "int", RegisterOperand("eax"), ArithmeticOperand("ebx+1")], 0x24]
+            [TextInstruction(0, "MOV", "int", RegisterOperand("eax"), RegisterOperand("ebx")), 0x12],
+            [TextInstruction(1, "SUB", "int", AddressOperand("i"), ImmediateOperand("1"), "loop"), 0x2C],
+            [TextInstruction(2, "HLT", "", None, None), 0x00],
+            [TextInstruction(3, "MOV", "1B", AddressOperand("a"), AddressOperand("b")), 0x10],
+            [TextInstruction(4, "ADD", "int", RegisterOperand("eax"), ArithmeticOperand("ebx+1")), 0x24]
         ]
-        for args, opcode in instructions:
-            with self.subTest(args=str(args)):
-                instr = TextInstruction(0, *args)
+        place_memory_addresses({"i": 40, "a": 44, "b": 44}, [pair[0] for pair in instructions])
+        for instr, opcode in instructions:
+            with self.subTest(args=str(instr)):
                 self.assertEquals(instr.get_bytes({"i": 40, "a": 44, "b": 44})[0], opcode)
 
     def test_A623(self):
         instructions = [
-            [["HLT", "", "", ""], 0x00],
-            [["MOV", "int", RegisterOperand("eax"), RegisterOperand("ebx")], 0x11],
-            [["MOV", "int", AddressOperand("a"), ArithmeticOperand("eax*ebx")], 0x57],
-            [["MOV", "int", RegisterOperand("eax"), ImmediateOperand("5")], 0x12]
+            [TextInstruction(0, "HLT", "", None, None), 0x00],
+            [TextInstruction(1, "MOV", "int", RegisterOperand("eax"), RegisterOperand("ebx")), 0x11],
+            [TextInstruction(2, "MOV", "int", AddressOperand("a"), ArithmeticOperand("eax*ebx")), 0x57],
+            [TextInstruction(3, "MOV", "int", RegisterOperand("eax"), ImmediateOperand("5")), 0x12]
         ]
-        for args, operand_byte in instructions:
-            with self.subTest(args=args):
-                instr = TextInstruction(0, *args)
-                self.assertEquals(instr.get_bytes({"i": 40, "a": 44})[0], operand_byte)
+        place_memory_addresses({"i": 40, "a": 44}, [pair[0] for pair in instructions])
+        for instr, operand_byte in instructions:
+            with self.subTest(args=repr(instr)):
+                self.assertEquals(instr.get_bytes({"i": 40, "a": 44})[1], operand_byte)
