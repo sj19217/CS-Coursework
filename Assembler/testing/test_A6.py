@@ -17,7 +17,7 @@ class Test_Instruction(unittest.TestCase):
     def test_A610(self):
         instr1 = DataInstruction(0, "i", "5", "int")
         instr2 = DataInstruction(0, "i", "5", "int")
-        self.assertEquals(instr1, instr2)
+        self.assertEqual(instr1, instr2)
 
     def test_A611(self):
         test_values = {
@@ -33,20 +33,20 @@ class Test_Instruction(unittest.TestCase):
         for value, size in test_values.items():
             with self.subTest(value=value):
                 instr = DataInstruction(0, "i", value, "int" if "." not in value else "float")
-                self.assertEquals(instr._calculate_valsize(), size)
+                self.assertEqual(instr._calculate_valsize(), size)
 
     def test_A612(self):
         instr = DataInstruction(0, "i", "5", "int")
-        self.assertEquals(instr.get_bytes_length(), len(instr.get_bytes({"i": 40})))
+        self.assertEqual(instr.get_bytes_length(), len(instr.get_bytes({"i": 40})))
 
     def test_A620(self):
         instr1 = TextInstruction(0, "MOV", "int", RegisterOperand("eax"), ImmediateOperand("5"))
         instr2 = TextInstruction(0, "MOV", "int", RegisterOperand("eax"), ImmediateOperand("5"))
-        self.assertEquals(instr1, instr2)
+        self.assertEqual(instr1, instr2)
 
     def test_A621(self):
         instr = TextInstruction(0, "MOV", "int", RegisterOperand("eax"), ImmediateOperand("5"))
-        self.assertEquals(instr.get_bytes_length(), len(instr.get_bytes({})))
+        self.assertEqual(instr.get_bytes_length(), len(instr.get_bytes({})))
 
     def test_A622(self):
         instructions = [
@@ -59,7 +59,7 @@ class Test_Instruction(unittest.TestCase):
         place_memory_addresses({"i": 40, "a": 44, "b": 44}, [pair[0] for pair in instructions])
         for instr, opcode in instructions:
             with self.subTest(args=str(instr)):
-                self.assertEquals(instr.get_bytes({"i": 40, "a": 44, "b": 44})[0], opcode)
+                self.assertEqual(instr.get_bytes({"i": 40, "a": 44, "b": 44})[0], opcode)
 
     def test_A623(self):
         instructions = [
@@ -71,4 +71,4 @@ class Test_Instruction(unittest.TestCase):
         place_memory_addresses({"i": 40, "a": 44}, [pair[0] for pair in instructions])
         for instr, operand_byte in instructions:
             with self.subTest(args=repr(instr)):
-                self.assertEquals(instr.get_bytes({"i": 40, "a": 44})[1], operand_byte)
+                self.assertEqual(instr.get_bytes({"i": 40, "a": 44})[1], operand_byte)

@@ -1,3 +1,4 @@
+from collections import namedtuple
 import unittest
 
 from assembler import *
@@ -85,4 +86,77 @@ class Test_ImmediateOperand(unittest.TestCase):
         for inp, out in bytes_.items():
             with self.subTest(inp=inp):
                 op = ImmediateOperand(inp)
+                self.assertEqual(op.get_bytes(), out)
+
+
+class Test_AddressOperand(unittest.TestCase):
+    def test_A720(self):
+        for x in (64, "variable"):
+            with self.subTest(x=x):
+                _ = AddressOperand(x)
+
+    def test_A721(self):
+        op = AddressOperand(100)
+        self.assertEqual(op.get_bit_designation(), 5)
+
+    def test_A722(self):
+        op = AddressOperand(100)
+        self.assertEqual(op.get_required_length(), 4)
+
+    def test_A723(self):
+        with self.subTest(input=99999):
+            self.assertEqual(AddressOperand(99999).get_bytes(), b"\x00\x01\x86\x9f")
+
+        with self.subTest(input="variable"):
+            with self.assertRaises(Exception):
+                AddressOperand("variable").get_bytes()
+
+class Test_ArithmeticOperand(unittest.TestCase):
+    def test_A730(self):
+        ExpectedOutput = namedtuple("ExpectedOutput", "a b c")
+        outputs = {
+            "eax": ExpectedOutput("eax", None, None),
+            "eax*4": ExpectedOutput("eax", "4", None),
+            "eax+ebx": ExpectedOutput("eax", "ebx", None),
+            "eax*ebx+4": ExpectedOutput("eax", "ebx", "4"),
+            "eax+ebx*4": ExpectedOutput("eax", "ebx", "4")
+        }
+        for inp, out in outputs.items():
+            with self.subTest(inp=inp):
+                op = ArithmeticOperand(inp)
+                self.assertEqual(op.a, out.a)
+                self.assertEqual(op.b, out.b)
+                self.assertEqual(op.c, out.c)
+
+    def test_A731(self):
+        outputs = {
+            "eax": (6, 1),
+            "eax*4": (7, 2),
+            "eax+ebx": (8, 2),
+            "eax*ebx+4": (9, 3),
+            "eax+ebx*4": (10, 3)
+        }
+        for inp, out in outputs.items():
+            with self.subTest(inp=inp):
+                op = ArithmeticOperand(inp)
+                self.assertEqual(op.get_bit_designation(), out[0])
+                self.assertEqual(op.get_required_length(), out[1])
+
+    def test_A732(self):
+        for x in ("a+b+c+d", "eax-ebx", "*hello*"):
+            with self.subTest(x=x):
+                with self.assertRaises(Exception):
+                    _ = ArithmeticOperand(x)
+
+    def test_A733(self):
+        outputs = {
+            "eax": b"\xa0",
+            "ax+4": b"\xa1\x04",
+            "eax*ebx": b"\xa0\xb0",
+            "eax*4+dl": b"\xa0\x04\xd3",
+            "edx+esp*8": b"\xd0\xe4\x08"
+        }
+        for inp, out in outputs.items():
+            with self.subTest(inp=inp):
+                op = ArithmeticOperand(inp)
                 self.assertEqual(op.get_bytes(), out)

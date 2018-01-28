@@ -479,11 +479,11 @@ class AddressOperand(Operand):
 
 
 class ArithmeticOperand(Operand):
-    type_6 = r"(?P<a>[a-zA-Z0-9]+)"    # a
-    type_7 = r"(?P<a>[a-zA-Z0-9]+)\*(?P<b>[a-zA-Z0-9]+)"    # a*b
-    type_8 = r"(?P<a>[a-zA-Z0-9]+)\+(?P<b>[a-zA-Z0-9]+)"    # a+b
-    type_9 = r"(?P<a>[a-zA-Z0-9]+)\*(?P<b>[a-zA-Z0-9]+)\+(?P<c>[a-zA-Z0-9]+)"    # a*b+c
-    type_10 = r"(?P<a>[a-zA-Z0-9]+)\+(?P<b>[a-zA-Z0-9]+)\*(?P<c>[a-zA-Z0-9]+)"    # a+b*c
+    type_6 = r"^(?P<a>[a-zA-Z0-9]+)$"    # a
+    type_7 = r"^(?P<a>[a-zA-Z0-9]+)\*(?P<b>[a-zA-Z0-9]+)$"    # a*b
+    type_8 = r"^(?P<a>[a-zA-Z0-9]+)\+(?P<b>[a-zA-Z0-9]+)$"    # a+b
+    type_9 = r"^(?P<a>[a-zA-Z0-9]+)\*(?P<b>[a-zA-Z0-9]+)\+(?P<c>[a-zA-Z0-9]+)$"    # a*b+c
+    type_10 = r"^(?P<a>[a-zA-Z0-9]+)\+(?P<b>[a-zA-Z0-9]+)\*(?P<c>[a-zA-Z0-9]+)$"    # a+b*c
 
     def __init__(self, asm_str):
         super().__init__()
