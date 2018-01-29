@@ -15,6 +15,17 @@ unsigned int convertTo_uint(const unsigned char *str)
     return result;
 }
 
+// Takes an int and turns it into a sequence of characters
+unsigned char* convertTo_str(int num)
+{
+    unsigned char str[4];
+    str[0] = (unsigned char) (0x000000FF & num);
+    str[1] = (unsigned char) (0x0000FF00 & num) >> 8;
+    str[2] = (unsigned char) (0x00FF0000 & num) >> 16;
+    str[3] = (unsigned char) (0xFF000000 & num) >> 24;
+    return str;
+}
+
 void setMemory(unsigned int maddr, int length, const unsigned char* value)
 {
     log_trace("setMemory(maddr=%i, length=%i, value[0]=%02x)", maddr, length, value);

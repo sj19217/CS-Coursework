@@ -119,7 +119,11 @@ void exec_MOV_reg(unsigned char regnum, int length, const unsigned char* str)
 
     // The 4-byte `full` now contains the value. Now place it into the register, trimming as necessary.
     // Turn it into an array of chars so that the right amount can be extracted
-    char* bytes = (char*) &full;
+    unsigned char bytes[4];
+    bytes[3] = (unsigned char) (0x000000FF & full);
+    bytes[2] = (unsigned char) (0x0000FF00 & full) >> 8;
+    bytes[1] = (unsigned char) (0x00FF0000 & full) >> 16;
+    bytes[0] = (unsigned char) (0xFF000000 & full) >> 24;
     if (reg_size == 1) {
         setRegisterValue(regnum, (void *) &bytes[3]);
     } else if (reg_size == 2) {
@@ -314,26 +318,34 @@ void exec_ADD_float(unsigned char* op1, int op1_type, unsigned char* op2, int op
 
 // The complicated, ugly code needed to get the value of an operand and place it in the right version of the union
 #define SET_OPERANDS(D, T) operand1.b = *(T*) getOperandValue(op1_type, (void*) op1); \
-operand2.##D = *(T*) getOperandValue(op2_type, (void*) op2);
+operand2.D = *(T*) getOperandValue(op2_type, (void*) op2);
 
 // The still complicated, though slightly less ugly, code for performing the given operation on all possible versions.
 #define CALCULATE_TOTAL(O) switch (dtype) { \
 case 'b':\
-    total.i = operand1.b O operand2.b;\
+    total.b = operand1.b O operand2.b;\
+    break; \
 case 'B':\
-    total.i = operand1.B O operand2.B; \
+    total.B = operand1.B O operand2.B; \
+    break; \
 case 'h': \
-    total.i = operand1.h O operand2.h;\
+    total.h = operand1.h O operand2.h;\
+    break; \
 case 'H': \
-    total.i = operand1.H O operand2.H; \
+    total.H = operand1.H O operand2.H; \
+    break; \
 case 'i': \
     total.i = operand1.i O operand2.i; \
+    break; \
 case 'I': \
     total.i = operand1.I O operand2.I; \
+    break; \
 case 'f': \
-    total.i = operand1.f O operand2.f; \
+    total.f = operand1.f O operand2.f; \
+    break; \
 default: \
     log_error("Unknown type: %c", dtype);\
+    break; \
 }
 
 // The prototype function that will replace almost anything
@@ -346,25 +358,30 @@ void exec_arithmetic(char* function, char dtype, unsigned char* op1, int op1_typ
     switch (dtype)
     {
         case 'b':
-            SET_OPERANDS(b, char)
+            SET_OPERANDS(b, char); break;
         case 'B':
-            SET_OPERANDS(B, unsigned char)
+            SET_OPERANDS(B, unsigned char); break;
         case 'h':
-            SET_OPERANDS(h, int16_t)
+            SET_OPERANDS(h, int16_t); break;
         case 'H':
-            SET_OPERANDS(H, uint16_t)
+            SET_OPERANDS(H, uint16_t); break;
         case 'i':
-            SET_OPERANDS(i, int)
+            SET_OPERANDS(i, int); break;
         case 'I':
-            SET_OPERANDS(I, unsigned int)
+            SET_OPERANDS(I, unsigned int); break;
         case 'f':
-            SET_OPERANDS(f, float)
+            SET_OPERANDS(f, float); break;
         default:
             log_error("Unknown data type: %c", dtype);
     }
 
     union {
+        signed char b;
+        unsigned char B;
+        int16_t h;
+        uint16_t H;
         int i;
+        unsigned int I;
         float f;
     } total;
 
@@ -422,7 +439,7 @@ void exec_arithmetic(char* function, char dtype, unsigned char* op1, int op1_typ
         setRegisterValue(op1[0], (void*) bytes);
     } else if (op1_type == 5) {
         // Memory location
-        setMemory(*(unsigned int*) op1, 1, (unsigned char*) bytes+3);
+        setMemory(convertTo_uint(op1), 1, (unsigned char*) bytes+3);
     } else if (op1_type >= 6 && op1_type <= 10) {
         setMemory(getMAddrFromArithmetic(op1_type, op1), 1, (unsigned char*) bytes+3);
     } else {    // Add arithmetic expressions too

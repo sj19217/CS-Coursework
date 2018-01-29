@@ -89,3 +89,11 @@ for (int i = config_length; i < length - config_length; i++) {
 * Wrote one function to replace all of the other arithmetic ones
 * Stopped commenting out the data type code in runLoop() and now pass the result to execute()
 * Implemented arithmetic in the execute() switch statement (though to avoid repetitiveness it is all placed in default)
+* Bug bash:
+  * NULL pointer causing segfault in exec_MOV_mem()
+  * This was fixed, and the first few commands ran. Then found an issue in the bytecode possibly indicating an assembler bug.
+  * Problem caused by missing break statements in a switch statement
+  * BLOODY ENDIANNESS
+  * Oh wait I already wrote convertTo_uint to manage it myself
+  * Basically, some pointer arithmetic meant that while it was meant to find address 0x00000042 it looked for 0x42000000
+  * More problems with endianness in exec_MOV_reg. Tried to fix with convertTo_str but this caused a segfault. Just did it in place instead.

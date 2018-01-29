@@ -26,12 +26,6 @@ if (op1_type == (T) && op1_len == (L)) { \
 }
 
 
-// Used to store the current opcode string being worked on
-struct {
-    unsigned char* str;
-} current;
-
-
 
 // FUNCTIONS
 
@@ -56,7 +50,7 @@ int processConfig(const unsigned char *bytecode, int length)
     // Add a null character to the end
     config_str[i] = '\0';
 
-    log_info("Config string: %s\n", config_str);
+    log_info("Config string: %s", config_str);
 
     // Split the string at a & sign
     char* cfg_str = strdup(config_str);
@@ -97,14 +91,14 @@ int processConfig(const unsigned char *bytecode, int length)
     }
 
     // Print out the config struct
-    log_info("config.memorykb = %i\n", config.memorykb);
+    log_info("config.memorykb = %i", config.memorykb);
 
     return strlen(config_str);
 }
 
 int getOpLen(int type)
 {
-    log_trace("getOpLen(type=%i)\n", type);
+    log_trace("getOpLen(type=%i)", type);
     switch (type) {
         case 0: // None
             return 0;
@@ -199,12 +193,12 @@ void setRegisterValue(unsigned char regnum, void* data)
         case 0xD3: // dl
             env.edx.div.d.dl = *(unsigned char*) data;
         case 0xF1:
-            log_error("Cannot set input value as a register\n");
+            log_error("Cannot set input value as a register");
         case 0xF0:
             printf("%c", *(unsigned char*) data);
             break;
         default:
-            log_error("Unknown register number in setRegisterValue: 0x%x\n", regnum);
+            log_error("Unknown register number in setRegisterValue: 0x%x", regnum);
     }
 }
 
@@ -323,17 +317,17 @@ void* getOperandValue(int type, unsigned char *str)
             // Take one byte
             return getRegisterValue(str[0]);
         case 2: // 1-byte immediate
-            return (void*) current.str;
+            return (void*) str;
         case 3: // 2-byte immediate
-            return (void*) current.str;
+            return (void*) str;
         case 4: //4-byte immediate
-            return (void*) current.str;
+            return (void*) str;
         case 5: // Memory address
             maddr = 0;
-            maddr += current.str[0] << 24;
-            maddr += current.str[1] << 16;
-            maddr += current.str[2] << 8;
-            maddr += current.str[3];
+            maddr += str[0] << 24;
+            maddr += str[1] << 16;
+            maddr += str[2] << 8;
+            maddr += str[3];
             // Copy 4 bytes from memory into a separate variable
             return (void*) &env.memory[maddr];
         default:
@@ -342,7 +336,7 @@ void* getOperandValue(int type, unsigned char *str)
                 maddr = getMAddrFromArithmetic(type, str);
                 return (void*) &env.memory[maddr];
             }
-            printf("Unknown type in getOperandValue: 0x%x", type);
+            printf("Unknown type in getOperandValue: 0x%x\n", type);
             break;
     }
 }
@@ -408,7 +402,8 @@ void execute(unsigned char opcode, char dtype,
             if (op1_type == 1) {
                 exec_MOV_reg(op1_str[0], 1, (unsigned char*) getOperandValue(op2_type, op2_str));
             } else if (op1_type == 5) {
-                exec_MOV_mem(op1_str[0], 1, (unsigned char*) getOperandValue(op2_type, op2_str));
+                unsigned char* data = getOperandValue(op2_type, op2_str);
+                exec_MOV_mem(op1_str[0], 1, data);
             } else if (op1_type >= 6 && op1_type <= 10) {
                 exec_MOV_mem(getMAddrFromArithmetic(op1_type, op1_str),
                              1,
@@ -675,6 +670,10 @@ int main(int argc, char** argv)
     content = (unsigned char*)malloc(filelen*sizeof(char));
     fread(content, (size_t) filelen, 1, fileptr);
     fclose(fileptr);
+
+    printf("%i\n", __BYTE_ORDER__);
+    printf("Little: %i\n", __ORDER_LITTLE_ENDIAN__);
+    printf("Big: %i\n", __ORDER_BIG_ENDIAN__);
 
     run(content, iflag, filelen);
 
