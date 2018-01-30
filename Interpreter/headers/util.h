@@ -1,3 +1,13 @@
+union OperandValue {
+    char b;
+    unsigned char B;
+    int16_t h;
+    uint16_t H;
+    int i;
+    unsigned int I;
+    float f;
+};
+
 unsigned int convertTo_uint(const unsigned char *str);
 unsigned char* convertTo_str(int num);
 void setMemory(unsigned int maddr, int length, const unsigned char* value);
