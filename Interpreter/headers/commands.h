@@ -27,8 +27,8 @@ void exec_JGE(unsigned int addr);
 void exec_MOV_reg(unsigned char regnum, int length, const unsigned char* str);
 void exec_MOV_mem(unsigned long maddr, int length, const unsigned char* str);
 
-void exec_LEA_reg(unsigned char regnum, unsigned long maddr);
-void exec_LEA_mem(unsigned long maddr_to, unsigned long maddr_from);
+void exec_LEA_reg(unsigned char regnum, unsigned int maddr);
+void exec_LEA_mem(unsigned int maddr_to, unsigned int maddr_from);
 
 void exec_ADD_char(unsigned char* op1, int op1_type, unsigned char* op2, int op2_type);
 void exec_ADD_uchar(unsigned char* op1, int op1_type, unsigned char* op2, int op2_type);

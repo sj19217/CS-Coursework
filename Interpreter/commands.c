@@ -126,8 +126,16 @@ void exec_MOV_reg(unsigned char regnum, int length, const unsigned char* str)
     unsigned char* bytes = calloc(4, 1);
     if (length == 1) {  // MOV 1B
         bytes[3] = str[0];
-    } else if (length == 2) {
-
+    } else if (length == 2) { // MOV 2B
+        bytes[2] = str[0];
+        bytes[3] = str[1];
+    } else if (length == 4) { // MOV 4B
+        bytes[0] = str[0];
+        bytes[1] = str[1];
+        bytes[2] = str[2];
+        bytes[3] = str[3];
+    } else {
+        log_error("Unknown length parameter %i", length);
     }
 
 
@@ -152,12 +160,12 @@ void exec_MOV_mem(unsigned long maddr, int length, const unsigned char* str)
 
 
 // The LEA commands take any settable first operand and either a memory address or arithmetic second operand
-void exec_LEA_reg(unsigned char regnum, unsigned long maddr)
+void exec_LEA_reg(unsigned char regnum, unsigned int maddr)
 {
     log_trace("exec_LEA_reg(regnum=0x%02x, maddr=0x%x)", regnum, maddr);
     // This one is given the memory address as an int and stores that number in the destination register
     unsigned char reg_size = getRegisterSize(regnum);
-    char* bytes = (char*) &maddr;
+    unsigned char* bytes = convertTo_str(maddr);
     if (reg_size == 1) {
         setRegisterValue(regnum, (void *) &bytes[3]);
     } else if (reg_size == 2) {
@@ -165,16 +173,18 @@ void exec_LEA_reg(unsigned char regnum, unsigned long maddr)
     } else if (reg_size == 4) {
         setRegisterValue(regnum, (void *) bytes);
     }
+    free(bytes);
 }
 
-void exec_LEA_mem(unsigned long maddr_to, unsigned long pointer)
+void exec_LEA_mem(unsigned int maddr_to, unsigned int pointer)
 {
     log_trace("exec_LEA_mem(maddr_to=0x%x, pointer=0x%x", maddr_to, pointer);
-    unsigned char* bytes = (unsigned char*) &pointer;
+    unsigned char* bytes = convertTo_str(pointer);
     env.memory[maddr_to] = bytes[0];
     env.memory[maddr_to+1] = bytes[1];
     env.memory[maddr_to+2] = bytes[2];
     env.memory[maddr_to+3] = bytes[3];
+    free(bytes);
 }
 
 // Arithmetic commands begin here. Rather than having two versions, they are included in the same function.
@@ -326,8 +336,8 @@ void exec_ADD_float(unsigned char* op1, int op1_type, unsigned char* op2, int op
 }
 
 // The complicated, ugly code needed to get the value of an operand and place it in the right version of the union
-#define SET_OPERANDS(D, T) operand1.b = *(T*) getOperandValue(op1_type, (void*) op1); \
-operand2.D = *(T*) getOperandValue(op2_type, (void*) op2);
+#define SET_OPERANDS(D, T, N) operand1.b = convertTo_##N((T*) getOperandValue(op1_type, (void*) op1)); \
+operand2.D = convertTo_##N((T*) getOperandValue(op2_type, (void*) op2));
 
 // The still complicated, though slightly less ugly, code for performing the given operation on all possible versions.
 #define CALCULATE_TOTAL(O) switch (dtype) { \
@@ -367,19 +377,19 @@ void exec_arithmetic(char* function, char dtype, unsigned char* op1, int op1_typ
     switch (dtype)
     {
         case 'b':
-            SET_OPERANDS(b, char); break;
+            SET_OPERANDS(b, char, char); break;
         case 'B':
-            SET_OPERANDS(B, unsigned char); break;
+            SET_OPERANDS(B, unsigned char, uchar); break;
         case 'h':
-            SET_OPERANDS(h, int16_t); break;
+            SET_OPERANDS(h, int16_t, short); break;
         case 'H':
-            SET_OPERANDS(H, uint16_t); break;
+            SET_OPERANDS(H, uint16_t, ushort); break;
         case 'i':
-            SET_OPERANDS(i, int); break;
+            SET_OPERANDS(i, int, int); break;
         case 'I':
-            SET_OPERANDS(I, unsigned int); break;
+            SET_OPERANDS(I, unsigned int, uint); break;
         case 'f':
-            SET_OPERANDS(f, float); break;
+            SET_OPERANDS(f, float, float); break;
         default:
             log_error("Unknown data type: %c", dtype);
     }
@@ -441,16 +451,16 @@ void exec_arithmetic(char* function, char dtype, unsigned char* op1, int op1_typ
         }
     }
 
-    // Convert the int to 4 chars
-    char* bytes = (char*) &total;
+    // Convert the union to 4 chars
+    unsigned char* bytes = convertTo_str(total.i);
     if (op1_type == 1) {
         // Register
         setRegisterValue(op1[0], (void*) bytes);
     } else if (op1_type == 5) {
         // Memory location
-        setMemory(convertTo_uint(op1), 1, (unsigned char*) bytes+3);
+        setMemory(convertTo_uint(op1), 1, bytes+3);
     } else if (op1_type >= 6 && op1_type <= 10) {
-        setMemory(getMAddrFromArithmetic(op1_type, op1), 1, (unsigned char*) bytes+3);
+        setMemory(getMAddrFromArithmetic(op1_type, op1), 1, bytes+3);
     } else {    // Add arithmetic expressions too
         log_error("Cannot move result of arithmetic to location of type %i", op1_type);
     }

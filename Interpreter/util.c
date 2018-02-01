@@ -3,6 +3,18 @@
 #include "headers/main.h"
 #include "headers/log.h"
 
+char convertTo_char(const unsigned char* str)
+{
+    log_trace("convertTo_char(str[0]=%0x2)", str[0]);
+    return *(char*) str;
+}
+
+unsigned char convertTo_uchar(const unsigned char* str)
+{
+    log_trace("convertTo_uchar(str[0]=%0x2)", str[0]);
+    return *str;
+}
+
 int16_t convertTo_short(const unsigned char* str)
 {
     log_trace("convertTo_short(str[0]=%0x2)", str[0]);
@@ -15,7 +27,7 @@ int16_t convertTo_short(const unsigned char* str)
 
 int16_t convertTo_ushort(const unsigned char* str)
 {
-    log_trace("convertTo_short(str[0]=%0x2)", str[0]);
+    log_trace("convertTo_ushort(str[0]=%0x2)", str[0]);
     uint16_t result = 0;
     result += str[0] << 8;
     result += str[1];
@@ -46,6 +58,11 @@ int convertTo_int(const unsigned char* str)
     result += str[3];
 
     return result;
+}
+
+float convertTo_float(const unsigned char* str)
+{
+    return *(float*) str;
 }
 
 // Takes an int and turns it into a sequence of characters
