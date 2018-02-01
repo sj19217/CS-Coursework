@@ -1,3 +1,8 @@
+#ifndef INTERPRETER_UTIL_H
+#define INTERPRETER_UTIL_H
+
+#include <stdint.h>
+
 union OperandValue {
     char b;
     unsigned char B;
@@ -19,3 +24,5 @@ unsigned char* convertTo_str(int num);
 void setMemory(unsigned int maddr, int length, const unsigned char* value);
 void memdump(int max, _Bool headings, int columns);
 _Bool startsWith(const char* a, const char* b);
+
+#endif

@@ -99,4 +99,6 @@ for (int i = config_length; i < length - config_length; i++) {
   * More problems with endianness in exec_MOV_reg. Tried to fix with convertTo_str but this caused a segfault. Just did it in place instead.
   * Went through whole program and looked for any changes between chars and ints relying on endianness
     * Made other convertTo functions
+    * Big revamp of exec_arithmetic
   * Made def_CMP set comparisons to 0 before acting
+  * Holy crap it actually seemed to work - but didn't print anything (except logs)

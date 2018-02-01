@@ -20,7 +20,7 @@
 // It is a macro, meaning that wherever shield_exec_jump appears elsewhere this will be pasted in
 #define shield_exec_jump(C, T, L) \
 if (op1_type == (T) && op1_len == (L)) { \
-    C (*(unsigned int*) op1_str);\
+    C (convertTo_uint(op1_str));\
 } else { \
     printf("Unable to execute cmd statement with op1_type=%i, op1_len=%i", \
                                 op1_type, op1_len);\
@@ -153,48 +153,69 @@ void setRegisterValue(unsigned char regnum, void* data)
     switch (regnum) {
         case 0xA0: // eax
             env.eax.eax = *(unsigned int*) data;
+            break;
             //return (void *) &env.eax;
         case 0xB0: // ebx
             env.ebx.ebx = *(unsigned int*) data;
+            break;
         case 0xC0: // ecx
             env.ebx.ebx = *(unsigned int*) data;
+            break
         case 0xD0: // edx
             env.ebx.ebx = *(unsigned int*) data;
+            break;
         case 0xE1: // esi
             env.esi = *(unsigned int*) data;
+            break;
         case 0xE2: // edi
             env.edi = *(unsigned int*) data;
+            break;
         case 0xE3: // ebp
             env.ebp = *(unsigned int*) data;
+            break;
         case 0xE4: // esp
             env.esp = *(unsigned int*) data;
+            break;
         case 0xA1: // ax
             env.eax.div.ax = *(uint16_t*) data;
+            break;
             //return (void *) &env.eax.div.ax;
         case 0xB1: // bx
             env.ebx.div.bx = *(uint16_t*) data;
+            break;
         case 0xC1: // cx
             env.ecx.div.cx = *(uint16_t*) data;
+            break;
         case 0xD1: // dx
             env.edx.div.dx = *(uint16_t*) data;
+            break;
         case 0xA2: // ah
             env.eax.div.a.ah = *(unsigned char*) data;
+            break;
         case 0xB2: // bh
             env.ebx.div.b.bh = *(unsigned char*) data;
+            break;
         case 0xC2: // ch
             env.ecx.div.c.ch = *(unsigned char*) data;
+            break;
         case 0xD2: // dh
             env.edx.div.d.dh = *(unsigned char*) data;
+            break;
         case 0xA3: // al
             env.eax.div.a.al = *(unsigned char*) data;
+            break;
         case 0xB3: // bl
             env.ebx.div.b.bl = *(unsigned char*) data;
+            break;
         case 0xC3: // cl
             env.ecx.div.c.cl = *(unsigned char*) data;
+            break;
         case 0xD3: // dl
             env.edx.div.d.dl = *(unsigned char*) data;
+            break;
         case 0xF1:
             log_error("Cannot set input value as a register");
+            break;
         case 0xF0:
             printf("%c", *(unsigned char*) data);
             break;
