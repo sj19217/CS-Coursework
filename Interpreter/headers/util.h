@@ -1,5 +1,13 @@
-int16_t convertTo_short(const unsigned char* str);
-uint16_t convertTo_ushort(const unsigned char* str);
+union OperandValue {
+    char b;
+    unsigned char B;
+    int16_t h;
+    uint16_t H;
+    int i;
+    unsigned int I;
+    float f;
+};
+
 unsigned int convertTo_uint(const unsigned char *str);
 int convertTo_int(const unsigned char *str);
 unsigned char* convertTo_str(int num);

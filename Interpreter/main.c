@@ -5,6 +5,7 @@
 #include <unistd.h>
 #include <malloc.h>
 #include <mem.h>
+#include <stdlib.h>
 
 #include "headers/main.h"
 #include "headers/instructions.h"
@@ -251,7 +252,7 @@ void* getRegisterValue(unsigned char regnum)
             printf("> ");
             scanf("%lu", &retval);
             printf("\n");
-            return (void*) retval;
+            return (void*) &retval;
         case 0xF0:
             printf("Cannot get value from output register");
             return (void*) &env.memory[0];
