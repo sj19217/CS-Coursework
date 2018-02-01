@@ -1,6 +1,27 @@
 #include <mem.h>
+#include <malloc.h>
 #include "headers/main.h"
 #include "headers/log.h"
+
+int16_t convertTo_short(const unsigned char* str)
+{
+    log_trace("convertTo_short(str[0]=%0x2)", str[0]);
+    int16_t result = 0;
+    result += str[0] << 8;
+    result += str[1];
+
+    return result;
+}
+
+int16_t convertTo_ushort(const unsigned char* str)
+{
+    log_trace("convertTo_short(str[0]=%0x2)", str[0]);
+    uint16_t result = 0;
+    result += str[0] << 8;
+    result += str[1];
+
+    return result;
+}
 
 // Takes a char* and reads 4 bytes from it, turning them into an integer
 unsigned int convertTo_uint(const unsigned char *str)
@@ -15,10 +36,22 @@ unsigned int convertTo_uint(const unsigned char *str)
     return result;
 }
 
+int convertTo_int(const unsigned char* str)
+{
+    log_trace("convertTo_int(str[0]=%02x)", str[0]);
+    int result = 0;
+    result += str[0] << 24;
+    result += str[1] << 16;
+    result += str[2] << 8;
+    result += str[3];
+
+    return result;
+}
+
 // Takes an int and turns it into a sequence of characters
 unsigned char* convertTo_str(int num)
 {
-    unsigned char str[4];
+    unsigned char* str = (unsigned char*) malloc(sizeof(unsigned char)*4);
     str[0] = (unsigned char) (0x000000FF & num);
     str[1] = (unsigned char) (0x0000FF00 & num) >> 8;
     str[2] = (unsigned char) (0x00FF0000 & num) >> 16;

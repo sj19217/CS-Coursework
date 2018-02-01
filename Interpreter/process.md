@@ -97,3 +97,6 @@ for (int i = config_length; i < length - config_length; i++) {
   * Oh wait I already wrote convertTo_uint to manage it myself
   * Basically, some pointer arithmetic meant that while it was meant to find address 0x00000042 it looked for 0x42000000
   * More problems with endianness in exec_MOV_reg. Tried to fix with convertTo_str but this caused a segfault. Just did it in place instead.
+  * Went through whole program and looked for any changes between chars and ints relying on endianness
+    * Made other convertTo functions
+  * Made def_CMP set comparisons to 0 before acting

@@ -5,6 +5,7 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <mem.h>
+#include <stdlib.h>
 #include "headers/main.h"
 #include "headers/util.h"
 #include "headers/log.h"
@@ -18,6 +19,9 @@
 void exec_CMP_##N(T op1_val, T op2_val) \
 { \
     T diff = op1_val - op2_val; \
+    env.cmp_n = 0; \
+    env.cmp_e = 0; \
+    env.cmp_p = 0; \
     if (diff < 0) { \
         env.cmp_n = 1; \
     } else if (diff == 0) { \
@@ -106,24 +110,29 @@ void exec_MOV_reg(unsigned char regnum, int length, const unsigned char* str)
     }
 
     // Store a full 4-byte integer and just add to it whatever the value is. This manages the zeroes.
-    unsigned long full = 0;
-    if (length == 1) { // MOV 1B
-        full += str[0];
+//    unsigned long full = 0;
+//    if (length == 1) { // MOV 1B
+//        full += str[0];
+//    } else if (length == 2) {
+//        full += *(uint16_t*) str;
+//    } else if (length == 4) {
+//        full += *(unsigned int*) str;
+//    } else {
+//        printf("Unknown length parameter %i\n", length);
+//    }
+
+    // Alternative zero-managing method: manually calloc (malloc + zeroing) some memory for the job
+    // This avoids the compiler's endianness having a backwards int
+    unsigned char* bytes = calloc(4, 1);
+    if (length == 1) {  // MOV 1B
+        bytes[3] = str[0];
     } else if (length == 2) {
-        full += *(uint16_t*) str;
-    } else if (length == 4) {
-        full += *(unsigned int*) str;
-    } else {
-        printf("Unknown length parameter %i\n", length);
+
     }
 
-    // The 4-byte `full` now contains the value. Now place it into the register, trimming as necessary.
-    // Turn it into an array of chars so that the right amount can be extracted
-    unsigned char bytes[4];
-    bytes[3] = (unsigned char) (0x000000FF & full);
-    bytes[2] = (unsigned char) (0x0000FF00 & full) >> 8;
-    bytes[1] = (unsigned char) (0x00FF0000 & full) >> 16;
-    bytes[0] = (unsigned char) (0xFF000000 & full) >> 24;
+
+    // Removed the process of turning the int into chars because this is now already done
+
     if (reg_size == 1) {
         setRegisterValue(regnum, (void *) &bytes[3]);
     } else if (reg_size == 2) {

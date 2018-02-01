@@ -359,20 +359,20 @@ void execute(unsigned char opcode, char dtype,
                           *(unsigned char*) getOperandValue(op2_type, op2_str));
             break;
         case CMP_short:
-            exec_CMP_short(*(int16_t*) getOperandValue(op1_type, op1_str),
-                          *(int16_t*) getOperandValue(op2_type, op2_str));
+            exec_CMP_short(convertTo_short((unsigned char*) getOperandValue(op1_type, op1_str)),
+                           convertTo_short((unsigned char*) getOperandValue(op1_type, op1_str)));
             break;
         case CMP_ushort:
-            exec_CMP_ushort(*(uint16_t*) getOperandValue(op1_type, op1_str),
-                          *(uint16_t*) getOperandValue(op2_type, op2_str));
+            exec_CMP_ushort(convertTo_ushort((unsigned char*) getOperandValue(op1_type, op1_str)),
+                           convertTo_ushort((unsigned char*) getOperandValue(op1_type, op1_str)));
             break;
         case CMP_int:
-            exec_CMP_int(*(int*) getOperandValue(op1_type, op1_str),
-                          *(int*) getOperandValue(op2_type, op2_str));
+            exec_CMP_int(convertTo_int((unsigned char*) getOperandValue(op1_type, op1_str)),
+                         convertTo_int((unsigned char*) getOperandValue(op2_type, op2_str)));
             break;
         case CMP_uint:
-            exec_CMP_uint(*(unsigned int*) getOperandValue(op1_type, op1_str),
-                          *(unsigned int*) getOperandValue(op2_type, op2_str));
+            exec_CMP_uint(convertTo_uint((unsigned char*) getOperandValue(op1_type, op1_str)),
+                          convertTo_uint((unsigned char*) getOperandValue(op2_type, op2_str)));
             break;
         case CMP_float:
             exec_CMP_float(*(float*) getOperandValue(op1_type, op1_str),
@@ -674,6 +674,12 @@ int main(int argc, char** argv)
     printf("%i\n", __BYTE_ORDER__);
     printf("Little: %i\n", __ORDER_LITTLE_ENDIAN__);
     printf("Big: %i\n", __ORDER_BIG_ENDIAN__);
+
+#if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
+    log_info("Compiled as little endian\n");
+#elif __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
+    log_info("Compiled as big endian\n");
+#endif
 
     run(content, iflag, filelen);
 

@@ -3,6 +3,7 @@
 
 # CMake stuff
 *cmake-build-debug*
+*cmake-build-release*
 
 # JetBrains config 
 *.idea*
