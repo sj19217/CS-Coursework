@@ -18,6 +18,7 @@
 #define def_CMP(T, N) \
 void exec_CMP_##N(T op1_val, T op2_val) \
 { \
+    log_trace("exec_CMP_%s(op1_val=%i, op2_val=%i)", #N, op1_val, op2_val);\
     T diff = op1_val - op2_val; \
     env.cmp_n = 0; \
     env.cmp_e = 0; \
@@ -141,13 +142,17 @@ void exec_MOV_reg(unsigned char regnum, int length, const unsigned char* str)
 
     // Removed the process of turning the int into chars because this is now already done
 
+    void* results = malloc(reg_size);
+
     if (reg_size == 1) {
-        setRegisterValue(regnum, (void *) &bytes[3]);
+        ((unsigned char*) results)[0] = convertTo_uchar(&bytes[3]);
     } else if (reg_size == 2) {
-        setRegisterValue(regnum, (void *) &bytes[2]);
+        ((uint16_t*) results)[0] = convertTo_ushort(&bytes[2]);
     } else if (reg_size == 4) {
-        setRegisterValue(regnum, (void *) bytes);
+        ((unsigned int*) results)[0] = convertTo_uint(bytes);
     }
+
+    setRegisterValue(regnum, results);
 }
 
 void exec_MOV_mem(unsigned long maddr, int length, const unsigned char* str)

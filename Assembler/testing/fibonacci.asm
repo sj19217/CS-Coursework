@@ -9,7 +9,7 @@ i VAR char 50
 section.text
 MOV eax 1
 MOV ebx 1
-loop MOV temp eax
+loop MOV 2B temp eax
 ADD eax ebx
 ADD ebx temp
 

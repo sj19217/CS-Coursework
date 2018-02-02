@@ -102,3 +102,7 @@ for (int i = config_length; i < length - config_length; i++) {
     * Big revamp of exec_arithmetic
   * Made def_CMP set comparisons to 0 before acting
   * Holy crap it actually seemed to work - but didn't print anything (except logs)
+  * Turns out the lack of break statements in the switch statement in setRegisterValue
+  * The MOV command will assume the amount to move based on the size of its operands, but does not know variables' types.
+    This causes the line "MOV temp eax" to move all 4 bytes of eax into temp even if temp is only a short, overwriting subsequent variables.
+    The solution is to change the line to specifically "MOV 2B temp eax".

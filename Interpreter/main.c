@@ -130,7 +130,7 @@ int getOpLen(int type)
 
 unsigned char getRegisterSize(unsigned char regnum)
 {
-    log_trace("getRegisterSize(regnum=0x%i)", regnum);
+    log_trace("getRegisterSize(regnum=0x%x)", regnum);
     if ((regnum >= 0xE1 && regnum <= 0xE4) || (regnum >> 4 >= 10 && regnum >> 4 <= 13)) {
         return 4;
     } else if ((regnum >> 4) >= 10 && (regnum >> 4) <= 13) {
@@ -149,7 +149,7 @@ unsigned char getRegisterSize(unsigned char regnum)
 
 void setRegisterValue(unsigned char regnum, void* data)
 {
-    log_trace("setRegisterValue(regnum=0x%i, void* data)");
+    log_trace("setRegisterValue(regnum=0x%x, void* data)");
     switch (regnum) {
         case 0xA0: // eax
             env.eax.eax = *(unsigned int*) data;
@@ -160,7 +160,7 @@ void setRegisterValue(unsigned char regnum, void* data)
             break;
         case 0xC0: // ecx
             env.ebx.ebx = *(unsigned int*) data;
-            break
+            break;
         case 0xD0: // edx
             env.ebx.ebx = *(unsigned int*) data;
             break;
@@ -217,7 +217,7 @@ void setRegisterValue(unsigned char regnum, void* data)
             log_error("Cannot set input value as a register");
             break;
         case 0xF0:
-            printf("%c", *(unsigned char*) data);
+            printf("Output: %i\n", *(unsigned int*) data);
             break;
         default:
             log_error("Unknown register number in setRegisterValue: 0x%x", regnum);
@@ -227,7 +227,7 @@ void setRegisterValue(unsigned char regnum, void* data)
 void* getRegisterValue(unsigned char regnum)
 {
     log_trace("getRegisterValue(regnum=0x%x)", regnum);
-    unsigned long retval;
+    unsigned long* retval = (unsigned long*) malloc(sizeof(long));
     switch (regnum) {
         case 0xA0: // eax
             return (void*) &env.eax;
@@ -271,9 +271,9 @@ void* getRegisterValue(unsigned char regnum)
             return (void*) &env.edx.div.d.dl;
         case 0xF1:
             printf("> ");
-            scanf("%lu", &retval);
+            scanf("%lu", retval);
             printf("\n");
-            return (void*) &retval;
+            return (void*) retval;
         case 0xF0:
             printf("Cannot get value from output register");
             return (void*) &env.memory[0];
@@ -425,7 +425,7 @@ void execute(unsigned char opcode, char dtype,
                 exec_MOV_reg(op1_str[0], 1, (unsigned char*) getOperandValue(op2_type, op2_str));
             } else if (op1_type == 5) {
                 unsigned char* data = getOperandValue(op2_type, op2_str);
-                exec_MOV_mem(op1_str[0], 1, data);
+                exec_MOV_mem(convertTo_uint(op1_str), 1, data);
             } else if (op1_type >= 6 && op1_type <= 10) {
                 exec_MOV_mem(getMAddrFromArithmetic(op1_type, op1_str),
                              1,
@@ -622,7 +622,7 @@ void run(unsigned char* bytecode, int iflag, int length)
 
     // Initialise the environment
     const int memsize = config.memorykb * 1024;
-    env.memory = (unsigned char*) malloc(memsize*sizeof(unsigned char));
+    env.memory = (unsigned char*) calloc(memsize, sizeof(unsigned char));
 
     // Fill up the memory with the instructions
     for (int i = config_length; i < length; i++) {

@@ -78,7 +78,7 @@ unsigned char* convertTo_str(int num)
 
 void setMemory(unsigned int maddr, int length, const unsigned char* value)
 {
-    log_trace("setMemory(maddr=%i, length=%i, value[0]=%02x)", maddr, length, value);
+    log_trace("setMemory(maddr=%i, length=%i, value[0]=%02x)", maddr, length, value[0]);
     for (int i = 0; i < length; i++)
     {
         env.memory[maddr+i] = value[i];
