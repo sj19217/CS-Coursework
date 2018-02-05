@@ -1,8 +1,9 @@
 import re
 import io
 
+# DO NOT TOUCH THESE
 DIRECTIVES = {
-    "include": r"^#include\s*[\"<](?P<fname>[\w,\s-]+\.[A-Za-z]{3})[\">]$"
+    "include": r"^\s*#\s*include\s+[<\"](?P<fname>[\w\.\\/]*)[>\"]\s*"
 }
 
 def directive_include(text: str, lineno, filename):
@@ -36,7 +37,7 @@ def process(text):
     # First, look for all of the #include statements
     while True:
         # Find the first instance of #include currently in the text
-        m = re.match(DIRECTIVES["include"], text)
+        m = re.search(DIRECTIVES["include"], text)
         if m is None:
             break   # No more includes
 
@@ -49,5 +50,8 @@ def process(text):
 
 # Make an interactive version available
 if __name__ == "__main__":
+    with open("testing/csamples/include.c", "rt") as f:
+        print(process(f.read()))
+
     import code
     code.interact(local=locals())
