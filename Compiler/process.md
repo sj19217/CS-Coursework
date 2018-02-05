@@ -17,3 +17,5 @@
   * It now works with the more complicated example :)
 * Went back and made better comments
 * When commenting, found a logical error (only looked for first #undef statement, not the one that matches)
+* After beginning to write if statement code, realised that what is defined where has been lost. So I went back and
+  added defined_lines.

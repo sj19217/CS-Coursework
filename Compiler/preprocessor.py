@@ -1,11 +1,13 @@
 import re
 import io
+from collections import deque
 
 # DO NOT TOUCH THESE
 DIRECTIVES = {
     "include": r"\s*#\s*include\s+[<\"](?P<fname>[\w\.\\/]*)[>\"]",
     "define": r"\s*#\s*define\s*(?P<name>\w*)\s*(?P<value>[^\n]*)",
-    "undef": r"\s*#\s*undef\s*(?P<name>\w*)"
+    "undef": r"\s*#\s*undef\s*(?P<name>\w*)",
+    "ifdef": r"\s*#\s*ifdef\s*(?P<name>\w*)"
 }
 
 def directive_include(text: str, lineno, filename):
@@ -51,6 +53,7 @@ def process(text):
         text = directive_include(text, lineno, filename)
 
     # -------- Next, work through the #define statements
+    defined_lines = []
     while True:
         # Get the first existing #define statement
         m_def = re.search(DIRECTIVES["define"], text)
@@ -94,6 +97,30 @@ def process(text):
             pass    # This is perfectly expected, it just means there is no undef statement
 
         text = "\n".join(lines)
+
+        # Add the info about this to the defined_lines list
+        defined_lines.append([name, start_def, end_def-1])
+
+        # Update the existing things to cope with the extra removed lines
+        for item in defined_lines:
+            # For each of the start and end lines, check this:
+            # If both the start and end here are below it, then reduce it by 2
+            # If just the start is before, then reduce it by 1
+            if item[1] > end_def:
+                item[1] = item[1] - 2
+            elif item[1] > start_def:
+                item[1] = item[1] - 1
+
+            if item[2] > end_def:
+                item[2] = item[2] - 2
+            elif item[2] > start_def:
+                item[2] = item[2] - 1
+
+    # -------- Mark down where which if statements apply
+    lines = text.split("\n")
+    linedata = [[] for _ in lines]
+    ifstack = deque()
+
 
     return text
 
