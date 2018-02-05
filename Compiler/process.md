@@ -15,3 +15,5 @@
   * Sneaky problem, when removing the line corresponding to #undef, I forgot its index has been shifted 1 up by the
     deletion of the #define line
   * It now works with the more complicated example :)
+* Went back and made better comments
+* When commenting, found a logical error (only looked for first #undef statement, not the one that matches)

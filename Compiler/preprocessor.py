@@ -38,7 +38,7 @@ DIRECTIVE_FUNCTIONS = {
 }
 
 def process(text):
-    # First, look for all of the #include statements
+    # -------- First, look for all of the #include statements
     while True:
         # Find the first instance of #include currently in the text
         m = re.search(DIRECTIVES["include"], text)
@@ -50,24 +50,39 @@ def process(text):
 
         text = directive_include(text, lineno, filename)
 
-    # Next, work through the #define statements
+    # -------- Next, work through the #define statements
     while True:
+        # Get the first existing #define statement
         m_def = re.search(DIRECTIVES["define"], text)
 
         if m_def is None:
-            # No matches of #define left
+            # No matches of #define left, so this stage is done
             break
 
+        # Get some info on the #define line
         start_def = lineof(text, m_def.string[m_def.start():m_def.end()])
         name = m_def.group("name")
         value = m_def.group("value")
 
-        m_undef = re.search(DIRECTIVES["undef"], text)
-        if m_undef is None or m_undef.group("name") != name:
-            end_def = len(text.split("\n"))    # As in go to the last line
-        else:
-            end_def = lineof(text, m_undef.string[m_undef.start():m_undef.end()].strip())
+        # Get the
+        # m_undef = re.search(DIRECTIVES["undef"], text)
+        # if m_undef is None or m_undef.group("name") != name:
+        #     end_def = len(text.split("\n"))    # As in go to the last line
+        # else:
+        #     end_def = lineof(text, m_undef.string[m_undef.start():m_undef.end()].strip())
+        while True:
+            m_undef = re.search(DIRECTIVES["undef"], text)
+            if m_undef is None:
+                # If none, then no #undef statements are left, so act as if it is the end of the file
+                end_def = len(text.split("\n"))
+                break
+            elif m_undef.group("name") == name:
+                # Found one that the name matches so write down its line
+                end_def = lineof(text, m_undef.string[m_undef.start():m_undef.end()].strip())
+                break
+            # If neither of those is the case, then try the next one
 
+        # Split up into lines to make individual replacements
         lines = text.split("\n")
         for i, line in enumerate(lines):
             if start_def <= i <= end_def:
