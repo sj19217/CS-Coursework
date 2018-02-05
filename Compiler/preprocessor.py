@@ -4,7 +4,8 @@ import io
 # DO NOT TOUCH THESE
 DIRECTIVES = {
     "include": r"\s*#\s*include\s+[<\"](?P<fname>[\w\.\\/]*)[>\"]\s*",
-    "define": r"\s*#\s*define\s*(?P<name>\w*)\s*(?P<value>[^\n]*)\s*"
+    "define": r"\s*#\s*define\s*(?P<name>\w*)\s*(?P<value>[^\n]*)\s*",
+    "undef": r"\s*#\s*undef\s*(?P<name>\w*)\s*"
 }
 
 def directive_include(text: str, lineno, filename):
@@ -29,6 +30,8 @@ def lineof(text, substring):
     for i, line in enumerate(lines):
         if substring in line:
             return i
+
+    return -1
 
 DIRECTIVE_FUNCTIONS = {
 
@@ -55,19 +58,22 @@ def process(text):
             # No matches of #define left
             break
 
-        start_def = lineof(text, m.string[m.start():m.end()])
+        start_def = lineof(text, m_def.string[m_def.start():m_def.end()])
         name = m_def.group("name")
         value = m_def.group("value")
 
         m_undef = re.search(DIRECTIVES["undef"], text)
-        if m_undef is None:
-            end_def = None    # As in go to the last line
+        if m_undef is None or m_undef.group("name") != name:
+            end_def = len(text.split("\n"))    # As in go to the last line
         else:
-            end_def = lineof(text, m_undef.string[m.start():m.end()])
+            end_def = lineof(text, m_undef.string[m_undef.start():m_undef.end()])
 
-        lines = text.split("\n")[start_def:end_def]
+        lines = text.split("\n")
         for i, line in enumerate(lines):
-            lines[i] = line.replace(name, value)
+            if start_def <= i <= end_def:
+                lines[i] = line.replace(name, value)
+
+        text = "\n".join(lines)
 
     return text
 
