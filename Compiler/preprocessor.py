@@ -151,12 +151,14 @@ def process(text):
             # This line is an ifdef statement
             name = m.group("name")
             linedata[i].append(("def", name))
+            ifstack.append(("def", name))
 
         m = re.match(DIRECTIVES["ifndef"], line.strip())
         if m is not None:
             # This line is an ifndef statement
             name = m.group("name")
             linedata[i].append(("ndef", name))
+            ifstack.append(("ndef", name))
 
         # Add all of the constraints already on the stack
         for constraint in ifstack:
@@ -180,6 +182,16 @@ def process(text):
 
         if erase:
             lines[i] = ""
+
+    # -------- Remove all remaining lines beginning with a #
+    lines = text.split("\n")
+    for i, line in enumerate(lines):
+        if line.strip().startswith("#"):
+            lines[i] = ""
+    text = "\n".join(lines)
+
+    # -------- Remove all duplicate newlines
+    text = re.sub("\n+", "\n", text)
 
     return text
 

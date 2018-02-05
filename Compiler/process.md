@@ -23,4 +23,6 @@
 * Added in code to act on the constraints
 * Added in logging
 * Was getting stuck because the loop looking for #undef matches has no way to continue, so fixed that
-* Then getting an error from popping from an empty stack, because it was never added to
+* Then getting an error from popping from an empty stack, because it was never added to (5f875c5)
+* The if statements now work but not yet removing the if statements from the text
+* Removes all lines beginning with # and all duplicate newlines
