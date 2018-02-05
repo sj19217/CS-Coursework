@@ -44,3 +44,10 @@ def process(text):
         lineno = lineof(text, m.string[m.start():m.end()])
 
         text = directive_include(text, lineno, filename)
+
+    return text
+
+# Make an interactive version available
+if __name__ == "__main__":
+    import code
+    code.interact(local=locals())
