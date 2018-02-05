@@ -1,6 +1,9 @@
 import re
 import io
+import logging
 from collections import deque
+
+logging.basicConfig(level=logging.DEBUG)
 
 # DO NOT TOUCH THESE
 DIRECTIVES = {
@@ -21,6 +24,7 @@ def directive_include(text: str, lineno, filename):
     :param filename:
     :return:
     """
+    logging.debug("Running directive_include(text, lineno={0}, filename={1}".format(lineno, filename))
     lines = text.split("\n")
     include_statement = lines[lineno]
 
@@ -30,6 +34,7 @@ def directive_include(text: str, lineno, filename):
     return text.replace(include_statement, file_content)
 
 def lineof(text, substring):
+    logging.debug("Running lineof(text, substring={0})".format(substring))
     lines = text.split("\n")
     for i, line in enumerate(lines):
         if substring in line:
@@ -44,6 +49,7 @@ def get_is_defined(defined_lines, const, line):
     :param const:
     :return:
     """
+    logging.debug("Running get_is_defined(defined_lines, const={0}, line={1})".format(const, line))
     for name, start, end in defined_lines:
         if name != const:
             # Not useful
@@ -61,6 +67,7 @@ DIRECTIVE_FUNCTIONS = {
 }
 
 def process(text):
+    logging.debug("Running process(text)")
     # -------- First, look for all of the #include statements
     while True:
         # Find the first instance of #include currently in the text
@@ -69,7 +76,7 @@ def process(text):
             break   # No more includes
 
         filename = m.group("fname")
-        lineno = lineof(text, m.string[m.start():m.end()])
+        lineno = lineof(text, m.string[m.start():m.end()].strip())
 
         text = directive_include(text, lineno, filename)
 
@@ -84,7 +91,7 @@ def process(text):
             break
 
         # Get some info on the #define line
-        start_def = lineof(text, m_def.string[m_def.start():m_def.end()])
+        start_def = lineof(text, m_def.string[m_def.start():m_def.end()].strip())
         name = m_def.group("name")
         value = m_def.group("value")
 
@@ -94,17 +101,13 @@ def process(text):
         #     end_def = len(text.split("\n"))    # As in go to the last line
         # else:
         #     end_def = lineof(text, m_undef.string[m_undef.start():m_undef.end()].strip())
-        while True:
-            m_undef = re.search(DIRECTIVES["undef"], text)
-            if m_undef is None:
-                # If none, then no #undef statements are left, so act as if it is the end of the file
-                end_def = len(text.split("\n"))
-                break
-            elif m_undef.group("name") == name:
+        undef_statements = re.compile(DIRECTIVES["undef"]).finditer(text)
+        end_def = len(text.split("\n"))
+        for m_undef in undef_statements:
+            if m_undef.group("name") == name:
                 # Found one that the name matches so write down its line
                 end_def = lineof(text, m_undef.string[m_undef.start():m_undef.end()].strip())
                 break
-            # If neither of those is the case, then try the next one
 
         # Split up into lines to make individual replacements
         lines = text.split("\n")

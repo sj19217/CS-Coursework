@@ -21,3 +21,6 @@
   added defined_lines (git commit 5f875c5)
 * Completed first attempt at logic for the if statements
 * Added in code to act on the constraints
+* Added in logging
+* Was getting stuck because the loop looking for #undef matches has no way to continue, so fixed that
+* Then getting an error from popping from an empty stack, because it was never added to
