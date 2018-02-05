@@ -18,4 +18,6 @@
 * Went back and made better comments
 * When commenting, found a logical error (only looked for first #undef statement, not the one that matches)
 * After beginning to write if statement code, realised that what is defined where has been lost. So I went back and
-  added defined_lines.
+  added defined_lines (git commit 5f875c5)
+* Completed first attempt at logic for the if statements
+* Added in code to act on the constraints

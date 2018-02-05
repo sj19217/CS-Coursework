@@ -7,7 +7,9 @@ DIRECTIVES = {
     "include": r"\s*#\s*include\s+[<\"](?P<fname>[\w\.\\/]*)[>\"]",
     "define": r"\s*#\s*define\s*(?P<name>\w*)\s*(?P<value>[^\n]*)",
     "undef": r"\s*#\s*undef\s*(?P<name>\w*)",
-    "ifdef": r"\s*#\s*ifdef\s*(?P<name>\w*)"
+    "ifdef": r"\s*#\s*ifdef\s*(?P<name>\w*)",
+    "ifndef": r"\s*#\s*ifndef\s*(?P<name>\w*)",
+    "endif": r"\s*#\s*endif\s*"
 }
 
 def directive_include(text: str, lineno, filename):
@@ -34,6 +36,25 @@ def lineof(text, substring):
             return i
 
     return -1
+
+def get_is_defined(defined_lines, const, line):
+    """
+    Returns True if, based on defined_lines, `const` will be defined at line `line`.
+    :param defined_lines:
+    :param const:
+    :return:
+    """
+    for name, start, end in defined_lines:
+        if name != const:
+            # Not useful
+            continue
+
+        # This is const
+        if start <= line <= end:
+            return True
+
+    # It isn't defined anywhere
+    return False
 
 DIRECTIVE_FUNCTIONS = {
 
@@ -121,12 +142,47 @@ def process(text):
     linedata = [[] for _ in lines]
     ifstack = deque()
 
+    for i, line in enumerate(lines):
+        m = re.match(DIRECTIVES["ifdef"], line.strip())
+        if m is not None:
+            # This line is an ifdef statement
+            name = m.group("name")
+            linedata[i].append(("def", name))
+
+        m = re.match(DIRECTIVES["ifndef"], line.strip())
+        if m is not None:
+            # This line is an ifndef statement
+            name = m.group("name")
+            linedata[i].append(("ndef", name))
+
+        # Add all of the constraints already on the stack
+        for constraint in ifstack:
+            linedata[i].append(constraint)
+
+        # If this is an endif line, pop the stack
+        m = re.match(DIRECTIVES["endif"], line.strip())
+        if m is not None:
+            ifstack.pop()
+
+    # -------- Act on the constraints
+    for i, line in enumerate(lines):
+        constraints = linedata[i]
+        erase = False
+        for constraint in constraints:
+            is_def = get_is_defined(defined_lines, constraint[1], i)
+            if constraint[0] == "def" and not is_def:
+                erase = True
+            elif constraint[0] == "ndef" and is_def:
+                erase = True
+
+        if erase:
+            lines[i] = ""
 
     return text
 
 # Make an interactive version available
 if __name__ == "__main__":
-    with open("testing/csamples/define2.c", "rt") as f:
+    with open("testing/csamples/if1.c", "rt") as f:
         print(process(f.read()))
 
     import code
