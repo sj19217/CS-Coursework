@@ -3,9 +3,9 @@ import io
 
 # DO NOT TOUCH THESE
 DIRECTIVES = {
-    "include": r"\s*#\s*include\s+[<\"](?P<fname>[\w\.\\/]*)[>\"]\s*",
-    "define": r"\s*#\s*define\s*(?P<name>\w*)\s*(?P<value>[^\n]*)\s*",
-    "undef": r"\s*#\s*undef\s*(?P<name>\w*)\s*"
+    "include": r"\s*#\s*include\s+[<\"](?P<fname>[\w\.\\/]*)[>\"]",
+    "define": r"\s*#\s*define\s*(?P<name>\w*)\s*(?P<value>[^\n]*)",
+    "undef": r"\s*#\s*undef\s*(?P<name>\w*)"
 }
 
 def directive_include(text: str, lineno, filename):
@@ -66,12 +66,17 @@ def process(text):
         if m_undef is None or m_undef.group("name") != name:
             end_def = len(text.split("\n"))    # As in go to the last line
         else:
-            end_def = lineof(text, m_undef.string[m_undef.start():m_undef.end()])
+            end_def = lineof(text, m_undef.string[m_undef.start():m_undef.end()].strip())
 
         lines = text.split("\n")
         for i, line in enumerate(lines):
             if start_def <= i <= end_def:
                 lines[i] = line.replace(name, value)
+        del lines[start_def]
+        try:
+            del lines[end_def-1]    # The -1 is to compensate for the removal of the #define line
+        except IndexError:
+            pass    # This is perfectly expected, it just means there is no undef statement
 
         text = "\n".join(lines)
 
@@ -79,7 +84,7 @@ def process(text):
 
 # Make an interactive version available
 if __name__ == "__main__":
-    with open("testing/csamples/define.c", "rt") as f:
+    with open("testing/csamples/define2.c", "rt") as f:
         print(process(f.read()))
 
     import code
