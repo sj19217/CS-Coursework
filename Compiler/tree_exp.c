@@ -5,8 +5,8 @@ int main()
     unsigned char unsigned_char;
     short short_ = 5;
     unsigned short ushort_;
-    int integer;
-    unsigned int unsigned_int = -50;
+    int integer = -50;
+    unsigned int unsigned_int;
     float f = 5.2;
 
     character = 7;
