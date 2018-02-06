@@ -39,9 +39,30 @@ An operation involving only one object.
 * `obj.expr` - A node representing what is being acted on. For "-50", this is a Constant, but it could be more complex.
 
 ### BinaryOp
+This is an operation, most likely a mathematical one, which has two operands.
+* `obj.op` - A string containing the operation, like "+" or "<<"
+* `obj.left` - A node containing the left hand side of the operation
+* `obj.right` - A node containing  the right hand side of the operation
+
 ### ID
+This is the node used to hold the name of a variable, typically.
+* `obj.name` - A string containing the name of the item
+
 ### Cast
+Represents a cast from one type to another.
+* `obj.to_type` - A Typename object holding the type that the object is being cast into
+* `obj.expr` - The object to be cast
+
 ### If
+Represents an if statement.
+* `obj.cond` - Contains the expression whose truth will determine whether to run the statement or not
+* `obj.iftrue` - Contains a Compound object which is the code block to be run if the expression was true
+* `obj.iffalse` - Contains a Compound object which is the code block to be run if the expression was false
+
 ### Compound
+A node which contains a sequence of other nodes. Possibly where local variables will be attached to.
+* `obj.block_items` - A list containing all of the elements in their sequence
+
 ### For
 ### While
+### Typename
