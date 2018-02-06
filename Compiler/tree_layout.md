@@ -64,5 +64,24 @@ A node which contains a sequence of other nodes. Possibly where local variables 
 * `obj.block_items` - A list containing all of the elements in their sequence
 
 ### For
+Represents a for loop.
+* `obj.init` - A DeclList object, whose decls attribute contains a list of Decl objects, representing the content of the
+  first part of a for loop's initialisation
+* `obj.cond` - An expression object showing the comparison. Typically would be a BinaryOp.
+* `obj.next` - Represents what to do after each iteration. In the case of "i++", it would be a UnaryOp with the "p++" op
+* `obj.stmt` - A Compound object containing the code block in the for loop
+
 ### While
+Represents a while loop. 
+* `obj.cond` - A node, possibly a BinaryOp in the case of a comparison, for the expression that has to be checked for
+  each loop round.
+* `obj.stmt` - A Compound object which contains the block of code 
+
 ### Typename
+A seemingly unnecessarily complex object that defines a type, like an int.
+* `obj.name` - If in an assignment, this is the name of the variable being assigned to. If elsewhere, like in a cast,
+  this will just be None.
+* `obj.type` - A TypeDecl object:
+  * `obj.type.type` - An IdentifierType object
+    * `obj.type.type.names` - Finally, this is the one you want. It is a list containing all of the declared specifics
+      of this type. The data type will be one, like "int", but also "unsigned" could be in there.

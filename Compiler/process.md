@@ -26,3 +26,5 @@
 * Then getting an error from popping from an empty stack, because it was never added to (5f875c5)
 * The if statements now work but not yet removing the if statements from the text
 * Removes all lines beginning with # and all duplicate newlines
+* Created tree_layout.md to describe how the tree from pycparser works
+* 
