@@ -54,4 +54,17 @@ int main()
         f = f * 1.01;
         i--;
     }
+
+    int* ptr;
+    ptr = &integer;
+    int regained_int = *ptr;
+
+    char myArray[5];
+    myArray[0] = 10;
+    printf(myArray[0]);
+
+    char* str = "Hello, World";
+
+    float* inHeap = malloc(sizeof(float) * 10);
+    free(inHeap);
 }

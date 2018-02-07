@@ -112,7 +112,11 @@ FileAST(ext=[FuncDef(decl=Decl(name='main',
                                                                                              ]
                                                                                        )
                                                                    ),
-                                                     init=None,
+                                                     init=UnaryOp(op='-',
+                                                                  expr=Constant(type='int',
+                                                                                value='50'
+                                                                                )
+                                                                  ),
                                                      bitsize=None
                                                      ),
                                                 Decl(name='unsigned_int',
@@ -130,11 +134,7 @@ FileAST(ext=[FuncDef(decl=Decl(name='main',
                                                                                              ]
                                                                                        )
                                                                    ),
-                                                     init=UnaryOp(op='-',
-                                                                  expr=Constant(type='int',
-                                                                                value='50'
-                                                                                )
-                                                                  ),
+                                                     init=None,
                                                      bitsize=None
                                                      ),
                                                 Decl(name='f',
@@ -582,7 +582,171 @@ FileAST(ext=[FuncDef(decl=Decl(name='main',
                                                                                          )
                                                                                 ]
                                                                     )
-                                                      )
+                                                      ),
+                                                Decl(name='ptr',
+                                                     quals=[
+                                                           ],
+                                                     storage=[
+                                                             ],
+                                                     funcspec=[
+                                                              ],
+                                                     type=PtrDecl(quals=[
+                                                                        ],
+                                                                  type=TypeDecl(declname='ptr',
+                                                                                quals=[
+                                                                                      ],
+                                                                                type=IdentifierType(names=['int'
+                                                                                                          ]
+                                                                                                    )
+                                                                                )
+                                                                  ),
+                                                     init=None,
+                                                     bitsize=None
+                                                     ),
+                                                Assignment(op='=',
+                                                           lvalue=ID(name='ptr'
+                                                                     ),
+                                                           rvalue=UnaryOp(op='&',
+                                                                          expr=ID(name='integer'
+                                                                                  )
+                                                                          )
+                                                           ),
+                                                Decl(name='regained_int',
+                                                     quals=[
+                                                           ],
+                                                     storage=[
+                                                             ],
+                                                     funcspec=[
+                                                              ],
+                                                     type=TypeDecl(declname='regained_int',
+                                                                   quals=[
+                                                                         ],
+                                                                   type=IdentifierType(names=['int'
+                                                                                             ]
+                                                                                       )
+                                                                   ),
+                                                     init=UnaryOp(op='*',
+                                                                  expr=ID(name='ptr'
+                                                                          )
+                                                                  ),
+                                                     bitsize=None
+                                                     ),
+                                                Decl(name='myArray',
+                                                     quals=[
+                                                           ],
+                                                     storage=[
+                                                             ],
+                                                     funcspec=[
+                                                              ],
+                                                     type=ArrayDecl(type=TypeDecl(declname='myArray',
+                                                                                  quals=[
+                                                                                        ],
+                                                                                  type=IdentifierType(names=['char'
+                                                                                                            ]
+                                                                                                      )
+                                                                                  ),
+                                                                    dim=Constant(type='int',
+                                                                                 value='5'
+                                                                                 ),
+                                                                    dim_quals=[
+                                                                              ]
+                                                                    ),
+                                                     init=None,
+                                                     bitsize=None
+                                                     ),
+                                                Assignment(op='=',
+                                                           lvalue=ArrayRef(name=ID(name='myArray'
+                                                                                   ),
+                                                                           subscript=Constant(type='int',
+                                                                                              value='0'
+                                                                                              )
+                                                                           ),
+                                                           rvalue=Constant(type='int',
+                                                                           value='10'
+                                                                           )
+                                                           ),
+                                                FuncCall(name=ID(name='printf'
+                                                                 ),
+                                                         args=ExprList(exprs=[ArrayRef(name=ID(name='myArray'
+                                                                                               ),
+                                                                                       subscript=Constant(type='int',
+                                                                                                          value='0'
+                                                                                                          )
+                                                                                       )
+                                                                             ]
+                                                                       )
+                                                         ),
+                                                Decl(name='str',
+                                                     quals=[
+                                                           ],
+                                                     storage=[
+                                                             ],
+                                                     funcspec=[
+                                                              ],
+                                                     type=PtrDecl(quals=[
+                                                                        ],
+                                                                  type=TypeDecl(declname='str',
+                                                                                quals=[
+                                                                                      ],
+                                                                                type=IdentifierType(names=['char'
+                                                                                                          ]
+                                                                                                    )
+                                                                                )
+                                                                  ),
+                                                     init=Constant(type='string',
+                                                                   value='"Hello, World"'
+                                                                   ),
+                                                     bitsize=None
+                                                     ),
+                                                Decl(name='inHeap',
+                                                     quals=[
+                                                           ],
+                                                     storage=[
+                                                             ],
+                                                     funcspec=[
+                                                              ],
+                                                     type=PtrDecl(quals=[
+                                                                        ],
+                                                                  type=TypeDecl(declname='inHeap',
+                                                                                quals=[
+                                                                                      ],
+                                                                                type=IdentifierType(names=['float'
+                                                                                                          ]
+                                                                                                    )
+                                                                                )
+                                                                  ),
+                                                     init=FuncCall(name=ID(name='malloc'
+                                                                           ),
+                                                                   args=ExprList(exprs=[BinaryOp(op='*',
+                                                                                                 left=UnaryOp(op='sizeof',
+                                                                                                              expr=Typename(name=None,
+                                                                                                                            quals=[
+                                                                                                                                  ],
+                                                                                                                            type=TypeDecl(declname=None,
+                                                                                                                                          quals=[
+                                                                                                                                                ],
+                                                                                                                                          type=IdentifierType(names=['float'
+                                                                                                                                                                    ]
+                                                                                                                                                              )
+                                                                                                                                          )
+                                                                                                                            )
+                                                                                                              ),
+                                                                                                 right=Constant(type='int',
+                                                                                                                value='10'
+                                                                                                                )
+                                                                                                 )
+                                                                                       ]
+                                                                                 )
+                                                                   ),
+                                                     bitsize=None
+                                                     ),
+                                                FuncCall(name=ID(name='free'
+                                                                 ),
+                                                         args=ExprList(exprs=[ID(name='inHeap'
+                                                                                 )
+                                                                             ]
+                                                                       )
+                                                         )
                                                ]
                                    )
                      )

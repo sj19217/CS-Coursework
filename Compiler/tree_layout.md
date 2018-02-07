@@ -14,10 +14,7 @@ A node representing the calling of a function.
 ### Decl - Declaration
 This statement is used to describe a variable or function declaration. Its relevant aspects are:
 * `obj.name` - The name of the variable or function
-* `obj.type` - An object that describes the type of the object being defined
-  * `obj.type.declname` - The name (again)
-  * `obj.type.type` - An IdentifierType object describing the type of object (e.g. int)
-    * `obj.type.type.names` - A list containing the designations of this type. For example, 'int' or 'unsigned'.
+* `obj.type` - An object that describes the type of the object being defined. Could be a TypeDecl, PtrDecl or ArrayDecl.
 * `obj.init` - Contains an object describing what this was initialised as. It could be a Constant object, or any
   other type of tree entry.
 
@@ -78,10 +75,32 @@ Represents a while loop.
 * `obj.stmt` - A Compound object which contains the block of code 
 
 ### Typename
-A seemingly unnecessarily complex object that defines a type, like an int.
+A seemingly unnecessarily complex object that defines a type, like an int, for the purposes of something like a cast or
+a call to sizeof().
 * `obj.name` - If in an assignment, this is the name of the variable being assigned to. If elsewhere, like in a cast,
   this will just be None.
 * `obj.type` - A TypeDecl object:
   * `obj.type.type` - An IdentifierType object
     * `obj.type.type.names` - Finally, this is the one you want. It is a list containing all of the declared specifics
       of this type. The data type will be one, like "int", but also "unsigned" could be in there.
+
+### TypeDecl
+Used to state a type within a declaration (under `decl.type`), either directly under the `Decl` object, or further under
+a PtrDecl or ArrayDecl. It has only one attribute of use:
+* `obj.type` - An instance of IdentifierType, whose `.names` attribute holds a list of things the type is declared as
+  (such as "int" and "unsigned").
+
+### PtrDecl
+Used within the `type` attribute of Decl objects to state that this is a declaration of a pointer, not just a normal
+type.
+* `obj.type` - A TypeDecl object for what type this is a pointer to.
+
+### ArrayDecl
+Used within a Decl object to show that this is an array declaration. 
+* `obj.type` - A TypeDecl object for what type of array this is.
+* `obj.dim` - Contains the length of the array. Probably a Constant (though only if it was defined by a constant).
+
+### ArrayRef
+Means that an array is being subscripted, e.g. at an occurrence of myArray\[0\].
+* `obj.name` - The name of the array variable
+* `obj.subscript` - The subscript, i.e. the number in the square brackets. Could be any kind of expression.
