@@ -692,10 +692,13 @@ def divide_and_contextualise(section_dict: dict):
             del parts[1]
         elif parts[1].upper() == "1B":
             dtype = "char"
+            del parts[1]
         elif parts[1].upper() == "2B":
             dtype = "short"
+            del parts[1]
         elif parts[1].upper() == "4B":
             dtype = "int"
+            del parts[1]
 
         # If not then assume the data type is unspecified
         mnemonic = parts[0]
