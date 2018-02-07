@@ -2,9 +2,8 @@ import sys
 import logging
 
 from pycparser import CParser
-from pycparser.c_lexer import CLexer
-
 from preprocessor import process as preprocess
+from global_parser import global_parser
 
 def lexing_error(msg, line, column):
     print("Error on line {}, column {}: {}", line, column, msg)
@@ -17,13 +16,12 @@ def main(text):
     logging.info("After preprocessing, text is: " + text)
 
     # STAGE 2 - LEXICAL AND SYNTAX ANALYSIS
-    lexer = CLexer(lexing_error, lambda: None, lambda: None, lambda _: True)
-    tokens = []
-    while True:
-        tok = lexer.token()
-        if tok is None:
-            break
-        tokens.append(tok)
+    parser = CParser()
+    tree = parser.parse(text)
+    logging.info(tree)
+
+    # STAGE 3 - GLOBAL VARIABLE TABLE
+    global_symbols = global_parser(tree.ext)
 
 
 if __name__ == "__main__":
