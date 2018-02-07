@@ -693,9 +693,6 @@ int main(int argc, char** argv)
     fread(content, (size_t) filelen, 1, fileptr);
     fclose(fileptr);
 
-    printf("%i\n", __BYTE_ORDER__);
-    printf("Little: %i\n", __ORDER_LITTLE_ENDIAN__);
-    printf("Big: %i\n", __ORDER_BIG_ENDIAN__);
 
 #if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
     log_info("Compiled as little endian\n");
