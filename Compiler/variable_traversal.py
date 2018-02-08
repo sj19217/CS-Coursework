@@ -5,7 +5,9 @@ The stage that manages local variable management and type checking.
 from collections import namedtuple
 import logging
 
-from pycparser.c_ast import Compound, Decl, PtrDecl, TypeDecl
+from pycparser.c_ast import Compound, Decl, PtrDecl, TypeDecl, If, For, While, \
+                            FuncCall, ID, Assignment, Constant, UnaryOp, BinaryOp, \
+                            Cast, ArrayDecl, ArrayRef
 
 LocalVariable = namedtuple("LocalVariable", "name type initial")
 
@@ -43,6 +45,48 @@ def get_type_name(typedecl: TypeDecl):
     return type_name
 
 
+def variable_search(statement):
+    """
+    A recursive generator - Quite an elegant but distinctly pythonic construct.
+    This will check to see if this node is an ID. If so, yield the statement back up and return out. If not, run
+    this function on the sub-parts of this node (like the args of a FuncCall or the ""lvalue" and "rvalue" of an
+    Assignment.
+    :param statement:
+    :return:
+    """
+
+    if isinstance(statement, ID):
+        # Yield back this thing already
+        yield statement
+        return
+
+    if isinstance(statement, FuncCall):
+        for arg in statement.args.exprs:
+            yield from variable_search(arg)
+    elif isinstance(statement, Assignment):
+        yield from variable_search(statement.lvalue)
+        yield from variable_search(statement.rvalue)
+    elif isinstance(statement, Constant):
+        # if it is a constant it is neither a variable or a thing with sub-parts, so just end.
+        return
+    elif isinstance(statement, UnaryOp):
+        yield from variable_search(statement.expr)
+    elif isinstance(statement, BinaryOp):
+        yield from variable_search(statement.left)
+        yield from variable_search(statement.right)
+    elif isinstance(statement, Cast):
+        yield from variable_search(statement.expr)
+    elif isinstance(statement, ArrayDecl):
+        # An array declaration could have a variable length given
+        yield from variable_search(statement.dim)
+    elif isinstance(statement, ArrayRef):
+        # Check in the subscript of an array
+        yield from variable_search(statement.subscript)
+    else:
+        # If here then assume this is a non-ID, childless thing.
+        return
+
+
 def parse_compound(block: Compound):
     """
     Parses through the block, registering any local variables it finds and running itself recursively on any sub-blocks.
@@ -78,4 +122,18 @@ def parse_compound(block: Compound):
 
             # Actually add it to the block
             block.locals.append(LocalVariable(name, type_name, initial))
-        elif isinstance()
+
+        # Recursively call the sub-blocks of compound types
+        elif isinstance(statement, If):
+            parse_compound(statement.iftrue)
+            parse_compound(statement.iffalse)
+        elif isinstance(statement, (For, While)):
+            parse_compound(statement.stmt)
+
+        # Other types of statement to analyse for references to variables
+        else:
+            for var in variable_search(statement):
+                if var in climbing_variable_search(block):
+                    logging.error("Variable not in locals: {}".format(var))
+
+        #

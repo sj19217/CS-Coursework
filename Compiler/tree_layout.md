@@ -109,3 +109,9 @@ Means that an array is being subscripted, e.g. at an occurrence of myArray\[0\].
 Some statements are compound statements, meaning they have sub-blocks. Others are not, though these non-compound blocks
 may still have sub-nodes. These sub-nodes are simply something that will probably be evaluated on the stack directly,
 rather than spawning a new block of code with its own local variables.
+
+The compound statements are these:
+* If
+* For
+* While
+There are others, but they will not appear in the type of code this program is supposed to be able to run.
