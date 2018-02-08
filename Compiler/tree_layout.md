@@ -104,3 +104,8 @@ Used within a Decl object to show that this is an array declaration.
 Means that an array is being subscripted, e.g. at an occurrence of myArray\[0\].
 * `obj.name` - The name of the array variable
 * `obj.subscript` - The subscript, i.e. the number in the square brackets. Could be any kind of expression.
+
+## Compound and non-compound statements
+Some statements are compound statements, meaning they have sub-blocks. Others are not, though these non-compound blocks
+may still have sub-nodes. These sub-nodes are simply something that will probably be evaluated on the stack directly,
+rather than spawning a new block of code with its own local variables.

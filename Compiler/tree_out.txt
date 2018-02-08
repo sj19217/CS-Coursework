@@ -478,7 +478,8 @@ FileAST(ext=[FuncDef(decl=Decl(name='main',
                                                                                                              ]
                                                                                                        )
                                                                                          )
-                                                                               ]
+                                                                               ],
+                                                                   coord=<pycparser.plyparser.Coord object at 0x0000000002DCB048>
                                                                    ),
                                                    iffalse=If(cond=BinaryOp(op='||',
                                                                             left=ID(name='a'
@@ -494,7 +495,8 @@ FileAST(ext=[FuncDef(decl=Decl(name='main',
                                                                                                                         ]
                                                                                                                   )
                                                                                                     )
-                                                                                          ]
+                                                                                          ],
+                                                                              coord=<pycparser.plyparser.Coord object at 0x0000000002DCB288>
                                                                               ),
                                                               iffalse=Compound(block_items=[If(cond=UnaryOp(op='!',
                                                                                                             expr=Constant(type='int',
@@ -509,11 +511,13 @@ FileAST(ext=[FuncDef(decl=Decl(name='main',
                                                                                                                                                          ]
                                                                                                                                                    )
                                                                                                                                      )
-                                                                                                                           ]
+                                                                                                                           ],
+                                                                                                               coord=<pycparser.plyparser.Coord object at 0x0000000002DCB510>
                                                                                                                ),
                                                                                                iffalse=None
                                                                                                )
-                                                                                           ]
+                                                                                           ],
+                                                                               coord=<pycparser.plyparser.Coord object at 0x0000000002DCB5E8>
                                                                                )
                                                               )
                                                    ),
@@ -555,7 +559,8 @@ FileAST(ext=[FuncDef(decl=Decl(name='main',
                                                                                           rvalue=ID(name='i'
                                                                                                     )
                                                                                           )
-                                                                              ]
+                                                                              ],
+                                                                  coord=<pycparser.plyparser.Coord object at 0x0000000002DCBA20>
                                                                   )
                                                     ),
                                                 While(cond=BinaryOp(op='<',
@@ -580,7 +585,8 @@ FileAST(ext=[FuncDef(decl=Decl(name='main',
                                                                                          expr=ID(name='i'
                                                                                                  )
                                                                                          )
-                                                                                ]
+                                                                                ],
+                                                                    coord=<pycparser.plyparser.Coord object at 0x0000000002DCBDC8>
                                                                     )
                                                       ),
                                                 Decl(name='ptr',
@@ -710,7 +716,7 @@ FileAST(ext=[FuncDef(decl=Decl(name='main',
                                                                   type=TypeDecl(declname='inHeap',
                                                                                 quals=[
                                                                                       ],
-                                                                                type=IdentifierType(names=['float'
+                                                                                type=IdentifierType(names=['void'
                                                                                                           ]
                                                                                                     )
                                                                                 )
@@ -747,7 +753,8 @@ FileAST(ext=[FuncDef(decl=Decl(name='main',
                                                                              ]
                                                                        )
                                                          )
-                                               ]
+                                               ],
+                                   coord=<pycparser.plyparser.Coord object at 0x0000000002DD8CA8>
                                    )
                      )
             ]

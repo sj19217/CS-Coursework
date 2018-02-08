@@ -309,10 +309,11 @@ class Cast(Node):
     attr_names = ()
 
 class Compound(Node):
-    __slots__ = ('block_items', 'coord', '__weakref__')
+    __slots__ = ('block_items', 'coord', '__weakref__', 'locals')   # Added 'locals' as part of compiler
     def __init__(self, block_items, coord=None):
         self.block_items = block_items
         self.coord = coord
+        self.locals = []
 
     def children(self):
         nodelist = []

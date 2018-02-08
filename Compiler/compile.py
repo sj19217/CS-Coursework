@@ -23,6 +23,9 @@ def main(text):
     # STAGE 3 - GLOBAL VARIABLE TABLE
     global_symbols = global_parser(tree.ext)
 
+    # STAGE 4 - Store local variables and perform type checking
+    
+
 
 if __name__ == "__main__":
     if len(sys.argv) == 2:

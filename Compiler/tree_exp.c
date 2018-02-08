@@ -65,6 +65,6 @@ int main()
 
     char* str = "Hello, World";
 
-    float* inHeap = malloc(sizeof(float) * 10);
+    void* inHeap = malloc(sizeof(float) * 10);
     free(inHeap);
 }
