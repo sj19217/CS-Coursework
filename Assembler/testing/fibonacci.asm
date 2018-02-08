@@ -15,5 +15,5 @@ ADD ebx temp
 
 SUB i 1
 MOV out eax
-CMP i 0
+CMP char i 0
 JNE loop

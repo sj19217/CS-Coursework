@@ -1,5 +1,6 @@
-# Compiled files
+# Binary files
 *.exe
+*.lnk
 
 # CMake stuff
 *cmake-build-debug*
@@ -14,3 +15,6 @@ Compiler/yacctab.py
 
 # pycache files
 *__pycache__*
+
+# Annoying windows Thumbs.db files
+*/Thumbs.db
