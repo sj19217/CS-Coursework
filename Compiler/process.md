@@ -31,3 +31,8 @@
 * Created compile.py which joins each of the other modules together
 * Tried to include a lexer then a parser, to show the list of tokens simply, but then found that a CLexer is only meant
   to be made inside a CParser and decided against it. May program my own system later.
+* Created variable_traversal.py and found it surprisingly simple to make
+  * Looks for each Decl and adds it to the locals
+  * Goes through any sub-blocks and runs itself on them
+  * Goes through any expressions looking for variables and making sure they exist
+  * This last one used "yield from" in a recursive generator, an astonishingly elegant Python solution

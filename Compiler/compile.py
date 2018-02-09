@@ -2,8 +2,11 @@ import sys
 import logging
 
 from pycparser import CParser
+from pycparser.c_ast import Compound
+
 from preprocessor import process as preprocess
 from global_parser import global_parser
+from variable_traversal import parse_compound
 
 def lexing_error(msg, line, column):
     print("Error on line {}, column {}: {}", line, column, msg)
@@ -24,6 +27,9 @@ def main(text):
     global_symbols = global_parser(tree.ext)
 
     # STAGE 4 - Store local variables and perform type checking
+    top_compound = Compound(tree.ext)
+    parse_compound(top_compound, [], global_symbols)
+
     
 
 

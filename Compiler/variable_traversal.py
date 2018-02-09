@@ -87,7 +87,19 @@ def variable_search(statement):
         return
 
 
-def parse_compound(block: Compound):
+def climbing_variable_search(varname, block_list):
+    """
+    From back to front, look through the list of blocks for a declaration of the variable name. Return its entry.
+    :param block_list:
+    :return:
+    """
+    for block in reversed(block_list):
+        for var_decl in block.locals:
+            if var_decl[0] == varname:
+                return var_decl
+
+
+def parse_compound(block: Compound, parents: list, globals: list):
     """
     Parses through the block, registering any local variables it finds and running itself recursively on any sub-blocks.
     :param block:
@@ -125,15 +137,21 @@ def parse_compound(block: Compound):
 
         # Recursively call the sub-blocks of compound types
         elif isinstance(statement, If):
-            parse_compound(statement.iftrue)
-            parse_compound(statement.iffalse)
+            parse_compound(statement.iftrue, parents + [block], globals)
+            parse_compound(statement.iffalse, parents + [block], globals)
         elif isinstance(statement, (For, While)):
-            parse_compound(statement.stmt)
+            parse_compound(statement.stmt, parents + [block], globals)
 
         # Other types of statement to analyse for references to variables
         else:
             for var in variable_search(statement):
-                if var in climbing_variable_search(block):
-                    logging.error("Variable not in locals: {}".format(var))
+                decl = climbing_variable_search(var, parents + [block])
+                if decl is None:
+                    # Maybe try the globals?
+                    for var_decl in globals:
+                        if var_decl[0] == var:
+                            decl = var_decl
+                # Still None? it wasn't found.
+                if decl is None:
+                    logging.error("Variable not found: {}".format(var))
 
-        #
