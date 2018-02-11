@@ -1,0 +1,18 @@
+{
+  "description": "Graphical interface for my CS Project",
+  "main": "main.js",
+  "devDependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sj19217/CS-Coursework.git"
+  },
+  "keywords": [
+    "compiler",
+    "assembler",
+    "interpreter",
+    "graphical",
+    "electron"
+  ],
+  "author": "Stephen Jones",
+  "license": "ISC"
+}

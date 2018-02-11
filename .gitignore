@@ -18,3 +18,7 @@ Compiler/yacctab.py
 
 # Annoying windows Thumbs.db files
 */Thumbs.db
+
+# Stuff from electron
+GUI/node_modules
+GUI/node_modules/*
