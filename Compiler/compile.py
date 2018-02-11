@@ -7,6 +7,7 @@ from pycparser.c_ast import Compound
 from preprocessor import process as preprocess
 from global_parser import global_parser
 from variable_traversal import parse_compound
+from code_block_gen import generate_code_block
 
 def lexing_error(msg, line, column):
     print("Error on line {}, column {}: {}", line, column, msg)
@@ -29,6 +30,9 @@ def main(text):
     # STAGE 4 - Store local variables and perform type checking
     top_compound = Compound(tree.ext)
     parse_compound(top_compound, [], global_symbols)
+
+    # STAGE 5 - HIERARCHICAL INSTRUCTION GENERATION
+    main_block = generate_code_block(top_compound)
 
     
 
