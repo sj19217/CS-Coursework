@@ -25,4 +25,9 @@ void setMemory(unsigned int maddr, int length, const unsigned char* value);
 void memdump(int max, _Bool headings, int columns);
 _Bool startsWith(const char* a, const char* b);
 
+// Stuff from csv.c
+void free_csv_line( char **parsed );
+static int count_fields( const char *line );
+char** parse_csv( const char *line );
+
 #endif

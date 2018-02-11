@@ -106,3 +106,4 @@ for (int i = config_length; i < length - config_length; i++) {
   * The MOV command will assume the amount to move based on the size of its operands, but does not know variables' types.
     This causes the line "MOV temp eax" to move all 4 bytes of eax into temp even if temp is only a short, overwriting subsequent variables.
     The solution is to change the line to specifically "MOV 2B temp eax".
+* Added csv.c to split up the inputs from the GUI
