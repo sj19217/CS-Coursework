@@ -14,5 +14,9 @@
     "electron"
   ],
   "author": "Stephen Jones",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "electron": "^1.8.2",
+    "jquery": "^3.3.1"
+  }
 }

@@ -4,3 +4,4 @@
   (process_files/Configurations.PNG)
 * Followed web tutorial to make basic stuff
 * Made skeleton versions of the app's files (ed72b15)
+* After much frustration due to bad documentation and differing electron versions, got interpreter file dialog to work
