@@ -115,6 +115,17 @@ void memdump(int len, _Bool headings, int columns)
     }
 }
 
+// Prints out the prefix "mem" followed by the `max` first memory items in decimal, separated by spaces
+void linearMemdump(int max)
+{
+    log_trace("linearMemdump(max=%i)", max);
+    printf("mem");
+    for (int i = 0; i < max; i++) {
+        printf(" %i", env.memory[i]);
+    }
+    printf("\n");
+}
+
 _Bool startsWith(const char* a, const char* b)
 {
     if (strncmp(a, b, strlen(b)) == 0) return 1;

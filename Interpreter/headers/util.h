@@ -23,6 +23,7 @@ float convertTo_float(const unsigned char* str);
 unsigned char* convertTo_str(int num);
 void setMemory(unsigned int maddr, int length, const unsigned char* value);
 void memdump(int max, _Bool headings, int columns);
+void linearMemdump(int max);
 _Bool startsWith(const char* a, const char* b);
 
 // Stuff from csv.c

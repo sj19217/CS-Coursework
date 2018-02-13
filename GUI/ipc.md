@@ -25,7 +25,6 @@ The interpreter will be started giving it the binary file through the -f command
 also be given, which tells the interpreter to act interactively, responding to instructions and giving output.
 
 The commands given to the interpreter are:
-* process_full_cmd - Tells the interpreter to run a full execute() cycle
 * step - Moves on one step. The steps are:
   * Get opcode
   * Get operand byte
@@ -34,7 +33,7 @@ The commands given to the interpreter are:
   * Read operand 2 data
   * Switch statement entry
   * Next depends on what type of operation this is
-* get_mem - Instructs the interpreter to return a dump of its memory
+* get_mem <amt> - Instructs the interpreter to return a dump of its memory up to the given address
 
 The types of data that can return are:
 * done_step <name> <other_args> - Tells the GUI that a step has been performed. The name, and corresponding other
@@ -45,3 +44,4 @@ The types of data that can return are:
   * read_op - Read than operand byte from memory. The first argument is "1" or "2", saying which operand it is.  Number
     of other arguments depends on the size, with the bytes of it given as hex.
   * in_switch - Jumped to the position in the execute() switch statement. The argument is the instruction name.
+* mem <val>* - Gives the contents of the memory in decimal separated by spaces

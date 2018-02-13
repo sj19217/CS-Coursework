@@ -10,6 +10,7 @@
 #include "headers/util.h"
 #include "headers/log.h"
 #include "headers/commands.h"
+#include "headers/gui.h"
 
 // HLT has no actions, it just breaks the loop
 
@@ -19,6 +20,7 @@
 void exec_CMP_##N(T op1_val, T op2_val) \
 { \
     log_trace("exec_CMP_%s(op1_val=%i, op2_val=%i)", #N, op1_val, op2_val);\
+    pauseUntilPermitted(s_exec_func);\
     T diff = op1_val - op2_val; \
     env.cmp_n = 0; \
     env.cmp_e = 0; \
@@ -47,12 +49,14 @@ def_CMP(float, float);
 void exec_JMP(unsigned int addr)
 {
     log_trace("exec_JMP(addr=0x%x)", addr);
+    pauseUntilPermitted(s_exec_func);
     env.pc = addr;
 }
 
 void exec_JE(unsigned int addr)
 {
     log_trace("exec_JE(addr=0x%x)", addr);
+    pauseUntilPermitted(s_exec_func);
     if (env.cmp_e) {
         env.pc = addr;
     }
@@ -61,6 +65,7 @@ void exec_JE(unsigned int addr)
 void exec_JNE(unsigned int addr)
 {
     log_trace("exec_JNE(addr=0x%x)", addr);
+    pauseUntilPermitted(s_exec_func);
     if (!env.cmp_e) {
         env.pc = addr;
     }
@@ -69,6 +74,7 @@ void exec_JNE(unsigned int addr)
 void exec_JLT(unsigned int addr)
 {
     log_trace("exec_JLT(addr=0x%x)", addr);
+    pauseUntilPermitted(s_exec_func);
     if (env.cmp_n) {
         env.pc = addr;
     }
@@ -77,6 +83,7 @@ void exec_JLT(unsigned int addr)
 void exec_JLE(unsigned int addr)
 {
     log_trace("exec_JLE(addr=0x%x)", addr);
+    pauseUntilPermitted(s_exec_func);
     if (env.cmp_n || env.cmp_e) {
         env.pc = addr;
     }
@@ -85,6 +92,7 @@ void exec_JLE(unsigned int addr)
 void exec_JGT(unsigned int addr)
 {
     log_trace("exec_JGT(addr=0x%x)", addr);
+    pauseUntilPermitted(s_exec_func);
     if (env.cmp_p) {
         env.pc = addr;
     }
@@ -93,6 +101,7 @@ void exec_JGT(unsigned int addr)
 void exec_JGE(unsigned int addr)
 {
     log_trace("exec_JGE(addr=0x%x)", addr);
+    pauseUntilPermitted(s_exec_func);
     if (env.cmp_p || env.cmp_e) {
         env.pc = addr;
     }
@@ -104,6 +113,7 @@ void exec_JGE(unsigned int addr)
 void exec_MOV_reg(unsigned char regnum, int length, const unsigned char* str)
 {
     log_trace("exec_MOV_reg(regnum=0x%02x, length=%i, str[0]=0x%02x", regnum, length, str[0]);
+    pauseUntilPermitted(s_exec_func);
     unsigned char reg_size = getRegisterSize(regnum);
 
     if (reg_size < length) {
@@ -158,6 +168,7 @@ void exec_MOV_reg(unsigned char regnum, int length, const unsigned char* str)
 void exec_MOV_mem(unsigned long maddr, int length, const unsigned char* str)
 {
     log_trace("exec_MOV_mem(maddr=0x%x, length=%i, str[0]=0x%02x", maddr, length, str[0]);
+    pauseUntilPermitted(s_exec_func);
     for (int i = 0; i < length; i++) {
         env.memory[maddr + i] = str[i];
     }
@@ -168,6 +179,7 @@ void exec_MOV_mem(unsigned long maddr, int length, const unsigned char* str)
 void exec_LEA_reg(unsigned char regnum, unsigned int maddr)
 {
     log_trace("exec_LEA_reg(regnum=0x%02x, maddr=0x%x)", regnum, maddr);
+    pauseUntilPermitted(s_exec_func);
     // This one is given the memory address as an int and stores that number in the destination register
     unsigned char reg_size = getRegisterSize(regnum);
     unsigned char* bytes = convertTo_str(maddr);
@@ -184,6 +196,7 @@ void exec_LEA_reg(unsigned char regnum, unsigned int maddr)
 void exec_LEA_mem(unsigned int maddr_to, unsigned int pointer)
 {
     log_trace("exec_LEA_mem(maddr_to=0x%x, pointer=0x%x", maddr_to, pointer);
+    pauseUntilPermitted(s_exec_func);
     unsigned char* bytes = convertTo_str(pointer);
     env.memory[maddr_to] = bytes[0];
     env.memory[maddr_to+1] = bytes[1];
@@ -194,151 +207,154 @@ void exec_LEA_mem(unsigned int maddr_to, unsigned int pointer)
 
 // Arithmetic commands begin here. Rather than having two versions, they are included in the same function.
 
-void exec_ADD_char(unsigned char* op1, int op1_type, unsigned char* op2, int op2_type)
-{
-    // The first can be a register, a memory address or an arithmetic operand
-    char val1 = *(char*) getOperandValue(op1_type, op1);
-    char val2 = *(char*) getOperandValue(op2_type, op2);
-    char total = val1 + val2;
-    int expanded_total = total;
-    if (op1_type == 1) {
-        // Destination is a register
-        setRegisterValue(op1[0], (void *) &expanded_total);
-    } else if (op1_type == 5) {
-        // Destination is a memory address
-        unsigned int maddr = convertTo_uint(op1);
-        setMemory(maddr, 1, &((unsigned char*) &expanded_total)[3]);
-    } else if (op1_type >= 6 && op1_type <= 10) {
-        // Destination is an arithmetic expression
-        unsigned int maddr = getMAddrFromArithmetic(op1_type, op1);
-        setMemory(maddr, 1, &((unsigned char*) &expanded_total)[3]);
-    }
-}
-
-void exec_ADD_uchar(unsigned char* op1, int op1_type, unsigned char* op2, int op2_type)
-{
-    // The first can be a register, a memory address or an arithmetic operand
-    unsigned char val1 = *(unsigned char*) getOperandValue(op1_type, op1);
-    unsigned char val2 = *(unsigned char*) getOperandValue(op2_type, op2);
-    unsigned char total = val1 + val2;
-    unsigned int expanded_total = total;
-    if (op1_type == 1) {
-        // Destination is a register
-        setRegisterValue(op1[0], (void *) &expanded_total);
-    } else if (op1_type == 5) {
-        // Destination is a memory address
-        unsigned int maddr = convertTo_uint(op1);
-        setMemory(maddr, 1, &((unsigned char*) &expanded_total)[3]);
-    } else if (op1_type >= 6 && op1_type <= 10) {
-        // Destination is an arithmetic expression
-        unsigned int maddr = getMAddrFromArithmetic(op1_type, op1);
-        setMemory(maddr, 1, &((unsigned char*) &expanded_total)[3]);
-    }
-}
-
-void exec_ADD_short(unsigned char* op1, int op1_type, unsigned char* op2, int op2_type)
-{
-    // The first can be a register, a memory address or an arithmetic operand
-    int16_t val1 = *(int16_t*) getOperandValue(op1_type, op1);
-    int16_t val2 = *(int16_t*) getOperandValue(op2_type, op2);
-    int16_t total = val1 + val2;
-    int expanded_total = total;
-    if (op1_type == 1) {
-        // Destination is a register
-        setRegisterValue(op1[0], (void *) &expanded_total);
-    } else if (op1_type == 5) {
-        // Destination is a memory address
-        unsigned int maddr = convertTo_uint(op1);
-        setMemory(maddr, 2, &((unsigned char*) &expanded_total)[2]);
-    } else if (op1_type >= 6 && op1_type <= 10) {
-        // Destination is an arithmetic expression
-        unsigned int maddr = getMAddrFromArithmetic(op1_type, op1);
-        setMemory(maddr, 2, &((unsigned char*) &expanded_total)[2]);
-    }
-}
-
-void exec_ADD_ushort(unsigned char* op1, int op1_type, unsigned char* op2, int op2_type)
-{
-    // The first can be a register, a memory address or an arithmetic operand
-    uint16_t val1 = *(uint16_t*) getOperandValue(op1_type, op1);
-    uint16_t val2 = *(uint16_t*) getOperandValue(op2_type, op2);
-    uint16_t total = val1 + val2;
-    unsigned int expanded_total = total;
-    if (op1_type == 1) {
-        // Destination is a register
-        setRegisterValue(op1[0], (void *) &expanded_total);
-    } else if (op1_type == 5) {
-        // Destination is a memory address
-        unsigned int maddr = convertTo_uint(op1);
-        setMemory(maddr, 2, &((unsigned char*) &expanded_total)[2]);
-    } else if (op1_type >= 6 && op1_type <= 10) {
-        // Destination is an arithmetic expression
-        unsigned int maddr = getMAddrFromArithmetic(op1_type, op1);
-        setMemory(maddr, 2, &((unsigned char*) &expanded_total)[2]);
-    }
-}
-
-void exec_ADD_int(unsigned char* op1, int op1_type, unsigned char* op2, int op2_type)
-{
-    // The first can be a register, a memory address or an arithmetic operand
-    int val1 = *(int*) getOperandValue(op1_type, op1);
-    int val2 = *(int*) getOperandValue(op2_type, op2);
-    int total = val1 + val2;
-    int expanded_total = total;
-    if (op1_type == 1) {
-        // Destination is a register
-        setRegisterValue(op1[0], (void *) &expanded_total);
-    } else if (op1_type == 5) {
-        // Destination is a memory address
-        unsigned int maddr = convertTo_uint(op1);
-        setMemory(maddr, 4, (unsigned char*) &expanded_total);
-    } else if (op1_type >= 6 && op1_type <= 10) {
-        // Destination is an arithmetic expression
-        unsigned int maddr = getMAddrFromArithmetic(op1_type, op1);
-        setMemory(maddr, 4, (unsigned char*) &expanded_total);
-    }
-}
-
-void exec_ADD_uint(unsigned char* op1, int op1_type, unsigned char* op2, int op2_type)
-{
-    // The first can be a register, a memory address or an arithmetic operand
-    unsigned int val1 = *(unsigned int*) getOperandValue(op1_type, op1);
-    unsigned int val2 = *(unsigned int*) getOperandValue(op2_type, op2);
-    unsigned int total = val1 + val2;
-    unsigned int expanded_total = total;
-    if (op1_type == 1) {
-        // Destination is a register
-        setRegisterValue(op1[0], (void *) &expanded_total);
-    } else if (op1_type == 5) {
-        // Destination is a memory address
-        unsigned int maddr = convertTo_uint(op1);
-        setMemory(maddr, 4, (unsigned char*) &expanded_total);
-    } else if (op1_type >= 6 && op1_type <= 10) {
-        // Destination is an arithmetic expression
-        unsigned int maddr = getMAddrFromArithmetic(op1_type, op1);
-        setMemory(maddr, 4, (unsigned char*) &expanded_total);
-    }
-}
-
-void exec_ADD_float(unsigned char* op1, int op1_type, unsigned char* op2, int op2_type)
-{
-    // The first can be a register, a memory address or an arithmetic operand
-    float val1 = *(float*) getOperandValue(op1_type, op1);
-    float val2 = *(float*) getOperandValue(op2_type, op2);
-    float total = val1 + val2;
-    if (op1_type == 1) {
-        // Destination is a register
-        setRegisterValue(op1[0], (void *) &total);
-    } else if (op1_type == 5) {
-        // Destination is a memory address
-        unsigned int maddr = convertTo_uint(op1);
-        setMemory(maddr, 4, (unsigned char*) &total);
-    } else if (op1_type >= 6 && op1_type <= 10) {
-        // Destination is an arithmetic expression
-        unsigned int maddr = getMAddrFromArithmetic(op1_type, op1);
-        setMemory(maddr, 4, (unsigned char*) &total);
-    }
-}
+//void exec_ADD_char(unsigned char* op1, int op1_type, unsigned char* op2, int op2_type)
+//{
+//    log_trace("exec_ADD_char(op1[0]=%c, op1_type=%i, op2[0]=%c, op2_type=%i)", op1[0], op1_type, op2[0], op2_type);
+//    pauseUntilPermitted(s_exec_func);
+//    // The first can be a register, a memory address or an arithmetic operand
+//    char val1 = *(char*) getOperandValue(op1_type, op1);
+//    char val2 = *(char*) getOperandValue(op2_type, op2);
+//    char total = val1 + val2;
+//    int expanded_total = total;
+//    if (op1_type == 1) {
+//        // Destination is a register
+//        setRegisterValue(op1[0], (void *) &expanded_total);
+//    } else if (op1_type == 5) {
+//        // Destination is a memory address
+//        unsigned int maddr = convertTo_uint(op1);
+//        setMemory(maddr, 1, &((unsigned char*) &expanded_total)[3]);
+//    } else if (op1_type >= 6 && op1_type <= 10) {
+//        // Destination is an arithmetic expression
+//        unsigned int maddr = getMAddrFromArithmetic(op1_type, op1);
+//        setMemory(maddr, 1, &((unsigned char*) &expanded_total)[3]);
+//    }
+//}
+//
+//void exec_ADD_uchar(unsigned char* op1, int op1_type, unsigned char* op2, int op2_type)
+//{
+//    pauseUntilPermitted(s_exec_func);
+//    // The first can be a register, a memory address or an arithmetic operand
+//    unsigned char val1 = *(unsigned char*) getOperandValue(op1_type, op1);
+//    unsigned char val2 = *(unsigned char*) getOperandValue(op2_type, op2);
+//    unsigned char total = val1 + val2;
+//    unsigned int expanded_total = total;
+//    if (op1_type == 1) {
+//        // Destination is a register
+//        setRegisterValue(op1[0], (void *) &expanded_total);
+//    } else if (op1_type == 5) {
+//        // Destination is a memory address
+//        unsigned int maddr = convertTo_uint(op1);
+//        setMemory(maddr, 1, &((unsigned char*) &expanded_total)[3]);
+//    } else if (op1_type >= 6 && op1_type <= 10) {
+//        // Destination is an arithmetic expression
+//        unsigned int maddr = getMAddrFromArithmetic(op1_type, op1);
+//        setMemory(maddr, 1, &((unsigned char*) &expanded_total)[3]);
+//    }
+//}
+//
+//void exec_ADD_short(unsigned char* op1, int op1_type, unsigned char* op2, int op2_type)
+//{
+//    // The first can be a register, a memory address or an arithmetic operand
+//    int16_t val1 = *(int16_t*) getOperandValue(op1_type, op1);
+//    int16_t val2 = *(int16_t*) getOperandValue(op2_type, op2);
+//    int16_t total = val1 + val2;
+//    int expanded_total = total;
+//    if (op1_type == 1) {
+//        // Destination is a register
+//        setRegisterValue(op1[0], (void *) &expanded_total);
+//    } else if (op1_type == 5) {
+//        // Destination is a memory address
+//        unsigned int maddr = convertTo_uint(op1);
+//        setMemory(maddr, 2, &((unsigned char*) &expanded_total)[2]);
+//    } else if (op1_type >= 6 && op1_type <= 10) {
+//        // Destination is an arithmetic expression
+//        unsigned int maddr = getMAddrFromArithmetic(op1_type, op1);
+//        setMemory(maddr, 2, &((unsigned char*) &expanded_total)[2]);
+//    }
+//}
+//
+//void exec_ADD_ushort(unsigned char* op1, int op1_type, unsigned char* op2, int op2_type)
+//{
+//    // The first can be a register, a memory address or an arithmetic operand
+//    uint16_t val1 = *(uint16_t*) getOperandValue(op1_type, op1);
+//    uint16_t val2 = *(uint16_t*) getOperandValue(op2_type, op2);
+//    uint16_t total = val1 + val2;
+//    unsigned int expanded_total = total;
+//    if (op1_type == 1) {
+//        // Destination is a register
+//        setRegisterValue(op1[0], (void *) &expanded_total);
+//    } else if (op1_type == 5) {
+//        // Destination is a memory address
+//        unsigned int maddr = convertTo_uint(op1);
+//        setMemory(maddr, 2, &((unsigned char*) &expanded_total)[2]);
+//    } else if (op1_type >= 6 && op1_type <= 10) {
+//        // Destination is an arithmetic expression
+//        unsigned int maddr = getMAddrFromArithmetic(op1_type, op1);
+//        setMemory(maddr, 2, &((unsigned char*) &expanded_total)[2]);
+//    }
+//}
+//
+//void exec_ADD_int(unsigned char* op1, int op1_type, unsigned char* op2, int op2_type)
+//{
+//    // The first can be a register, a memory address or an arithmetic operand
+//    int val1 = *(int*) getOperandValue(op1_type, op1);
+//    int val2 = *(int*) getOperandValue(op2_type, op2);
+//    int total = val1 + val2;
+//    int expanded_total = total;
+//    if (op1_type == 1) {
+//        // Destination is a register
+//        setRegisterValue(op1[0], (void *) &expanded_total);
+//    } else if (op1_type == 5) {
+//        // Destination is a memory address
+//        unsigned int maddr = convertTo_uint(op1);
+//        setMemory(maddr, 4, (unsigned char*) &expanded_total);
+//    } else if (op1_type >= 6 && op1_type <= 10) {
+//        // Destination is an arithmetic expression
+//        unsigned int maddr = getMAddrFromArithmetic(op1_type, op1);
+//        setMemory(maddr, 4, (unsigned char*) &expanded_total);
+//    }
+//}
+//
+//void exec_ADD_uint(unsigned char* op1, int op1_type, unsigned char* op2, int op2_type)
+//{
+//    // The first can be a register, a memory address or an arithmetic operand
+//    unsigned int val1 = *(unsigned int*) getOperandValue(op1_type, op1);
+//    unsigned int val2 = *(unsigned int*) getOperandValue(op2_type, op2);
+//    unsigned int total = val1 + val2;
+//    unsigned int expanded_total = total;
+//    if (op1_type == 1) {
+//        // Destination is a register
+//        setRegisterValue(op1[0], (void *) &expanded_total);
+//    } else if (op1_type == 5) {
+//        // Destination is a memory address
+//        unsigned int maddr = convertTo_uint(op1);
+//        setMemory(maddr, 4, (unsigned char*) &expanded_total);
+//    } else if (op1_type >= 6 && op1_type <= 10) {
+//        // Destination is an arithmetic expression
+//        unsigned int maddr = getMAddrFromArithmetic(op1_type, op1);
+//        setMemory(maddr, 4, (unsigned char*) &expanded_total);
+//    }
+//}
+//
+//void exec_ADD_float(unsigned char* op1, int op1_type, unsigned char* op2, int op2_type)
+//{
+//    // The first can be a register, a memory address or an arithmetic operand
+//    float val1 = *(float*) getOperandValue(op1_type, op1);
+//    float val2 = *(float*) getOperandValue(op2_type, op2);
+//    float total = val1 + val2;
+//    if (op1_type == 1) {
+//        // Destination is a register
+//        setRegisterValue(op1[0], (void *) &total);
+//    } else if (op1_type == 5) {
+//        // Destination is a memory address
+//        unsigned int maddr = convertTo_uint(op1);
+//        setMemory(maddr, 4, (unsigned char*) &total);
+//    } else if (op1_type >= 6 && op1_type <= 10) {
+//        // Destination is an arithmetic expression
+//        unsigned int maddr = getMAddrFromArithmetic(op1_type, op1);
+//        setMemory(maddr, 4, (unsigned char*) &total);
+//    }
+//}
 
 // The complicated, ugly code needed to get the value of an operand and place it in the right version of the union
 #define SET_OPERANDS(D, T, N) operand1.b = convertTo_##N((T*) getOperandValue(op1_type, (void*) op1)); \
@@ -375,6 +391,10 @@ default: \
 // The prototype function that will replace almost anything
 void exec_arithmetic(char* function, char dtype, unsigned char* op1, int op1_type, unsigned char* op2, int op2_type)
 {
+    log_trace("exec_arithmetic(function=%s, dtype=%c, op1[0]=%c, op1_type=%i, op2[0]=%c, op2_type=%i",
+                function, dtype, op1[0], op1_type, op2[0], op2_type);
+    pauseUntilPermitted(s_exec_func);
+
     union OperandValue operand1;
     union OperandValue operand2;
 

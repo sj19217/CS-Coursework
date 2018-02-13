@@ -5,13 +5,13 @@
 #include <unistd.h>
 #include <malloc.h>
 #include <mem.h>
-#include <stdlib.h>
 
 #include "headers/main.h"
 #include "headers/instructions.h"
 #include "headers/commands.h"
 #include "headers/util.h"
 #include "headers/log.h"
+#include "headers/gui.h"
 
 #define MAX_META_SECTION_LENGTH 100
 #define MAX_CONFIG_KEY_LENGTH 10
@@ -370,6 +370,7 @@ void execute(unsigned char opcode, char dtype,
     log_trace("execute(opcode=0x%02x, op1_type=%i, op1_len=%i, op1_str[0]=0x%02x, " \
                 "op2_type=%i, op2_len=%i, op2_str[0]=0x%02x", opcode, op1_type, op1_len, op1_str[0],
                 op2_type, op2_len, op2_str[0]);
+    pauseUntilPermitted(s_exec_switch);
     switch (opcode) {
         case CMP_char:
             // CMP takes 2 values
@@ -508,6 +509,8 @@ void runLoop()
     // Executes the instructions
     while (1)
     {
+        pauseUntilPermitted(s_fetch);
+
         // Fetch
         unsigned char opcode = env.memory[env.pc];
 
@@ -577,6 +580,8 @@ void runLoop()
             dtype = 'n';
         }
 
+        pauseUntilPermitted(s_decode_operands);
+
         // Interpret the operand type
         op1_type = (env.memory[env.pc+1] & 0b11110000) >> 4;
         op2_type = env.memory[env.pc+1] & 0b00001111;
@@ -641,6 +646,8 @@ void run(unsigned char* bytecode, int iflag, int length)
 int main(int argc, char** argv)
 {
     log_trace("main(argc=%i, char** argv)", argc);
+
+    pauseUntilPermitted(s_start);
 
     // Process command line arguments
     int iflag = 0;
