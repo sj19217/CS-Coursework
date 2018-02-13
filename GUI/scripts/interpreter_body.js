@@ -2,11 +2,16 @@ $ = require("jquery");
 remote = require("electron").remote;
 dialog = remote.dialog;
 
-console.log("Loaded interpreter_body.js");
-
 $("#choose-file").on("click", () => {
     console.log("File opener button clicked");
     console.log(dialog.showOpenDialog((fileNames) => {
-        console.log(fileNames[0]);
+        if (fileNames === undefined) {
+            console.log("No file given");
+            return;
+        }
+
+        console.log("File name: " + fileNames[0]);
+
+        window.location.href = "interpreter_active.html?fname=" + encodeURIComponent(fileNames[0]);
     }));
 });
