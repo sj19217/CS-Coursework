@@ -32,16 +32,18 @@ The commands given to the interpreter are:
   * Read operand 1 data
   * Read operand 2 data
   * Switch statement entry
-  * Next depends on what type of operation this is
+  * Execution function
 * get_mem <amt> - Instructs the interpreter to return a dump of its memory up to the given address
 
 The types of data that can return are:
 * done_step <name> <other_args> - Tells the GUI that a step has been performed. The name, and corresponding other
   arguments, are these:
-  * get_opcode - The opcode has been read from memory. Gives the number as an argument.
-  * get_opbyte - The operand byte has been read from memory. Gives the number as an argument.
-  * dec_opbyte - The operand byte has been decoded. Gives two arguments, the numerical type of the two operands.
-  * read_op - Read than operand byte from memory. The first argument is "1" or "2", saying which operand it is.  Number
-    of other arguments depends on the size, with the bytes of it given as hex.
-  * in_switch - Jumped to the position in the execute() switch statement. The argument is the instruction name.
+  * start - The initial setup procedures, as far as just about to get the first opcode
+  * fetch <opcode> - Got the opcode from memory
+  * fetch_opbyte <opbyte> - Got the given operand byte from memory
+  * fetch_op1 <bytes> - Got the first operand from memory (with `bytes` as decimals separated by spaces)
+  * fetch_op2 <bytes> - Got the second operand from memory
+  * decode <chosen> - The switch statement has decoded what to interpret the opcode as
+  * exec_func - The relevant exec function has been run
+ 
 * mem <val>* - Gives the contents of the memory in decimal separated by spaces

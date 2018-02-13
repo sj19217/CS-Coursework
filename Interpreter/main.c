@@ -370,7 +370,7 @@ void execute(unsigned char opcode, char dtype,
     log_trace("execute(opcode=0x%02x, op1_type=%i, op1_len=%i, op1_str[0]=0x%02x, " \
                 "op2_type=%i, op2_len=%i, op2_str[0]=0x%02x", opcode, op1_type, op1_len, op1_str[0],
                 op2_type, op2_len, op2_str[0]);
-    pauseUntilPermitted(s_exec_switch);
+    pauseUntilPermitted(s_decode);
     switch (opcode) {
         case CMP_char:
             // CMP takes 2 values
@@ -580,7 +580,7 @@ void runLoop()
             dtype = 'n';
         }
 
-        pauseUntilPermitted(s_decode_operands);
+        pauseUntilPermitted(s_fetch_opbyte);
 
         // Interpret the operand type
         op1_type = (env.memory[env.pc+1] & 0b11110000) >> 4;
@@ -597,11 +597,15 @@ void runLoop()
         unsigned char op1_str[op1_len];
         unsigned char op2_str[op2_len];
 
+        pauseUntilPermitted(s_fetch_op1);
+
         // Move the PC along to the start of the first operand and move to op1_str
         env.pc += 2;
         for (int i = 0; i < op1_len; i++) {
             op1_str[i] = env.memory[env.pc + i];
         }
+
+        pauseUntilPermitted(s_fetch_op2);
 
         // Move the PC along again and interpret
         env.pc += op1_len;
