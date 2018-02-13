@@ -9,12 +9,17 @@
 #include "headers/util.h"
 #include "headers/gui.h"
 #include "headers/log.h"
+#include "headers/main.h"
 
 enum stage next_pause = s_start;
 
 void pauseUntilPermitted(enum stage next_stage)
 {
-    //log_trace("pauseUntilPermitted(next_stage=%s)", next_stage);
+    log_trace("pauseUntilPermitted(next_stage=%s)", stage_names[next_stage]);
+    if (!config.interactive_mode) {
+        return;
+    }
+
     if (next_pause != next_stage) {
         return;
     }

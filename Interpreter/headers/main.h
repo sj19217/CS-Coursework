@@ -74,6 +74,7 @@ struct Environment{
 // Stores the config information
 struct {
     int memorykb;
+    _Bool interactive_mode;
 } config;
 
 int processConfig(const unsigned char *bytecode, int length);

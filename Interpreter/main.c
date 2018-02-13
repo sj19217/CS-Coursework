@@ -620,6 +620,7 @@ void runLoop()
 void run(unsigned char* bytecode, int iflag, int length)
 {
     log_trace("run(bytecode[0]=%02x, iflag=%i, length=%i)", bytecode[0], iflag, length);
+    pauseUntilPermitted(s_start);
 
     // Begin the process of running the bytecode
     // Start by loading all of the configuration data
@@ -636,7 +637,7 @@ void run(unsigned char* bytecode, int iflag, int length)
     }
 
     // Dump out the memory
-    memdump(200, 1, 16);
+    if (!config.interactive_mode) memdump(200, 1, 16);
 
 
     // Start running instructions
@@ -646,8 +647,6 @@ void run(unsigned char* bytecode, int iflag, int length)
 int main(int argc, char** argv)
 {
     log_trace("main(argc=%i, char** argv)", argc);
-
-    pauseUntilPermitted(s_start);
 
     // Process command line arguments
     int iflag = 0;
@@ -699,6 +698,10 @@ int main(int argc, char** argv)
     content = (unsigned char*)malloc(filelen*sizeof(char));
     fread(content, (size_t) filelen, 1, fileptr);
     fclose(fileptr);
+
+    if (iflag) {
+        config.interactive_mode = TRUE;
+    }
 
 
 #if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
