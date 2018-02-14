@@ -43,7 +43,15 @@ let beginInterpreter;
             console.log(`stderr: ${data}`);
         });
 
-        interpreter_proc.stdin.write("step\n");
+        interpreter_proc.stdout.on("data", (data) => {
+            handleOutput(data);
+        });
+    };
+
+    function handleOutput(data)
+    {
+        // This is run when the program gives some output. It will be some piece of data about a thing that has
+        // happened, so this function will then cause a relevant animation to happen.
     }
 
 })();

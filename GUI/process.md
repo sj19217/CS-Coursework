@@ -10,3 +10,5 @@
 * Had some annoying bugs, but eventually got it working. Had to make loading of properties.json block the JS file,
   otherwise it would not have loaded by the time its data was necessary (56d2fab)
 * Went and wrote gui.c/gui.h and used pauseUntilPermitted() and scattered its use around the program. 
+* After lots of fussing, managed to get interpreter.js to print the interpreter's stderr to the log. Turned out the 
+  streams in the interpreter needed flushing.
