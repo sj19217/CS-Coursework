@@ -5,6 +5,7 @@
 */
 
 #include <stdio.h>
+#include <windows.h>
 
 #include "headers/util.h"
 #include "headers/gui.h"
@@ -16,6 +17,10 @@ enum stage next_pause = s_start;
 void pauseUntilPermitted(enum stage next_stage)
 {
     log_trace("pauseUntilPermitted(next_stage=%s)", stage_names[next_stage]);
+
+    fflush(stderr);
+    fflush(stdout);
+
     if (!config.interactive_mode) {
         return;
     }
@@ -28,6 +33,7 @@ void pauseUntilPermitted(enum stage next_stage)
 
     for (;;) {
         // Keep listening until there is an input
+        Sleep(10);
         fgets(inp, 50, stdin);
 
         handleCommand(inp);
