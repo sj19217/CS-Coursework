@@ -1,39 +1,49 @@
 // The main file for the interpreter, once the file has been chosen.
 
-$ = require("jquery");
+let beginInterpreter;
 
-let spawn = require("child_process").spawn;
+(function () {
 
-console.log("Loaded interpreter_body.js");
+    $ = require("jquery");
+    let execFile = require("child_process").execFile;
 
-let INTERPRETER_EXECUTABLE = "";
-let LOADED_JSON = false;
+    console.log("Loaded interpreter_body.js");
 
-$.ajaxSetup( { "async": false } );  // This will mean the program will wait until the page is loaded
-$.getJSON("../properties.json", function(json) {
-    INTERPRETER_EXECUTABLE = json["interpreter"];
-    LOADED_JSON = true;
-});
-$.ajaxSetup( { "async": true } );
+    let INTERPRETER_EXECUTABLE = "";
+    let LOADED_JSON = false;
 
-function beginInterpreter() {
-    // Loads up the interpreter executable
-    let filename = urlParam("fname");
+    $.ajaxSetup( { "async": false } );  // This will mean the program will wait until the page is loaded
+    $.getJSON("../properties.json", function(json) {
+        INTERPRETER_EXECUTABLE = json["interpreter"];
+        LOADED_JSON = true;
+    });
+    $.ajaxSetup( { "async": true } );
 
-    if (filename === undefined) {
-        console.log("No filename given in URL parameters");
-        return;
+    let interpreter_proc;
+
+    beginInterpreter = function ()
+    {
+        // Loads up the interpreter executable
+        let filename = urlParam("fname");
+
+        if (filename === undefined) {
+            console.log("No filename given in URL parameters");
+            return;
+        }
+
+        filename = decodeURIComponent(filename);    // Get rid of the %20s and stuff like that
+        console.log("Loading bytecode file " + filename + " (" + typeof filename + ")");
+        console.log("Using executable " + INTERPRETER_EXECUTABLE);
+
+        interpreter_proc = execFile(INTERPRETER_EXECUTABLE, ["-i", "-f", filename]);
+        //interpreter_proc.stdin.setEncoding("utf8");
+        //interpreter_proc.stdout.pipe(process.stdout)
+
+        interpreter_proc.stderr.on('data', (data) => {
+            console.log(`stderr: ${data}`);
+        });
+
+        interpreter_proc.stdin.write("step\n");
     }
 
-    filename = decodeURIComponent(filename);    // Get rid of the %20s and stuff like that
-    console.log("Loading bytecode file " + filename + " (" + typeof filename + ")");
-    console.log("Using executable " + INTERPRETER_EXECUTABLE);
-
-    let interpreter_proc = spawn(INTERPRETER_EXECUTABLE, ["-i", "-f", filename]);
-    //interpreter_proc.stdin.setEncoding("utf8");
-    //interpreter_proc.stdout.pipe(process.stdout)
-
-    interpreter_proc.stdout.on('data', (data) => {
-        console.log(`stdout: ${data}`);
-    });
-}
+})();
