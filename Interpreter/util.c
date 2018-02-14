@@ -131,3 +131,26 @@ _Bool startsWith(const char* a, const char* b)
     if (strncmp(a, b, strlen(b)) == 0) return 1;
     return 0;
 }
+
+// Converts the given letter (e.g. "B") to a string name (e.g. "uchar")
+char* convertTypeLetterToName(char letter)
+{
+    switch (letter) {
+        case 'b':
+            return "char";
+        case 'B':
+            return "uchar";
+        case 'h':
+            return "short";
+        case 'H':
+            return "ushort";
+        case 'i':
+            return "int";
+        case 'I':
+            return "uint";
+        case 'f':
+            return "float";
+        default:
+            return "unknown";
+    }
+}
