@@ -12,3 +12,4 @@
 * Went and wrote gui.c/gui.h and used pauseUntilPermitted() and scattered its use around the program. 
 * After lots of fussing, managed to get interpreter.js to print the interpreter's stderr to the log. Turned out the 
   streams in the interpreter needed flushing.
+* Put some boxes on the screen to represent the parts of the program

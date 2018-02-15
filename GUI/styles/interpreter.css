@@ -1,23 +1,28 @@
 #registers {
-    width: 25%;
-    height: 200px;
     border: 1px solid green;
     float: left;
-    margin: 5px;
 }
 
 #centre {
-    width: 40%;
-    height: 200px;
     border: 1px solid red;
-    margin: 5px;
     float: left;
 }
 
 #memory {
-    width: 30%;
-    height: 200px;
     border: 1px solid blue;
-    margin: 5px;
-    float: right;
+    float: left;
+}
+
+body {
+    width:100%;
+    text-align:center;
+}
+
+.page_part {
+    width: calc(93% / 3);
+    display: inline-block;
+    vertical-align: top;
+    text-align:center;
+    margin: 1%;
+    height: 700px;
 }
