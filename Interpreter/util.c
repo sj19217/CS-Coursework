@@ -124,6 +124,7 @@ void linearMemdump(int max)
         printf(" %03i", env.memory[i]);
     }
     printf("\n");
+    fflush(stdout); // Flush it to get it out immediately
 }
 
 _Bool startsWith(const char* a, const char* b)

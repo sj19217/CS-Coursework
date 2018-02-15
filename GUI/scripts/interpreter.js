@@ -53,6 +53,18 @@ let interpreter_proc;
     {
         // This is run when the program gives some output. It will be some piece of data about a thing that has
         // happened, so this function will then cause a relevant animation to happen.
+
+        // Sometimes the data will actually contain multiple commands, so check for that
+        let parts = data.split("\n");
+        if (parts.length > 1) {
+            for (let i = 0; i < parts.length; i++) {
+                handleOutput(parts[i]);
+            }
+            return;
+        }
+
+
+        // Checks for what it is
         if (data.startsWith("config")) {
             // This is the initial config info, including the size of the memory (necessary to set up the table)
             let config_json = data.substr(7);

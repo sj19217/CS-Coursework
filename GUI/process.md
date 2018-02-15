@@ -14,3 +14,4 @@
   streams in the interpreter needed flushing.
 * Put some boxes on the screen to represent the parts of the program
 * Make the table in the memory
+* Made the memory scroll and fill in values when "mem" info is given
