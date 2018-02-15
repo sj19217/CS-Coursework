@@ -665,11 +665,16 @@ void runLoop()
 void run(unsigned char* bytecode, int iflag, int length)
 {
     log_trace("run(bytecode[0]=%02x, iflag=%i, length=%i)", bytecode[0], iflag, length);
-    pauseUntilPermitted(s_start);
 
     // Begin the process of running the bytecode
     // Start by loading all of the configuration data
     int config_length = processConfig(bytecode, length) + 4;
+
+    if (config.interactive_mode) {
+        printf("config {\"memorykb\": %i}", config.memorykb);
+    }
+
+    pauseUntilPermitted(s_start);
 
     // Initialise the environment
     const int memsize = config.memorykb * 1024;
@@ -748,6 +753,7 @@ int main(int argc, char** argv)
     if (iflag) {
         config.interactive_mode = TRUE;
     }
+
 
 
 #if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__

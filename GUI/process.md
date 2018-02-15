@@ -13,3 +13,4 @@
 * After lots of fussing, managed to get interpreter.js to print the interpreter's stderr to the log. Turned out the 
   streams in the interpreter needed flushing.
 * Put some boxes on the screen to represent the parts of the program
+* Make the table in the memory

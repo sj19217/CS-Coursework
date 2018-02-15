@@ -52,6 +52,18 @@ let beginInterpreter;
     {
         // This is run when the program gives some output. It will be some piece of data about a thing that has
         // happened, so this function will then cause a relevant animation to happen.
+        if (data.startsWith("config")) {
+            let config_json = data.substr(7);
+            let config = JSON.parse(config_json);
+            let memsize = config["memorykb"] * 1024;
+
+            let table_row = "<tr>" + "<td>000</td>".repeat(16) + "</tr>";
+
+            // Draw the table in the memory div
+            $("#memtable").html(
+                table_row.repeat(memsize / 16)
+            )
+        }
     }
 
 })();
