@@ -1,5 +1,7 @@
 // The main file for the interpreter, once the file has been chosen.
 
+require("string-format");
+
 let beginInterpreter;
 let interpreter_proc;
 
@@ -57,20 +59,33 @@ let interpreter_proc;
             let config = JSON.parse(config_json);
             let memsize = config["memorykb"] * 1024;
 
-            let table_row = "<tr>" + "<td>000</td>".repeat(16) + "</tr>";
+            let table_row = "<tr>" + "<td>{row}</td>" + "<td>000</td>".repeat(10) + "</tr>";
+            let table_html = "<tr><td></td>";
+
+            // Add the header row
+            for (let i = 0; i < 10; i++) {
+                table_html += "<td>" + i + "</td>";
+            }
+            table_html += "</tr>";
+
+            // Add the rows of the table
+            for (let i = 0; i < Math.ceil(memsize / 10); i++) {
+                // Most of this is padding for the row
+                table_html += table_row.replace("{row}", ("000" + i).substr(("000" + i).length - 3))
+            }
 
             // Draw the table in the memory div
-            $("#memtable").html(
-                table_row.repeat(memsize / 16)
-            )
+            $("#memtable").html(table_html)
         } else if (data.startsWith("mem")) {
             let items = data.split(" ");
             items = items.slice(1);
 
+            console.log("New memory information given");
+
             // Add all of these bits of memory to the table
             for (let i = 0; i < items.length; i++) {
                 let table = document.getElementById("memtable");
-                table.children[Math.floor(i / 16)].children[i % 16].innerHTML = items[i];
+                table.children[Math.floor(i / 10) + 1].children[(i % 10) + 1].innerHTML = items[i];
             }
         }
     }
