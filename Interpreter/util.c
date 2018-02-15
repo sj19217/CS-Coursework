@@ -121,7 +121,7 @@ void linearMemdump(int max)
     log_trace("linearMemdump(max=%i)", max);
     printf("mem");
     for (int i = 0; i < max; i++) {
-        printf(" %i", env.memory[i]);
+        printf(" %03i", env.memory[i]);
     }
     printf("\n");
 }

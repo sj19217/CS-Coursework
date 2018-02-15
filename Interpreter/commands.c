@@ -357,7 +357,7 @@ void exec_LEA_mem(unsigned int maddr_to, unsigned int pointer)
 //}
 
 // The complicated, ugly code needed to get the value of an operand and place it in the right version of the union
-#define SET_OPERANDS(D, T, N) operand1.b = convertTo_##N((T*) getOperandValue(op1_type, (void*) op1)); \
+#define SET_OPERANDS(D, T, N) operand1.D = convertTo_##N((T*) getOperandValue(op1_type, (void*) op1)); \
 operand2.D = convertTo_##N((T*) getOperandValue(op2_type, (void*) op2));
 
 // The still complicated, though slightly less ugly, code for performing the given operation on all possible versions.
