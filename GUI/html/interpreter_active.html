@@ -8,6 +8,7 @@
     <script src="../scripts/interpreter.js"></script>
 
     <link rel="stylesheet" type="text/css" href="../styles/interpreter.css" />
+    <link rel="stylesheet" type="text/css" href="../styles/controls.css" />
 </head>
 <body onload="beginInterpreter()">
 
@@ -16,7 +17,10 @@
 </div>
 
 <div id="centre" class="page_part">
-
+    <div id="play-controls">
+        <input type="range" min="1" max="100" value="50" class="speed-slider" id="speed_slider" title="Speed">
+        <script src="../scripts/controls.js"></script>
+    </div>
 </div>
 
 <div id="memory" class="page_part">

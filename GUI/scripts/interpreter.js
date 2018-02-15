@@ -1,6 +1,7 @@
 // The main file for the interpreter, once the file has been chosen.
 
 let beginInterpreter;
+let interpreter_proc;
 
 (function () {
 
@@ -18,8 +19,6 @@ let beginInterpreter;
         LOADED_JSON = true;
     });
     $.ajaxSetup( { "async": true } );
-
-    let interpreter_proc;
 
     beginInterpreter = function ()
     {
@@ -53,6 +52,7 @@ let beginInterpreter;
         // This is run when the program gives some output. It will be some piece of data about a thing that has
         // happened, so this function will then cause a relevant animation to happen.
         if (data.startsWith("config")) {
+            // This is the initial config info, including the size of the memory (necessary to set up the table)
             let config_json = data.substr(7);
             let config = JSON.parse(config_json);
             let memsize = config["memorykb"] * 1024;
@@ -63,6 +63,15 @@ let beginInterpreter;
             $("#memtable").html(
                 table_row.repeat(memsize / 16)
             )
+        } else if (data.startsWith("mem")) {
+            let items = data.split(" ");
+            items = items.slice(1);
+
+            // Add all of these bits of memory to the table
+            for (let i = 0; i < items.length; i++) {
+                let table = document.getElementById("memtable");
+                table.children[Math.floor(i / 16)].children[i % 16].innerHTML = items[i];
+            }
         }
     }
 
