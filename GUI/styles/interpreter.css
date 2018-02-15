@@ -1,16 +1,20 @@
 #registers {
     border: 1px solid green;
     float: left;
+    width: 28%;
 }
 
 #centre {
     border: 1px solid red;
     float: left;
+    width: 28%;
 }
 
 #memory {
     border: 1px solid blue;
     float: left;
+    overflow-y: scroll;
+    width: 35%;
 }
 
 body {
@@ -19,7 +23,6 @@ body {
 }
 
 .page_part {
-    width: calc(93% / 3);
     display: inline-block;
     vertical-align: top;
     text-align:center;
