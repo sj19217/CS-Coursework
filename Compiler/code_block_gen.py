@@ -34,6 +34,26 @@ class InstrArrayAssignment(Instruction):
         self.var_name = lvalue.name
 
 
+class InstrForLoop(Instruction):
+    def __init__(self, stmt: For):
+        super().__init__()
+        self._stmt = stmt
+        self.decls = stmt.init.decls
+        # TODO Finish this and the next two classes
+
+
+class InstrWhileLoop(Instruction):
+    def __init__(self, stmt):
+        super().__init__()
+        self._stmt = stmt
+
+
+class InstrIfStmt(Instruction):
+    def __init__(self, stmt):
+        super().__init__()
+        self._stmt = stmt
+
+
 
 ### FUNCTIONS
 
@@ -80,13 +100,27 @@ def get_stmt_instructions(stmt) -> list:
             instr_list.append(InstrVariableAssignment(stmt.lvalue))
         elif isinstance(stmt.lvalue, ArrayRef):
             instr_list.append(InstrArrayAssignment(stmt.lvalue))
+    elif isinstance(stmt, For):
+        instr_list.append(InstrForLoop(stmt))
+    elif isinstance(stmt, While):
+        instr_list.append(InstrWhileLoop(stmt))
+    elif isinstance(stmt, If):
+        instr_list.append(InstrIfStmt(stmt))
 
     return instr_list
 
 
 def expression_instructions(expr):
     """
-    Performs post-order traversal and returns a list of expression evaluation objects
+    Performs post-order traversal and returns a list of expression evaluation objects.
+    Each expression evaluation object has the job of taking (a) value(s) from the stack and processing it,
+    then pushing the result back on.
+
+    The object given to this function will be one of these:
+    * A UnaryOp - Means one value needs popping
+    * A BinaryOp - Means two values need popping
+    * A Constant - Nothing needs popping, but a value needs popping on
+    * An ID - Nothing needs popping, but a variable needs getting and pushing on
     :param expr:
     :return:
     """
