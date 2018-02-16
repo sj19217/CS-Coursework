@@ -79,12 +79,13 @@ animate = (function () {
             let config = JSON.parse(config_json);
             let memsize = config["memorykb"] * 1024;
 
-            let table_row = "<tr>" + "<td>{row}</td>" + "<td>000</td>".repeat(10) + "</tr>";
+            let table_row = "<tr>" + "<td style='font-weight: bold;'>{row}</td>" +
+                            "<td>000</td>".repeat(10) + "</tr>";
             let table_html = "<tr><td></td>";
 
             // Add the header row
             for (let i = 0; i < 10; i++) {
-                table_html += "<td>" + i + "</td>";
+                table_html += "<td style='font-weight: bold;'>" + i + "</td>";
             }
             table_html += "</tr>";
 
