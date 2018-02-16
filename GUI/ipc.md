@@ -33,17 +33,22 @@ The commands given to the interpreter are:
   * Read operand 2 data
   * Switch statement entry
   * Execution function
-* get_mem <amt> - Instructs the interpreter to return a dump of its memory up to the given address
 
 The types of data that can return are:
 * done_step <name> <other_args> - Tells the GUI that a step has been performed. The name, and corresponding other
   arguments, are these:
   * start - The initial setup procedures, as far as just about to get the first opcode
-  * fetch <opcode> - Got the opcode from memory
+  * fetch <pc> <opcode> - Got the opcode from memory
   * fetch_opbyte <opbyte> - Got the given operand byte from memory
   * fetch_op1 <bytes> - Got the first operand from memory (with `bytes` as decimals separated by spaces)
   * fetch_op2 <bytes> - Got the second operand from memory
   * decode <chosen> - The switch statement has decoded what to interpret the opcode as
   * exec_func - The relevant exec function has been run
  
-* mem <val>* - Gives the contents of the memory in decimal separated by spaces
+* data <content> - Given frequently by the interpreter to give status information. `content` is a JSON string,
+  with these attricutes:
+  * pc - The current value of the program counter
+  * genregs - A nested JSON object with all of the registers ("eax", "ebx", etc)
+  * cmp - A JSON object containing the values "e", "n" and "p", corresponding to those registers
+  * memory - A JSON array of the full memory
+  Naturally, this will be quite large. 

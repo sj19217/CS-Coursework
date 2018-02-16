@@ -370,6 +370,7 @@ void execute(unsigned char opcode, char dtype,
     log_trace("execute(opcode=0x%02x, op1_type=%i, op1_len=%i, op1_str[0]=0x%02x, " \
                 "op2_type=%i, op2_len=%i, op2_str[0]=0x%02x", opcode, op1_type, op1_len, op1_str[0],
                 op2_type, op2_len, op2_str[0]);
+    printEnvData();
     pauseUntilPermitted(s_decode);
     switch (opcode) {
         case CMP_char:
@@ -535,7 +536,10 @@ void runLoop()
     // Executes the instructions
     while (1)
     {
-        if (config.interactive_mode && !firstLoop) printf("done_step exec_func\n");
+        if (config.interactive_mode && !firstLoop) {
+            printf("done_step exec_func\n");
+            printEnvData();
+        }
         pauseUntilPermitted(s_fetch);
 
         // Fetch
@@ -671,7 +675,7 @@ void run(unsigned char* bytecode, int iflag, int length)
     int config_length = processConfig(bytecode, length) + 4;
 
     if (config.interactive_mode) {
-        printf("config {\"memorykb\": %i}", config.memorykb);
+        printf("config {\"memorykb\": %i}\n", config.memorykb);
     }
 
     pauseUntilPermitted(s_start);
@@ -691,7 +695,10 @@ void run(unsigned char* bytecode, int iflag, int length)
 
 
     // Start running instructions
-    if (config.interactive_mode) printf("done_step start\n");
+    if (config.interactive_mode) {
+        printf("done_step start\n");
+        printEnvData();
+    }
     runLoop();
 }
 

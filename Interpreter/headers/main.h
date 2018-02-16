@@ -60,9 +60,9 @@ struct Environment{
 
     // The special registers
     unsigned long pc;
-    unsigned long cmp_p;
-    unsigned long cmp_n;
-    unsigned long cmp_e;
+    unsigned char cmp_p;
+    unsigned char cmp_n;
+    unsigned char cmp_e;
     //unsigned long mar;
     //unsigned long mdr;
     //unsigned long cir; // This won't actually be used for these

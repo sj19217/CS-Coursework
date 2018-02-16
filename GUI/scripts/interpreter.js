@@ -5,6 +5,14 @@ require("string-format");
 let beginInterpreter;
 let interpreter_proc;
 
+animate = (function () {
+    return {
+        atomic: {
+
+        }
+    };
+})();
+
 (function () {
 
     $ = require("jquery");
@@ -99,6 +107,8 @@ let interpreter_proc;
                 let table = document.getElementById("memtable");
                 table.children[Math.floor(i / 10) + 1].children[(i % 10) + 1].innerHTML = items[i];
             }
+        } else if (data.startsWith("fetch")) {
+            animate.fetch()
         }
     }
 
