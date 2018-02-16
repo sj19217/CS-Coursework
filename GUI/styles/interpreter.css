@@ -48,3 +48,9 @@ table.bordered, td.bordered {
     text-align: right;
     font-weight: bold;
 }
+
+.reg-subdiv {
+    border: 1px solid black;
+    width: 90%;
+    margin: 0 auto;
+}

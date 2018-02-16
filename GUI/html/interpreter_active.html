@@ -12,8 +12,53 @@
 </head>
 <body onload="beginInterpreter()">
 
-<div id="registers" class="page_part">
+<div id="registers" class="page_part" style="display: table">
+    <div id="general-registers-part" style="height: 38%; " class="reg-subdiv">
+        <table style="width: 100%; table-layout: fixed;">
+            <tr>
+                <td class="bordered reg-label">EAX</td>
+                <td id="reg-eax" class="bordered"></td>
+            </tr>
+            <tr>
+                <td class="bordered reg-label">EBX</td>
+                <td id="reg-ebx" class="bordered"></td>
+            </tr>
+            <tr>
+                <td class="bordered reg-label">ECX</td>
+                <td id="reg-ecx" class="bordered"></td>
+            </tr>
+            <tr>
+                <td class="bordered reg-label">EDX</td>
+                <td id="reg-edx" class="bordered"></td>
+            </tr>
+            <tr>
+                <td class="bordered reg-label">ESI</td>
+                <td id="reg-esi" class="bordered"></td>
+            </tr>
+            <tr>
+                <td class="bordered reg-label">EDI</td>
+                <td id="reg-edi" class="bordered"></td>
+            </tr>
+            <tr>
+                <td class="bordered reg-label">EBP</td>
+                <td id="reg-ebp" class="bordered"></td>
+            </tr>
+            <tr>
+                <td class="bordered reg-label">ESP</td>
+                <td id="reg-esp" class="bordered"></td>
+            </tr>
+        </table>
+    </div>
 
+    <div id="output-box" style="height: 46%; " class="reg-subdiv">
+        <span style="font-weight: bold; text-align: center;">Output:</span>
+        <textarea title="Output" rows="19" cols="45" id="reg-output"></textarea>
+    </div>
+
+    <div id="input-box" style="height: 9%;" class="reg-subdiv">
+        <span style="font-weight: bold; text-align: center;">Input:</span>
+        <input title="Input" type="text" style="width: 90%;"/>
+    </div>
 </div>
 
 <div id="centre" class="page_part">
