@@ -22,30 +22,32 @@
         <script src="../scripts/controls.js"></script>
     </div>
     <div id="playground-container">
-        <table class="bordered" id="playground">
+        <table id="playground">
             <tr>
                 <td colspan="3" rowspan="2" class="bordered">Commentary box</td>
-                <td class="bordered">PC</td>
+                <td style="font-weight: bold; text-align: center;">PC:</td>
+            </tr>
+            <tr>
+                <td class="bordered" id="box-PC"></td>
             </tr>
             <tr></tr>
-            <tr></tr>
             <tr>
-                <td class="bordered"></td>
+                <td></td>
                 <td rowspan="2" class="bordered">ALU</td>
-                <td class="bordered"></td>
-                <td class="bordered">MAR</td>
+                <td class="reg-label">MAR:</td>
+                <td class="bordered" id="box-MAR"></td>
             </tr>
             <tr>
-                <td class="bordered"></td>
-                <td class="bordered"></td>
-                <td class="bordered">MDR</td>
+                <td></td>
+                <td class="reg-label">MDR:</td>
+                <td class="bordered" id="box-MDR"></td>
             </tr>
             <tr></tr>
             <tr>
-                <td class="bordered"></td>
-                <td class="bordered"></td>
-                <td class="bordered"></td>
-                <td class="bordered">CIR</td>
+                <td></td>
+                <td></td>
+                <td class="reg-label">CIR:</td>
+                <td class="bordered" id="box-CIR"></td>
             </tr>
             <tr>
                 <td colspan="4" class="bordered">Instruction description</td>
