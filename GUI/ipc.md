@@ -35,18 +35,28 @@ The commands given to the interpreter are:
   * Execution function
 
 The types of data that can return are:
-* done_step <name> <other_args> - Tells the GUI that a step has been performed. The name, and corresponding other
-  arguments, are these:
-  * start - The initial setup procedures, as far as just about to get the first opcode
-  * fetch <pc> <opcode> - Got the opcode from memory
-  * fetch_opbyte <opbyte> - Got the given operand byte from memory
-  * fetch_op1 <bytes> - Got the first operand from memory (with `bytes` as decimals separated by spaces)
-  * fetch_op2 <bytes> - Got the second operand from memory
-  * decode <chosen> - The switch statement has decoded what to interpret the opcode as
-  * exec_func - The relevant exec function has been run
- 
+* start - The initial setup procedures, as far as just about to get the first opcode
+* fetch <pc> <opcode> <opbyte> <operand1> <operand2> - Got the opcode and operands from memory
+* decode <chosen> - The switch statement has decoded what to interpret the opcode as
+* exec_func <funcname> <args> - The relevant exec function has been run. It can be any of these:
+  * cmp <val1> <val2> <p|n|e> - Ran a comparison function. For commentary, gives the values (decoded) and the register
+    that was set to 1 as a result.
+  * jmp <always|e|ne|lt|le|gt|ge> <addr> <val1> <val2> <true|false> - Any of the jump functions. Gives which jump
+    instruction, along with the memory address to jump to, the decoded values and whether the jump was made.
+  * mov_reg <regname> <size> <srctype> <srcdata> <srccontent> - Moved data to a register. `srctype` is "maddr",  "reg" or
+    "immediate". If it is "maddr" then `srcdata` is the memory address, if it is `reg` then it is a register name or if
+    it is "immediate" then it is the immediate value. `srccontent` is the value extracted, as decimal bytes. 
+  * mov_mem <destaddr> <size> <srctype> <srcdata> <srccontent> - Moved data to a memory address. The other arguments are
+    the same as above.
+  * lea_reg <regname> <addr> - Moved the given data (`addr`) to the register of the specified name. 
+  * lea_mem <destaddr> <addr> - Moved the given data to the given memory location.
+  * arithmetic <opname> <type> <desttype> <dest> <op1> <op2> <res> - Performed a piece of arithmetic. `opname` is the
+    name of the operation (e.g. "ADD" or "IDIV"). `type` is the type of the data, like `char`. `desttype` is either
+    "maddr" or "reg", and then `dest` is either the register name or memory address depending on which `desttype` is
+    given. Then `op1` and `op2` are the decoded values of the operands and `res` is the result.
+* config <config_json> - Gives the content of the config dict in a JSON form
 * data <content> - Given frequently by the interpreter to give status information. `content` is a JSON string,
-  with these attricutes:
+  with these attributes:
   * pc - The current value of the program counter
   * genregs - A nested JSON object with all of the registers ("eax", "ebx", etc)
   * cmp - A JSON object containing the values "e", "n" and "p", corresponding to those registers
