@@ -27,6 +27,7 @@ void linearMemdump(int max);
 _Bool startsWith(const char* a, const char* b);
 char* convertTypeLetterToName(char letter);
 void printEnvData();
+char* getRegisterName(int regnum);
 
 // Stuff from csv.c
 void free_csv_line( char **parsed );

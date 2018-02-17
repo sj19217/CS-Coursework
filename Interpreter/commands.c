@@ -27,10 +27,13 @@ void exec_CMP_##N(T op1_val, T op2_val) \
     env.cmp_p = 0; \
     if (diff < 0) { \
         env.cmp_n = 1; \
+        if (config.interactive_mode) printf("exec_func cmp %i %i n\n", op1_val, op2_val);\
     } else if (diff == 0) { \
         env.cmp_e = 1; \
+        if (config.interactive_mode) printf("exec_func cmp %i %i e\n", op1_val, op2_val);\
     } else if (diff > 0) { \
         env.cmp_p = 1; \
+        if (config.interactive_mode) printf("exec_func cmp %i %i p\n", op1_val, op2_val);\
     } \
 }
 
@@ -40,7 +43,27 @@ def_CMP(int16_t, short);
 def_CMP(uint16_t, ushort);
 def_CMP(int, int);
 def_CMP(unsigned int, uint);
-def_CMP(float, float);
+
+// Made this separately because printing the results as an integer won't work
+void exec_CMP_float(float op1_val, float op2_val)
+{
+    log_trace("exec_CMP_float(op1_val=%i, op2_val=%i)", op1_val, op2_val);
+    pauseUntilPermitted(s_exec_func);
+    float diff = op1_val - op2_val;
+    env.cmp_n = 0;
+    env.cmp_e = 0;
+    env.cmp_p = 0;
+    if (diff < 0) {
+        env.cmp_n = 1;
+        if (config.interactive_mode) printf("exec_func cmp %f %f n\n", op1_val, op2_val);
+    } else if (diff == 0) {
+        env.cmp_e = 1;
+        if (config.interactive_mode) printf("exec_func cmp %f %f e\n", op1_val, op2_val);
+    } else if (diff > 0) {
+        env.cmp_p = 1;
+        if (config.interactive_mode) printf("exec_func cmp %f %f p\n", op1_val, op2_val);
+    }
+}
 
 
 
@@ -51,6 +74,7 @@ void exec_JMP(unsigned int addr)
     log_trace("exec_JMP(addr=0x%x)", addr);
     pauseUntilPermitted(s_exec_func);
     env.pc = addr;
+    if (config.interactive_mode) printf("exec_func jmp always %i true", addr);
 }
 
 void exec_JE(unsigned int addr)
@@ -59,6 +83,9 @@ void exec_JE(unsigned int addr)
     pauseUntilPermitted(s_exec_func);
     if (env.cmp_e) {
         env.pc = addr;
+        if (config.interactive_mode) printf("exec_func jmp e %i true", addr);
+    } else {
+        if (config.interactive_mode) printf("exec_func jmp e %i false", addr);
     }
 }
 
@@ -68,6 +95,9 @@ void exec_JNE(unsigned int addr)
     pauseUntilPermitted(s_exec_func);
     if (!env.cmp_e) {
         env.pc = addr;
+        if (config.interactive_mode) printf("exec_func jmp ne %i true", addr);
+    } else {
+        if (config.interactive_mode) printf("exec_func jmp ne %i false", addr);
     }
 }
 
@@ -77,6 +107,9 @@ void exec_JLT(unsigned int addr)
     pauseUntilPermitted(s_exec_func);
     if (env.cmp_n) {
         env.pc = addr;
+        if (config.interactive_mode) printf("exec_func jmp lt %i true", addr);
+    } else {
+        if (config.interactive_mode) printf("exec_func jmp lt %i false", addr);
     }
 }
 
@@ -86,6 +119,9 @@ void exec_JLE(unsigned int addr)
     pauseUntilPermitted(s_exec_func);
     if (env.cmp_n || env.cmp_e) {
         env.pc = addr;
+        if (config.interactive_mode) printf("exec_func jmp le %i true", addr);
+    } else {
+        if (config.interactive_mode) printf("exec_func jmp le %i false", addr);
     }
 }
 
@@ -95,6 +131,9 @@ void exec_JGT(unsigned int addr)
     pauseUntilPermitted(s_exec_func);
     if (env.cmp_p) {
         env.pc = addr;
+        if (config.interactive_mode) printf("exec_func jmp gt %i true", addr);
+    } else {
+        if (config.interactive_mode) printf("exec_func jmp gt %i false", addr);
     }
 }
 
@@ -104,6 +143,9 @@ void exec_JGE(unsigned int addr)
     pauseUntilPermitted(s_exec_func);
     if (env.cmp_p || env.cmp_e) {
         env.pc = addr;
+        if (config.interactive_mode) printf("exec_func jmp ge %i true", addr);
+    } else {
+        if (config.interactive_mode) printf("exec_func jmp ge %i false", addr);
     }
 }
 
@@ -161,6 +203,7 @@ void exec_MOV_reg(unsigned char regnum, int length, const unsigned char* str)
     } else if (reg_size == 4) {
         ((unsigned int*) results)[0] = convertTo_uint(bytes);
     }
+
 
     setRegisterValue(regnum, results);
 }

@@ -192,3 +192,57 @@ void printEnvData()
     // End the object and command
     printf("}\n");
 }
+
+char* getRegisterName(int regnum)
+{
+    log_trace("getRegisterName(regnum=%i)", regnum);
+    switch (regnum) {
+        case 0xA0: // eax
+            return "eax";
+            //return (void *) &env.eax;
+        case 0xB0: // ebx
+            return "ebx";
+        case 0xC0: // ecx
+            return "ecx";
+        case 0xD0: // edx
+            return "edx";
+        case 0xE1: // esi
+            return "esi";
+        case 0xE2: // edi
+            return "edi";
+        case 0xE3: // ebp
+            return "ebp";
+        case 0xE4: // esp
+            return "esp";
+        case 0xA1: // ax
+            return "ax";
+        case 0xB1: // bx
+            return "bx";
+        case 0xC1: // cx
+            return "cx";
+        case 0xD1: // dx
+            return "dx";
+        case 0xA2: // ah
+            return "ah";
+        case 0xB2: // bh
+            return "bh";
+        case 0xC2: // ch
+            return "ch";
+        case 0xD2: // dh
+            return "dh";
+        case 0xA3: // al
+            return "al";
+        case 0xB3: // bl
+            return "bl";
+        case 0xC3: // cl
+            return "cl";
+        case 0xD3: // dl
+            return "dl";
+        case 0xF1:
+            return "in";
+        case 0xF0:
+            return "out";
+        default:
+            log_error("Unknown register number in getRegisterName: 0x%x", regnum);
+    }
+}
