@@ -374,69 +374,69 @@ void execute(unsigned char opcode, char dtype,
     switch (opcode) {
         case CMP_char:
             // CMP takes 2 values
-            if (config.interactive_mode) printf("done_step decode CMP_char\n");
+            if (config.interactive_mode) printf("decode CMP_char\n");
             exec_CMP_char(*(char*) getOperandValue(op1_type, op1_str),
                           *(char*) getOperandValue(op2_type, op2_str));
             break;
         case CMP_uchar:
-            if (config.interactive_mode) printf("done_step decode CMP_uchar\n");
+            if (config.interactive_mode) printf("decode CMP_uchar\n");
             exec_CMP_uchar(*(unsigned char*) getOperandValue(op1_type, op1_str),
                           *(unsigned char*) getOperandValue(op2_type, op2_str));
             break;
         case CMP_short:
-            if (config.interactive_mode) printf("done_step decode CMP_short\n");
+            if (config.interactive_mode) printf("decode CMP_short\n");
             exec_CMP_short(convertTo_short((unsigned char*) getOperandValue(op1_type, op1_str)),
                            convertTo_short((unsigned char*) getOperandValue(op1_type, op1_str)));
             break;
         case CMP_ushort:
-            if (config.interactive_mode) printf("done_step decode CMP_ushort\n");
+            if (config.interactive_mode) printf("decode CMP_ushort\n");
             exec_CMP_ushort(convertTo_ushort((unsigned char*) getOperandValue(op1_type, op1_str)),
                            convertTo_ushort((unsigned char*) getOperandValue(op1_type, op1_str)));
             break;
         case CMP_int:
-            if (config.interactive_mode) printf("done_step decode CMP_int\n");
+            if (config.interactive_mode) printf("decode CMP_int\n");
             exec_CMP_int(convertTo_int((unsigned char*) getOperandValue(op1_type, op1_str)),
                          convertTo_int((unsigned char*) getOperandValue(op2_type, op2_str)));
             break;
         case CMP_uint:
-            if (config.interactive_mode) printf("done_step decode CMP_uint\n");
+            if (config.interactive_mode) printf("decode CMP_uint\n");
             exec_CMP_uint(convertTo_uint((unsigned char*) getOperandValue(op1_type, op1_str)),
                           convertTo_uint((unsigned char*) getOperandValue(op2_type, op2_str)));
             break;
         case CMP_float:
-            if (config.interactive_mode) printf("done_step decode CMP_float\n");
+            if (config.interactive_mode) printf("decode CMP_float\n");
             exec_CMP_float(*(float*) getOperandValue(op1_type, op1_str),
                           *(float*) getOperandValue(op2_type, op2_str));
             break;
         case JMP:
-            if (config.interactive_mode) printf("done_step decode JMP\n");
+            if (config.interactive_mode) printf("decode JMP\n");
             shield_exec_jump(exec_JMP, 5, 4)
             break;
         case JE:
-            if (config.interactive_mode) printf("done_step decode JE\n");
+            if (config.interactive_mode) printf("decode JE\n");
             shield_exec_jump(exec_JE, 5, 4);
         case JNE:
-            if (config.interactive_mode) printf("done_step decode JNE\n");
+            if (config.interactive_mode) printf("decode JNE\n");
             shield_exec_jump(exec_JNE, 5, 4);
             break;
         case JLT:
-            if (config.interactive_mode) printf("done_step decode JLT\n");
+            if (config.interactive_mode) printf("decode JLT\n");
             shield_exec_jump(exec_JLT, 5, 4);
             break;
         case JLE:
-            if (config.interactive_mode) printf("done_step decode JLE\n");
+            if (config.interactive_mode) printf("decode JLE\n");
             shield_exec_jump(exec_JLE, 5, 4);
             break;
         case JGT:
-            if (config.interactive_mode) printf("done_step decode JGT\n");
+            if (config.interactive_mode) printf("decode JGT\n");
             shield_exec_jump(exec_JGT, 5, 4);
             break;
         case JGE:
-            if (config.interactive_mode) printf("done_step decode JGE\n");
+            if (config.interactive_mode) printf("decode JGE\n");
             shield_exec_jump(exec_JGE, 5, 4);
             break;
         case MOV_1B:
-            if (config.interactive_mode) printf("done_step decode MOV_1B\n");
+            if (config.interactive_mode) printf("decode MOV_1B\n");
             if (op1_type == 1) {
                 exec_MOV_reg(op1_str[0], 1, (unsigned char*) getOperandValue(op2_type, op2_str));
             } else if (op1_type == 5) {
@@ -451,7 +451,7 @@ void execute(unsigned char opcode, char dtype,
             }
             break;
         case MOV_2B:
-            if (config.interactive_mode) printf("done_step decode MOV_2B\n");
+            if (config.interactive_mode) printf("decode MOV_2B\n");
             if (op1_type == 1) {
                 exec_MOV_reg(op1_str[0], 2, (unsigned char*) getOperandValue(op2_type, op2_str));
             } else if (op1_type == 5) {
@@ -465,7 +465,7 @@ void execute(unsigned char opcode, char dtype,
             }
             break;
         case MOV_4B:
-            if (config.interactive_mode) printf("done_step decode MOV_4B\n");
+            if (config.interactive_mode) printf("decode MOV_4B\n");
             if (op1_type == 1) {
                 exec_MOV_reg(op1_str[0], 4, (unsigned char*) getOperandValue(op2_type, op2_str));
             } else if (op1_type == 5) {
@@ -479,7 +479,7 @@ void execute(unsigned char opcode, char dtype,
             }
             break;
         case LEA:
-            if (config.interactive_mode) printf("done_step decode LEA\n");
+            if (config.interactive_mode) printf("decode LEA\n");
             if (op1_type == 1) {
                 // Load effective address into register
                 if (op2_type == 5) {
@@ -503,22 +503,22 @@ void execute(unsigned char opcode, char dtype,
             }
         default:
             if (opcode >= ADD_char && opcode <= ADD_float) {
-                if (config.interactive_mode) printf("done_step decode ADD_%s", convertTypeLetterToName(dtype));
+                if (config.interactive_mode) printf("decode ADD_%s", convertTypeLetterToName(dtype));
                 exec_arithmetic("ADD", dtype, op1_str, op1_type, op2_str, op2_type);
             } else if (opcode >= SUB_char && opcode <= SUB_float) {
-                if (config.interactive_mode) printf("done_step decode SUB_%s", convertTypeLetterToName(dtype));
+                if (config.interactive_mode) printf("decode SUB_%s", convertTypeLetterToName(dtype));
                 exec_arithmetic("SUB", dtype, op1_str, op1_type, op2_str, op2_type);
             } else if (opcode >= MUL_char && opcode <= MUL_float) {
-                if (config.interactive_mode) printf("done_step decode MUL_%s", convertTypeLetterToName(dtype));
+                if (config.interactive_mode) printf("decode MUL_%s", convertTypeLetterToName(dtype));
                 exec_arithmetic("MUL", dtype, op1_str, op1_type, op2_str, op2_type);
             } else if (opcode >= IDIV_char && IDIV_float) {
-                if (config.interactive_mode) printf("done_step decode IDIV_%s", convertTypeLetterToName(dtype));
+                if (config.interactive_mode) printf("decode IDIV_%s", convertTypeLetterToName(dtype));
                 exec_arithmetic("IDIV", dtype, op1_str, op1_type, op2_str, op2_type);
             } else if (opcode >= MOD_char && opcode <= MOD_float) {
-                if (config.interactive_mode) printf("done_step decode MOD_%s", convertTypeLetterToName(dtype));
+                if (config.interactive_mode) printf("decode MOD_%s", convertTypeLetterToName(dtype));
                 exec_arithmetic("MOD", dtype, op1_str, op1_type, op2_str, op2_type);
             } else if (opcode >= EDIV_char && opcode <= EDIV_float) {
-                if (config.interactive_mode) printf("done_step decode EDIV_%s", convertTypeLetterToName(dtype));
+                if (config.interactive_mode) printf("decode EDIV_%s", convertTypeLetterToName(dtype));
                 exec_arithmetic("EDIV", dtype, op1_str, op1_type, op2_str, op2_type);
             } else {
                 log_error("Unknown opode: %i", opcode);
