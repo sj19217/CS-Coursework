@@ -370,7 +370,6 @@ void execute(unsigned char opcode, char dtype,
     log_trace("execute(opcode=0x%02x, op1_type=%i, op1_len=%i, op1_str[0]=0x%02x, " \
                 "op2_type=%i, op2_len=%i, op2_str[0]=0x%02x", opcode, op1_type, op1_len, op1_str[0],
                 op2_type, op2_len, op2_str[0]);
-    printEnvData();
     pauseUntilPermitted(s_decode);
     switch (opcode) {
         case CMP_char:
@@ -531,15 +530,9 @@ void execute(unsigned char opcode, char dtype,
 void runLoop()
 {
     log_trace("runLoop()");
-    char firstLoop = 1;
-
     // Executes the instructions
     while (1)
     {
-        if (config.interactive_mode && !firstLoop) {
-            printf("done_step exec_func\n");
-            printEnvData();
-        }
         pauseUntilPermitted(s_fetch);
 
         // Fetch
@@ -611,9 +604,6 @@ void runLoop()
             dtype = 'n';
         }
 
-        if (config.interactive_mode) printf("done_step fetch %i\n", opcode);
-        pauseUntilPermitted(s_fetch_opbyte);
-
         // Interpret the operand type
         op1_type = (env.memory[env.pc+1] & 0b11110000) >> 4;
         op2_type = env.memory[env.pc+1] & 0b00001111;
@@ -629,21 +619,11 @@ void runLoop()
         unsigned char op1_str[op1_len];
         unsigned char op2_str[op2_len];
 
-        if (config.interactive_mode) printf("done_step fetch_opbyte %i\n", env.memory[env.pc+1]);
-        pauseUntilPermitted(s_fetch_op1);
-
         // Move the PC along to the start of the first operand and move to op1_str
         env.pc += 2;
         for (int i = 0; i < op1_len; i++) {
             op1_str[i] = env.memory[env.pc + i];
         }
-
-        if (config.interactive_mode) {
-            printf("done_step fetch_op1");
-            for (int i = 0; i < op1_len; i++) printf(" %i", op1_str[i]);
-            printf("\n");
-        }
-        pauseUntilPermitted(s_fetch_op2);
 
         // Move the PC along again and interpret
         env.pc += op1_len;
@@ -655,14 +635,21 @@ void runLoop()
         env.pc += op2_len;
 
         if (config.interactive_mode) {
-            printf("done_step fetch_op2");
-            for (int i = 0; i < op2_len; i++) printf(" %i", op2_str[i]);
+            // Report the finishing of the fetch stage
+            printf("fetch %i %i %i", ((int)env.pc-2-op1_len-op2_len),
+                                      opcode,
+                                      ((int)env.pc+1-op1_len-op2_len));
+            printf(" [%i", op1_str[0]);
+            for (int i = 1; i < op1_len; i++) printf(",%i", op1_str[i]);
+            printf("] [%i", op2_str[0]);
+            for (int i = 1; i < op2_len; i++) printf(",%i", op2_str[i]);
+            printf("]");
             printf("\n");
+            printEnvData();
         }
 
         // Execute
         execute(opcode, dtype, op1_type, op1_len, op1_str, op2_type, op2_len, op2_str);
-        firstLoop = 0;
     }
 }
 

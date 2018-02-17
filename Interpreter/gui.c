@@ -54,15 +54,6 @@ void handleCommand(char* inp)
                 next_pause = s_fetch;
                 break;
             case s_fetch:
-                next_pause = s_fetch_opbyte;
-                break;
-            case s_fetch_opbyte:
-                next_pause = s_fetch_op1;
-                break;
-            case s_fetch_op1:
-                next_pause = s_fetch_op2;
-                break;
-            case s_fetch_op2:
                 next_pause = s_decode;
                 break;
             case s_decode:

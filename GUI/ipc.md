@@ -62,3 +62,26 @@ The types of data that can return are:
   * cmp - A JSON object containing the values "e", "n" and "p", corresponding to those registers
   * memory - A JSON array of the full memory
   Naturally, this will be quite large. 
+
+The process by which the GUI reads information from the interpreter and turns it into basic animations is this:
+```plantuml
+@startuml
+start
+:Load interpreter;
+:Read interpreter config data;
+:Tell interpreter to start;
+
+while (Is process running?) is (yes)
+  :Tell interpreter to step;
+  :Read event info from interpreter;
+  :Convert to atomic actions and add to queue;
+  while (Is queue empty?) is (no)
+    :Wait until time dictated
+    by animation speed;
+    :Dequeue next item;
+    :Run animation;
+  endwhile (yes)
+endwhile (no)
+stop
+@enduml
+```
