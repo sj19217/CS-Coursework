@@ -159,10 +159,10 @@ void setRegisterValue(unsigned char regnum, void* data)
             env.ebx.ebx = *(unsigned int*) data;
             break;
         case 0xC0: // ecx
-            env.ebx.ebx = *(unsigned int*) data;
+            env.ecx.ecx = *(unsigned int*) data;
             break;
         case 0xD0: // edx
-            env.ebx.ebx = *(unsigned int*) data;
+            env.edx.edx = *(unsigned int*) data;
             break;
         case 0xE1: // esi
             env.esi = *(unsigned int*) data;
