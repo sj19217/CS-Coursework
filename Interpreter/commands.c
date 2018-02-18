@@ -531,5 +531,19 @@ void exec_arithmetic(char* function, char dtype, unsigned char* op1, int op1_typ
         setMemory(getMAddrFromArithmetic(op1_type, op1), 1, bytes+3);
     } else {    // Add arithmetic expressions too
         log_error("Cannot move result of arithmetic to location of type %i", op1_type);
+        return;
+    }
+
+    if (config.interactive_mode) {
+        // Operation name and data type
+        printf("exec_func arithmetic %s %s ", function, convertTypeLetterToName(dtype));
+        // Print the destination type and content
+        if (op1_type == 1) {
+            printf("reg %s ", getRegisterName(op1[0]));
+        } else if (op1_type >= 5) {
+            printf("maddr %i ", convertTo_uint(op1));
+        }
+        // TODO Print op1 and op2
+        
     }
 }

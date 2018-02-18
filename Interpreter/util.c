@@ -246,3 +246,18 @@ char* getRegisterName(int regnum)
             log_error("Unknown register number in getRegisterName: 0x%x", regnum);
     }
 }
+
+char* bytesAsJSONArray(unsigned char* str, int len)
+{
+    char* json = (char*) calloc((size_t) len, 5);
+    json[0] = '[';
+    for (int i = 0; i < len; i++) {
+        sprintf(json, "%i", str[i]);
+        if (i < len-1) {
+            sprintf(json, ", ");
+        }
+    }
+    sprintf(json, "]");
+
+    return json;
+}
