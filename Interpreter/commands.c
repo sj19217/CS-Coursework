@@ -196,6 +196,8 @@ void exec_MOV_reg(unsigned char regnum, int length, const unsigned char* str)
 
     void* results = malloc(reg_size);
 
+    // TODO What was this all for again? Why not just use bytes?
+
     if (reg_size == 1) {
         ((unsigned char*) results)[0] = convertTo_uchar(&bytes[3]);
     } else if (reg_size == 2) {
