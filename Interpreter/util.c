@@ -252,12 +252,25 @@ char* bytesAsJSONArray(unsigned char* str, int len)
     char* json = (char*) calloc((size_t) len, 5);
     json[0] = '[';
     for (int i = 0; i < len; i++) {
-        sprintf(json, "%i", str[i]);
+        sprintf(json+strlen(json), "%i", str[i]);
         if (i < len-1) {
-            sprintf(json, ", ");
+            sprintf(json+strlen(json), ", ");
         }
     }
-    sprintf(json, "]");
+    sprintf(json+strlen(json), "]");
 
     return json;
+}
+
+char* getOperandType(unsigned char num)
+{
+    if (num == 0) {
+        return "none";
+    } else if (num == 1) {
+        return "reg";
+    } else if (num >= 2 && num <= 4) {
+        return "immediate";
+    } else if (num >= 5 && num <= 10) {
+        return "maddr";
+    }
 }

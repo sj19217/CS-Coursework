@@ -363,6 +363,14 @@ void* getOperandValue(int type, unsigned char *str)
     }
 }
 
+// Written these to simplify the annoyingly complex task of printing status after
+// a MOV or LEA
+#define REPORT_MOV_REG(size) \
+printf("exec_func mov_reg %s %i %s %s %s\n", getRegisterName(op1_str[0]), size, \
+        getOperandType(op2_str[0]), bytesAsJSONArray(op2_str, op2_len), \
+        bytesAsJSONArray((unsigned char*) getOperandValue(op2_type, op2_str), \
+        getOpLen(op2_str[0])));
+
 void execute(unsigned char opcode, char dtype,
              int op1_type, int op1_len, unsigned char* op1_str,
              int op2_type, int op2_len, unsigned char* op2_str)
@@ -439,6 +447,7 @@ void execute(unsigned char opcode, char dtype,
             if (config.interactive_mode) printf("decode MOV_1B\n");
             if (op1_type == 1) {
                 exec_MOV_reg(op1_str[0], 1, (unsigned char*) getOperandValue(op2_type, op2_str));
+                REPORT_MOV_REG(1)
             } else if (op1_type == 5) {
                 unsigned char* data = getOperandValue(op2_type, op2_str);
                 exec_MOV_mem(convertTo_uint(op1_str), 1, data);
@@ -454,6 +463,7 @@ void execute(unsigned char opcode, char dtype,
             if (config.interactive_mode) printf("decode MOV_2B\n");
             if (op1_type == 1) {
                 exec_MOV_reg(op1_str[0], 2, (unsigned char*) getOperandValue(op2_type, op2_str));
+                REPORT_MOV_REG(2)
             } else if (op1_type == 5) {
                 exec_MOV_mem(op1_str[0], 2, (unsigned char*) getOperandValue(op2_type, op2_str));
             } else if (op1_type >= 6 && op1_type <= 10) {
@@ -468,6 +478,7 @@ void execute(unsigned char opcode, char dtype,
             if (config.interactive_mode) printf("decode MOV_4B\n");
             if (op1_type == 1) {
                 exec_MOV_reg(op1_str[0], 4, (unsigned char*) getOperandValue(op2_type, op2_str));
+                REPORT_MOV_REG(4)
             } else if (op1_type == 5) {
                 exec_MOV_mem(op1_str[0], 4, (unsigned char*) getOperandValue(op2_type, op2_str));
             } else if (op1_type >= 6 && op1_type <= 10) {
@@ -638,7 +649,7 @@ void runLoop()
             // Report the finishing of the fetch stage
             printf("fetch %i %i %i", ((int)env.pc-2-op1_len-op2_len),
                                       opcode,
-                                      ((int)env.pc+1-op1_len-op2_len));
+                                      env.memory[env.pc-1-op1_len-op2_len]);
             printf(" [%i", op1_str[0]);
             for (int i = 1; i < op1_len; i++) printf(",%i", op1_str[i]);
             printf("] [%i", op2_str[0]);
@@ -691,6 +702,8 @@ void run(unsigned char* bytecode, int iflag, int length)
 
 int main(int argc, char** argv)
 {
+    log_set_level(LOG_TRACE);
+
     log_trace("main(argc=%i, char** argv)", argc);
 
     // Process command line arguments

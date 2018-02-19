@@ -408,16 +408,16 @@ operand2.D = convertTo_##N((T*) getOperandValue(op2_type, (void*) op2));
 // The still complicated, though slightly less ugly, code for performing the given operation on all possible versions.
 #define CALCULATE_TOTAL(O) switch (dtype) { \
 case 'b':\
-    total.b = operand1.b O operand2.b;\
+    total.i = operand1.b O operand2.b;\
     break; \
 case 'B':\
-    total.B = operand1.B O operand2.B; \
+    total.i = operand1.B O operand2.B; \
     break; \
 case 'h': \
-    total.h = operand1.h O operand2.h;\
+    total.i = operand1.h O operand2.h;\
     break; \
 case 'H': \
-    total.H = operand1.H O operand2.H; \
+    total.i = operand1.H O operand2.H; \
     break; \
 case 'i': \
     total.i = operand1.i O operand2.i; \
@@ -465,14 +465,11 @@ void exec_arithmetic(char* function, char dtype, unsigned char* op1, int op1_typ
     }
 
     union {
-        signed char b;
-        unsigned char B;
-        int16_t h;
-        uint16_t H;
         int i;
-        unsigned int I;
         float f;
     } total;
+
+    // TODO Investigate if the adding of results to the various types causes errors
 
     if (strcmp(function, "ADD") == 0) {
         CALCULATE_TOTAL(+)
@@ -546,6 +543,15 @@ void exec_arithmetic(char* function, char dtype, unsigned char* op1, int op1_typ
             printf("maddr %i ", convertTo_uint(op1));
         }
         // Print op1 and op2 (bytes)
-
+        printf("%s ", bytesAsJSONArray((unsigned char*) getOperandValue(op1_type, op1), getOpLen(op1_type)));
+        printf("%s ", bytesAsJSONArray((unsigned char*) getOperandValue(op2_type, op2), getOpLen(op2_type)));
+        // Print result
+        if (strcmp(function, "EDIV") == 0) {
+            // Result is a float
+            printf("%f", total.f);
+        } else {
+            // Result is an integer
+            printf("%i", total.i);
+        }
     }
 }

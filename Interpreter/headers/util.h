@@ -28,6 +28,8 @@ _Bool startsWith(const char* a, const char* b);
 char* convertTypeLetterToName(char letter);
 void printEnvData();
 char* getRegisterName(int regnum);
+char* bytesAsJSONArray(unsigned char* str, int len);
+char* getOperandType(unsigned char num);
 
 // Stuff from csv.c
 void free_csv_line( char **parsed );
