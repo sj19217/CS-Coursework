@@ -543,7 +543,7 @@ void exec_arithmetic(char* function, char dtype, unsigned char* op1, int op1_typ
         } else if (op1_type >= 5) {
             printf("maddr %i ", convertTo_uint(op1));
         }
-        // TODO Print op1 and op2
-        
+        // Print op1 and op2 (bytes)
+
     }
 }

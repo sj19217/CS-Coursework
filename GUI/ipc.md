@@ -53,7 +53,7 @@ The types of data that can return are:
   * arithmetic <opname> <type> <desttype> <dest> <op1> <op2> <res> - Performed a piece of arithmetic. `opname` is the
     name of the operation (e.g. "ADD" or "IDIV"). `type` is the type of the data, like `char`. `desttype` is either
     "maddr" or "reg", and then `dest` is either the register name or memory address depending on which `desttype` is
-    given. Then `op1` and `op2` are the decoded values of the operands and `res` is the result.
+    given. Then `op1` and `op2` are the decoded values (in bytes) of the operands and `res` is the result.
 * config <config_json> - Gives the content of the config dict in a JSON form
 * data <content> - Given frequently by the interpreter to give status information. `content` is a JSON string,
   with these attributes:
