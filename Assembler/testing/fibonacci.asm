@@ -10,7 +10,7 @@ section.text
 MOV eax 1
 MOV ebx 1
 loop MOV 2B temp eax
-ADD int eax ebx
+ADD char eax ebx
 ADD short ebx temp
 
 SUB char i 1

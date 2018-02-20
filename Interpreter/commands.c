@@ -402,8 +402,8 @@ void exec_LEA_mem(unsigned int maddr_to, unsigned int pointer)
 //}
 
 // The complicated, ugly code needed to get the value of an operand and place it in the right version of the union
-#define SET_OPERANDS(D, T, N) operand1.D = convertTo_##N((T*) getOperandValue(op1_type, (void*) op1)); \
-operand2.D = convertTo_##N((T*) getOperandValue(op2_type, (void*) op2));
+#define SET_OPERANDS(D, T, N) operand1.D = convertTo_##N((T*) reverse(getOperandValue(op1_type, (void*) op1), len)); \
+operand2.D = convertTo_##N((T*) reverse(getOperandValue(op2_type, (void*) op2), len));
 
 // The still complicated, though slightly less ugly, code for performing the given operation on all possible versions.
 #define CALCULATE_TOTAL(O) switch (dtype) { \
@@ -443,6 +443,8 @@ void exec_arithmetic(char* function, char dtype, unsigned char* op1, int op1_typ
     union OperandValue operand1;
     union OperandValue operand2;
 
+    unsigned char len = getSizeOfType(dtype);
+
     // Set the operands to have the correct value, written in their correct data type
     switch (dtype)
     {
@@ -468,6 +470,9 @@ void exec_arithmetic(char* function, char dtype, unsigned char* op1, int op1_typ
         int i;
         float f;
     } total;
+
+    // Recording this here so the original value can be printed later
+    char* initial_op1 = bytesAsJSONArray((unsigned char*) getOperandValue(op1_type, op1), getOpLen(op1_type));
 
     // TODO Investigate if the adding of results to the various types causes errors
 
@@ -543,7 +548,7 @@ void exec_arithmetic(char* function, char dtype, unsigned char* op1, int op1_typ
             printf("maddr %i ", convertTo_uint(op1));
         }
         // Print op1 and op2 (bytes)
-        printf("%s ", bytesAsJSONArray((unsigned char*) getOperandValue(op1_type, op1), getOpLen(op1_type)));
+        printf("%s ", initial_op1);
         printf("%s ", bytesAsJSONArray((unsigned char*) getOperandValue(op2_type, op2), getOpLen(op2_type)));
         // Print result
         if (strcmp(function, "EDIV") == 0) {

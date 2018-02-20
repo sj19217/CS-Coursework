@@ -274,3 +274,72 @@ char* getOperandType(unsigned char num)
         return "maddr";
     }
 }
+
+// Gets the size that the byte string returned by getOperandValue would be.
+// type - The operand type
+// str - The raw (non-decoded) content of the operand
+// default_ - In the event that this is a memory address, then a default is used,
+//            since the caller will probably know how many bytes from that address should be used
+int getOperandValueLength(unsigned char type, unsigned char* str, int default_)
+{
+    switch (type) {
+        case 0:
+            return 0;
+        case 1:
+            // Register
+            return getRegisterSize(str[0]);
+        case 2: // 1-byte immediate
+            return 1;
+        case 3: // 2-byte immediate
+            return 2;
+        case 4: // 4-byte-immediate
+            return 4;
+        case 5:
+            return default_;
+        case 6:
+            return default_;
+        case 7:
+            return default_;
+        case 8:
+            return default_;
+        case 9:
+            return default_;
+        case 10:
+            return default_;
+        default:
+            log_error("Unknown type in getOperandValueLength(): %i", type);
+            return 0;
+    }
+}
+
+// Reverses the given string
+unsigned char* reverse(const unsigned char* forward, int length)
+{
+    unsigned char* backward = calloc(1, (size_t) length);
+    for (int i = 0; i < length; i++) {
+        backward[i] = forward[length - 1 - i];
+    }
+    return backward;
+}
+
+unsigned char getSizeOfType(char typeletter)
+{
+    switch (typeletter) {
+        case 'b':
+            return 1;
+        case 'B':
+            return 1;
+        case 'h':
+            return 2;
+        case 'H':
+            return 2;
+        case 'i':
+            return 4;
+        case 'I':
+            return 4;
+        case 'f':
+            return 4;
+        default:
+            log_error("Invalid type letter in getSizeOfType: %c", typeletter);
+    }
+}

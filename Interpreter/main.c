@@ -371,6 +371,14 @@ printf("exec_func mov_reg %s %i %s %s %s\n", getRegisterName(op1_str[0]), size, 
         bytesAsJSONArray((unsigned char*) getOperandValue(op2_type, op2_str), \
         getOpLen(op2_str[0])));
 
+#define FIT_DECODED_OPERAND(size) \
+unsigned char* bytes = calloc(1, size); \
+int len = getOperandValueLength(op2_type, op2_str, size); \
+unsigned char* val_str = reverse((unsigned char*) getOperandValue(op2_type, op2_str), len); \
+for (int i = 0; i < len; i++) { \
+    bytes[i + ((size) - len)] = val_str[i]; \
+}
+
 void execute(unsigned char opcode, char dtype,
              int op1_type, int op1_len, unsigned char* op1_str,
              int op2_type, int op2_len, unsigned char* op2_str)
@@ -465,11 +473,12 @@ void execute(unsigned char opcode, char dtype,
                 exec_MOV_reg(op1_str[0], 2, (unsigned char*) getOperandValue(op2_type, op2_str));
                 REPORT_MOV_REG(2)
             } else if (op1_type == 5) {
-                exec_MOV_mem(op1_str[0], 2, (unsigned char*) getOperandValue(op2_type, op2_str));
+                //unsigned char* bytes = (unsigned char*) getOperandValue(op2_type, op2_str);
+                FIT_DECODED_OPERAND(2)
+                exec_MOV_mem(convertTo_uint(op1_str), 2, bytes);
             } else if (op1_type >= 6 && op1_type <= 10) {
-                exec_MOV_mem(getMAddrFromArithmetic(op1_type, op1_str),
-                             2,
-                             (unsigned char*) getOperandValue(op2_type, op2_str));
+                FIT_DECODED_OPERAND(2)
+                exec_MOV_mem(getMAddrFromArithmetic(op1_type, op1_str), 2, bytes);
             } else {
                 printf("Cannot move content to form %i\n", op1_type);
             }
@@ -480,11 +489,11 @@ void execute(unsigned char opcode, char dtype,
                 exec_MOV_reg(op1_str[0], 4, (unsigned char*) getOperandValue(op2_type, op2_str));
                 REPORT_MOV_REG(4)
             } else if (op1_type == 5) {
-                exec_MOV_mem(op1_str[0], 4, (unsigned char*) getOperandValue(op2_type, op2_str));
+                FIT_DECODED_OPERAND(4)
+                exec_MOV_mem(convertTo_uint(op1_str), 4, (unsigned char*) getOperandValue(op2_type, op2_str));
             } else if (op1_type >= 6 && op1_type <= 10) {
-                exec_MOV_mem(getMAddrFromArithmetic(op1_type, op1_str),
-                             4,
-                             (unsigned char*) getOperandValue(op2_type, op2_str));
+                FIT_DECODED_OPERAND(4)
+                exec_MOV_mem(getMAddrFromArithmetic(op1_type, op1_str), 4, bytes);
             } else {
                 printf("Cannot move content to form %i\n", op1_type);
             }
@@ -514,22 +523,22 @@ void execute(unsigned char opcode, char dtype,
             }
         default:
             if (opcode >= ADD_char && opcode <= ADD_float) {
-                if (config.interactive_mode) printf("decode ADD_%s", convertTypeLetterToName(dtype));
+                if (config.interactive_mode) printf("decode ADD_%s\n", convertTypeLetterToName(dtype));
                 exec_arithmetic("ADD", dtype, op1_str, op1_type, op2_str, op2_type);
             } else if (opcode >= SUB_char && opcode <= SUB_float) {
-                if (config.interactive_mode) printf("decode SUB_%s", convertTypeLetterToName(dtype));
+                if (config.interactive_mode) printf("decode SUB_%s\n", convertTypeLetterToName(dtype));
                 exec_arithmetic("SUB", dtype, op1_str, op1_type, op2_str, op2_type);
             } else if (opcode >= MUL_char && opcode <= MUL_float) {
-                if (config.interactive_mode) printf("decode MUL_%s", convertTypeLetterToName(dtype));
+                if (config.interactive_mode) printf("decode MUL_%s\n", convertTypeLetterToName(dtype));
                 exec_arithmetic("MUL", dtype, op1_str, op1_type, op2_str, op2_type);
             } else if (opcode >= IDIV_char && IDIV_float) {
-                if (config.interactive_mode) printf("decode IDIV_%s", convertTypeLetterToName(dtype));
+                if (config.interactive_mode) printf("decode IDIV_%s\n", convertTypeLetterToName(dtype));
                 exec_arithmetic("IDIV", dtype, op1_str, op1_type, op2_str, op2_type);
             } else if (opcode >= MOD_char && opcode <= MOD_float) {
-                if (config.interactive_mode) printf("decode MOD_%s", convertTypeLetterToName(dtype));
+                if (config.interactive_mode) printf("decode MOD_%s\n", convertTypeLetterToName(dtype));
                 exec_arithmetic("MOD", dtype, op1_str, op1_type, op2_str, op2_type);
             } else if (opcode >= EDIV_char && opcode <= EDIV_float) {
-                if (config.interactive_mode) printf("decode EDIV_%s", convertTypeLetterToName(dtype));
+                if (config.interactive_mode) printf("decode EDIV_%s\n", convertTypeLetterToName(dtype));
                 exec_arithmetic("EDIV", dtype, op1_str, op1_type, op2_str, op2_type);
             } else {
                 log_error("Unknown opode: %i", opcode);

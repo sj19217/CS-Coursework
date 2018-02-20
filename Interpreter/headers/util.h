@@ -30,6 +30,9 @@ void printEnvData();
 char* getRegisterName(int regnum);
 char* bytesAsJSONArray(unsigned char* str, int len);
 char* getOperandType(unsigned char num);
+int getOperandValueLength(unsigned char type, unsigned char* str, int default_);
+unsigned char* reverse(const unsigned char* forward, int length);
+unsigned char getSizeOfType(char typeletter);
 
 // Stuff from csv.c
 void free_csv_line( char **parsed );
