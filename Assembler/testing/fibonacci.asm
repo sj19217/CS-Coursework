@@ -10,10 +10,10 @@ section.text
 MOV eax 1
 MOV ebx 1
 loop MOV 2B temp eax
-ADD eax ebx
-ADD ebx temp
+ADD int eax ebx
+ADD short ebx temp
 
-SUB i 1
+SUB char i 1
 MOV out eax
 CMP char i 0
 JNE loop
