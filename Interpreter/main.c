@@ -702,20 +702,20 @@ void run(unsigned char* bytecode, int iflag, int length)
 
 int main(int argc, char** argv)
 {
-    log_set_level(LOG_TRACE);
-
-    log_trace("main(argc=%i, char** argv)", argc);
+    //log_trace("main(argc=%i, char** argv)", argc);
 
     // Process command line arguments
     int iflag = 0;
     char fname[100];
     int has_fname = 0;
+    long logLevel = 0;
+    char* end;
 
     // -i means instructions, meaning that the GUI program is listening and wants display instructions
     // -f <filename>, meaning the filename
 
     int c;
-    while ((c = getopt(argc, argv, "if:")) != -1)
+    while ((c = getopt(argc, argv, "id:f:")) != -1)
     {
         switch (c){
             case 'i':
@@ -724,10 +724,15 @@ int main(int argc, char** argv)
             case 'f':
                 strcpy(fname, optarg);
                 has_fname = 1;
+                break;
+            case 'd':
+                logLevel = strtol(optarg, &end, 10);
             default:
                 break;
         }
     }
+
+    log_set_level(logLevel);
 
     // Check that a filename was given
     if (has_fname == 0) {
