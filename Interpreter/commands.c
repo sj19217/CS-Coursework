@@ -548,10 +548,10 @@ void exec_arithmetic(char* function, char dtype, unsigned char* op1, int op1_typ
         // Print result
         if (strcmp(function, "EDIV") == 0) {
             // Result is a float
-            printf("%f", total.f);
+            printf("%f\n", total.f);
         } else {
             // Result is an integer
-            printf("%i", total.i);
+            printf("%i\n", total.i);
         }
     }
 }

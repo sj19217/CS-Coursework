@@ -33,6 +33,7 @@ The commands given to the interpreter are:
   * Read operand 2 data
   * Switch statement entry
   * Execution function
+* env - Prints out a "data" statement with the environment in JSON
 
 The types of data that can return are:
 * start - The initial setup procedures, as far as just about to get the first opcode
@@ -61,7 +62,7 @@ The types of data that can return are:
   * genregs - A nested JSON object with all of the registers ("eax", "ebx", etc)
   * cmp - A JSON object containing the values "e", "n" and "p", corresponding to those registers
   * memory - A JSON array of the full memory
-  Naturally, this will be quite large. 
+  Naturally, this will be quite large.
 
 The process by which the GUI reads information from the interpreter and turns it into basic animations is this:
 ```plantuml

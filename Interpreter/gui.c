@@ -69,5 +69,8 @@ void handleCommand(char* inp)
         sscanf(inp, "get_mem %d", &max_addr);
 
         linearMemdump(max_addr);
+    } else if (startsWith(inp, "env")) {
+        // Print out the environment in JSON
+        printEnvData();
     }
 }

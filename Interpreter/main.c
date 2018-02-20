@@ -656,7 +656,6 @@ void runLoop()
             for (int i = 1; i < op2_len; i++) printf(",%i", op2_str[i]);
             printf("]");
             printf("\n");
-            printEnvData();
         }
 
         // Execute
@@ -695,7 +694,6 @@ void run(unsigned char* bytecode, int iflag, int length)
     // Start running instructions
     if (config.interactive_mode) {
         printf("done_step start\n");
-        printEnvData();
     }
     runLoop();
 }
