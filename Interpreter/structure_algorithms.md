@@ -427,7 +427,7 @@ stop
 @enduml
 ```
 
-## commands.c/exec_MOV_mem
+## `commands.c/exec_MOV_mem`
 
 The next MOV function is to move data to the memory.
 
@@ -443,5 +443,54 @@ start
 while (memory remaining?) is (yes)
     :Move byte to memory;
 endwhile
+@enduml
+```
+
+## `commands.c/exec_LEA_reg`
+
+```pseudocode
+function exec_LEA_reg(register, address)
+    register_size = getRegisterSize(register)
+    bytes = convertToBytes(address)
+
+    if register_size == 1 then
+        setRegisterValue(register, last in bytes)
+    else if register_size == 2 then
+        setRegisterValue(register, last 2 in bytes)
+    else if register_size == 4 then
+        setRegisterValue(register, bytes)
+end function
+```
+
+```plantuml
+@startuml
+start
+:Get register size;
+:Get bytes;
+if (register_size) then(1)
+    :Set register to last byte;
+elseif (register_size) then (2)
+    :Set register to last 2 bytes;
+elseif (register_size) then (4)
+    :Set register to contain bytes;
+endif
+stop
+@enduml
+```
+
+## `commands.c/exec_LEA_mem`
+
+```pseudocode
+function exec_LEA_mem(destination, from)
+    bytes = convertToBytes(from)
+    Set 4 bytes of memory
+end function
+```
+
+```plantuml
+@startuml
+start
+:Get bytes from given location;
+:Move 4 bytes to destination;
 @enduml
 ```
