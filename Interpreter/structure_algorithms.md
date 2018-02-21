@@ -494,3 +494,47 @@ start
 :Move 4 bytes to destination;
 @enduml
 ```
+
+## `commands.c/exec_arithmetic`
+
+All of the arithmetic stuff.
+
+```pseudocode
+procedure exec_arithmetic(function, datatype, op1, op1_type, op2, op2_type)
+    length = length of datatype
+
+    switch datatype:
+        case 'b':
+            operand1 = get op1 as char
+            operand2 = get op2 as char
+        # All other data types like this
+    
+    if function == "ADD"
+        total = operand1 + operand2
+    elseif function == "SUB"
+        total = operand1 - operand2
+    # Like this for MUL, IDIV, MOD and EDIV
+
+    bytes = convert total to bytes
+
+    if op1_type == "register"
+        setRegister(op1, bytes)
+    elseif op1_type == "memory"
+        setMemory(op1, bytes)
+    elseif op1_type == "arithmetic"
+        setMemory(interpretArithmetic(op1), bytes)
+end procedure
+```
+
+```plantuml
+@startuml
+start
+:Get length of data type;
+:Set operands based on data type;
+:Perform operation;
+:Convert total to bytes;
+:Write bytes to destination;
+stop
+@enduml
+```
+
