@@ -388,7 +388,7 @@ void* getOperandValueR(unsigned char type, unsigned char *str, _Bool do_reverse,
 // Written these to simplify the annoyingly complex task of printing status after
 // a MOV or LEA
 #define REPORT_MOV_REG(size) \
-printf("exec_func mov_reg %s %i %s %s %s\n", getRegisterName(op1_str[0]), size, \
+if (config.interactive_mode) printf("exec_func mov_reg %s %i %s %s %s\n", getRegisterName(op1_str[0]), size, \
         getOperandType(op2_type), bytesAsJSONArray(op2_str, op2_len), \
         bytesAsJSONArray((unsigned char*) getOperandValue(op2_type, op2_str), \
         getOperandValueLength(op2_type, op2_str, size)));

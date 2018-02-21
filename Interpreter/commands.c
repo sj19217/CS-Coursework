@@ -74,7 +74,7 @@ void exec_JMP(unsigned int addr)
     log_trace("exec_JMP(addr=0x%x)", addr);
     pauseUntilPermitted(s_exec_func);
     env.pc = addr;
-    if (config.interactive_mode) printf("exec_func jmp always %i true", addr);
+    if (config.interactive_mode) printf("exec_func jmp always %i true\n", addr);
 }
 
 void exec_JE(unsigned int addr)
@@ -83,9 +83,9 @@ void exec_JE(unsigned int addr)
     pauseUntilPermitted(s_exec_func);
     if (env.cmp_e) {
         env.pc = addr;
-        if (config.interactive_mode) printf("exec_func jmp e %i true", addr);
+        if (config.interactive_mode) printf("exec_func jmp e %i true\n", addr);
     } else {
-        if (config.interactive_mode) printf("exec_func jmp e %i false", addr);
+        if (config.interactive_mode) printf("exec_func jmp e %i false\n", addr);
     }
 }
 
@@ -95,9 +95,9 @@ void exec_JNE(unsigned int addr)
     pauseUntilPermitted(s_exec_func);
     if (!env.cmp_e) {
         env.pc = addr;
-        if (config.interactive_mode) printf("exec_func jmp ne %i true", addr);
+        if (config.interactive_mode) printf("exec_func jmp ne %i true\n", addr);
     } else {
-        if (config.interactive_mode) printf("exec_func jmp ne %i false", addr);
+        if (config.interactive_mode) printf("exec_func jmp ne %i false\n", addr);
     }
 }
 
@@ -107,9 +107,9 @@ void exec_JLT(unsigned int addr)
     pauseUntilPermitted(s_exec_func);
     if (env.cmp_n) {
         env.pc = addr;
-        if (config.interactive_mode) printf("exec_func jmp lt %i true", addr);
+        if (config.interactive_mode) printf("exec_func jmp lt %i true\n", addr);
     } else {
-        if (config.interactive_mode) printf("exec_func jmp lt %i false", addr);
+        if (config.interactive_mode) printf("exec_func jmp lt %i false\n", addr);
     }
 }
 
@@ -119,9 +119,9 @@ void exec_JLE(unsigned int addr)
     pauseUntilPermitted(s_exec_func);
     if (env.cmp_n || env.cmp_e) {
         env.pc = addr;
-        if (config.interactive_mode) printf("exec_func jmp le %i true", addr);
+        if (config.interactive_mode) printf("exec_func jmp le %i true\n", addr);
     } else {
-        if (config.interactive_mode) printf("exec_func jmp le %i false", addr);
+        if (config.interactive_mode) printf("exec_func jmp le %i false\n", addr);
     }
 }
 
@@ -131,9 +131,9 @@ void exec_JGT(unsigned int addr)
     pauseUntilPermitted(s_exec_func);
     if (env.cmp_p) {
         env.pc = addr;
-        if (config.interactive_mode) printf("exec_func jmp gt %i true", addr);
+        if (config.interactive_mode) printf("exec_func jmp gt %i true\n", addr);
     } else {
-        if (config.interactive_mode) printf("exec_func jmp gt %i false", addr);
+        if (config.interactive_mode) printf("exec_func jmp gt %i false\n", addr);
     }
 }
 
@@ -143,9 +143,9 @@ void exec_JGE(unsigned int addr)
     pauseUntilPermitted(s_exec_func);
     if (env.cmp_p || env.cmp_e) {
         env.pc = addr;
-        if (config.interactive_mode) printf("exec_func jmp ge %i true", addr);
+        if (config.interactive_mode) printf("exec_func jmp ge %i true\n", addr);
     } else {
-        if (config.interactive_mode) printf("exec_func jmp ge %i false", addr);
+        if (config.interactive_mode) printf("exec_func jmp ge %i false\n", addr);
     }
 }
 
