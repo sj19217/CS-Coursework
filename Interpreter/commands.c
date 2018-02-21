@@ -154,7 +154,7 @@ void exec_JGE(unsigned int addr)
 // However, there are different functions depending on whether the destination is a register or a memory address.
 void exec_MOV_reg(unsigned char regnum, int length, const unsigned char* str)
 {
-    log_trace("exec_MOV_reg(regnum=0x%02x, length=%i, str[0]=0x%02x", regnum, length, str[0]);
+    log_trace("exec_MOV_reg(regnum=0x%02x, length=%i, str[0]=0x%02x)", regnum, length, str[0]);
     pauseUntilPermitted(s_exec_func);
     unsigned char reg_size = getRegisterSize(regnum);
 
@@ -402,8 +402,8 @@ void exec_LEA_mem(unsigned int maddr_to, unsigned int pointer)
 //}
 
 // The complicated, ugly code needed to get the value of an operand and place it in the right version of the union
-#define SET_OPERANDS(D, T, N) operand1.D = convertTo_##N((T*) reverse(getOperandValue(op1_type, (void*) op1), len)); \
-operand2.D = convertTo_##N((T*) reverse(getOperandValue(op2_type, (void*) op2), len));
+#define SET_OPERANDS(D, T, N, S) operand1.D = convertTo_##N(getOperandValueR(op1_type, (void*) op1, op1_type > 5 || op1_type == 1, S)); \
+operand2.D = convertTo_##N(getOperandValueR(op2_type, (void*) op2, op2_type == 1, S));
 
 // The still complicated, though slightly less ugly, code for performing the given operation on all possible versions.
 #define CALCULATE_TOTAL(O) switch (dtype) { \
@@ -434,7 +434,8 @@ default: \
 }
 
 // The prototype function that will replace almost anything
-void exec_arithmetic(char* function, char dtype, unsigned char* op1, int op1_type, unsigned char* op2, int op2_type)
+void exec_arithmetic(char* function, char dtype, unsigned char* op1, unsigned char op1_type,
+                     unsigned char* op2, unsigned char op2_type)
 {
     log_trace("exec_arithmetic(function=%s, dtype=%c, op1[0]=%c, op1_type=%i, op2[0]=%c, op2_type=%i",
                 function, dtype, op1[0], op1_type, op2[0], op2_type);
@@ -449,19 +450,19 @@ void exec_arithmetic(char* function, char dtype, unsigned char* op1, int op1_typ
     switch (dtype)
     {
         case 'b':
-            SET_OPERANDS(b, char, char); break;
+            SET_OPERANDS(b, char, char, 1); break;
         case 'B':
-            SET_OPERANDS(B, unsigned char, uchar); break;
+            SET_OPERANDS(B, unsigned char, uchar, 1); break;
         case 'h':
-            SET_OPERANDS(h, int16_t, short); break;
+            SET_OPERANDS(h, int16_t, short, 2); break;
         case 'H':
-            SET_OPERANDS(H, uint16_t, ushort); break;
+            SET_OPERANDS(H, uint16_t, ushort, 2); break;
         case 'i':
-            SET_OPERANDS(i, int, int); break;
+            SET_OPERANDS(i, int, int, 4); break;
         case 'I':
-            SET_OPERANDS(I, unsigned int, uint); break;
+            SET_OPERANDS(I, unsigned int, uint, 4); break;
         case 'f':
-            SET_OPERANDS(f, float, float); break;
+            SET_OPERANDS(f, float, float, 4); break;
         default:
             log_error("Unknown data type: %c", dtype);
     }
@@ -488,16 +489,22 @@ void exec_arithmetic(char* function, char dtype, unsigned char* op1, int op1_typ
         switch (dtype) {
             case 'b':
                 total.i = operand1.b % operand2.b;
+                break;
             case 'B':
                 total.i = operand1.B % operand2.B;
+                break;
             case 'h':
                 total.i = operand1.h % operand2.h;
+                break;
             case 'H':
                 total.i = operand1.H % operand2.H;
+                break;
             case 'i':
                 total.i = operand1.i % operand2.i;
+                break;
             case 'I':
                 total.i = operand1.I % operand2.I;
+                break;
             default:
                 log_error("Unknown type: %c", dtype);
         }
@@ -505,18 +512,25 @@ void exec_arithmetic(char* function, char dtype, unsigned char* op1, int op1_typ
         switch (dtype) {
             case 'b':
                 total.f = (float) operand1.b / (float) operand2.b;
+                break;
             case 'B':
                 total.f = (float) operand1.B / (float) operand2.B;
+                break;
             case 'h':
                 total.f = (float) operand1.h / (float) operand2.h;
+                break;
             case 'H':
                 total.f = (float) operand1.H / (float) operand2.H;
+                break;
             case 'i':
                 total.f = (float) operand1.i / (float) operand2.i;
+                break;
             case 'I':
                 total.f = (float) operand1.I / (float) operand2.I;
+                break;
             case 'f':
                 total.f = operand1.f / operand2.f;
+                break;
             default:
                 log_error("Unknown type: %c", dtype);
                 return;
@@ -530,7 +544,7 @@ void exec_arithmetic(char* function, char dtype, unsigned char* op1, int op1_typ
         setRegisterValue(op1[0], (void*) bytes);
     } else if (op1_type == 5) {
         // Memory location
-        setMemory(convertTo_uint(op1), 1, bytes+3);
+        setMemory(convertTo_uint(op1), 1, reverse(bytes, getSizeOfType(dtype)));
     } else if (op1_type >= 6 && op1_type <= 10) {
         setMemory(getMAddrFromArithmetic(op1_type, op1), 1, bytes+3);
     } else {    // Add arithmetic expressions too

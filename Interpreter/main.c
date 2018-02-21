@@ -326,24 +326,31 @@ unsigned long getMAddrFromArithmetic(int type, unsigned char *str)
     }
 }
 
-void* getOperandValue(int type, unsigned char *str)
+void* getOperandValue(unsigned char type, unsigned char *str)
 {
     // Gets the value represented by this, including (e.g.) dereferencing the memory address or getting a register's value
     log_trace("getOperandValue(type=%i, str[0]=0x%x)", type, str[0]);
+
+    int val_length = getOperandValueLength(type, str, 4);
+    unsigned char* bytes = calloc(1, (size_t) val_length);
+
     unsigned long maddr;
     switch (type) {
         case 0:
-            //return NULL;
-            return (void*) &env.memory[0];
+            break;
         case 1: // A register
             // Take one byte
-            return getRegisterValue(str[0]);
+            bytes = getRegisterValue(str[0]);
+            break;
         case 2: // 1-byte immediate
-            return (void*) str;
+            bytes = str;
+            break;
         case 3: // 2-byte immediate
-            return (void*) str;
+            bytes = str;
+            break;
         case 4: //4-byte immediate
-            return (void*) str;
+            bytes = str;
+            break;
         case 5: // Memory address
             maddr = 0;
             maddr += str[0] << 24;
@@ -351,15 +358,30 @@ void* getOperandValue(int type, unsigned char *str)
             maddr += str[2] << 8;
             maddr += str[3];
             // Copy 4 bytes from memory into a separate variable
-            return (void*) &env.memory[maddr];
+            bytes = &env.memory[maddr];
+            break;
         default:
             if (type >= 6 && type <= 10) {
                 // Arithmetic type
                 maddr = getMAddrFromArithmetic(type, str);
-                return (void*) &env.memory[maddr];
+                bytes = &env.memory[maddr];
+            } else {
+                printf("Unknown type in getOperandValue: 0x%x\n", type);
+                break;
             }
-            printf("Unknown type in getOperandValue: 0x%x\n", type);
-            break;
+    }
+
+    return bytes;
+}
+
+void* getOperandValueR(unsigned char type, unsigned char *str, _Bool do_reverse, unsigned int length)
+{
+    unsigned char* bytes = getOperandValue(type, str);
+
+    if (do_reverse) {
+        return reverse(bytes, length);
+    } else {
+        return bytes;
     }
 }
 
@@ -367,24 +389,24 @@ void* getOperandValue(int type, unsigned char *str)
 // a MOV or LEA
 #define REPORT_MOV_REG(size) \
 printf("exec_func mov_reg %s %i %s %s %s\n", getRegisterName(op1_str[0]), size, \
-        getOperandType(op2_str[0]), bytesAsJSONArray(op2_str, op2_len), \
+        getOperandType(op2_type), bytesAsJSONArray(op2_str, op2_len), \
         bytesAsJSONArray((unsigned char*) getOperandValue(op2_type, op2_str), \
-        getOpLen(op2_str[0])));
+        getOperandValueLength(op2_type, op2_str, size)));
 
 #define FIT_DECODED_OPERAND(size) \
 unsigned char* bytes = calloc(1, size); \
 int len = getOperandValueLength(op2_type, op2_str, size); \
-unsigned char* val_str = reverse((unsigned char*) getOperandValue(op2_type, op2_str), len); \
+unsigned char* val_str = (unsigned char*) getOperandValueR(op2_type, op2_str, op2_type==1, getOperandValueLength(op2_type, op2_str, size)); \
 for (int i = 0; i < len; i++) { \
     bytes[i + ((size) - len)] = val_str[i]; \
 }
 
 void execute(unsigned char opcode, char dtype,
-             int op1_type, int op1_len, unsigned char* op1_str,
-             int op2_type, int op2_len, unsigned char* op2_str)
+             unsigned char op1_type, int op1_len, unsigned char* op1_str,
+             unsigned char op2_type, int op2_len, unsigned char* op2_str)
 {
     log_trace("execute(opcode=0x%02x, op1_type=%i, op1_len=%i, op1_str[0]=0x%02x, " \
-                "op2_type=%i, op2_len=%i, op2_str[0]=0x%02x", opcode, op1_type, op1_len, op1_str[0],
+                "op2_type=%i, op2_len=%i, op2_str[0]=0x%02x)", opcode, op1_type, op1_len, op1_str[0],
                 op2_type, op2_len, op2_str[0]);
     pauseUntilPermitted(s_decode);
     switch (opcode) {

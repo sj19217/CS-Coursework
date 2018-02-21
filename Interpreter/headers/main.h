@@ -84,10 +84,11 @@ void setRegisterValue(unsigned char regnum, void *data);
 void* getRegisterValue(unsigned char regnum);
 unsigned long interpretArithmeticVariable(unsigned char val);
 unsigned long getMAddrFromArithmetic(int type, unsigned char *str);
-void* getOperandValue(int type, unsigned char *str);
+void* getOperandValue(unsigned char type, unsigned char *str);
+void* getOperandValueR(unsigned char type, unsigned char *str, _Bool do_reverse, unsigned int length);
 void execute(unsigned char opcode, char type,
-             int op1_type, int op1_len, unsigned char* op1_str,
-             int op2_type, int op2_len, unsigned char* op2_str);
+             unsigned char op1_type, int op1_len, unsigned char* op1_str,
+             unsigned char op2_type, int op2_len, unsigned char* op2_str);
 void runLoop();
 void run(unsigned char* bytecode, int iflag, int length);
 int main(int argc, char** argv);

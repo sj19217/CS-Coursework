@@ -38,6 +38,7 @@ void exec_ADD_int(unsigned char* op1, int op1_type, unsigned char* op2, int op2_
 void exec_ADD_uint(unsigned char* op1, int op1_type, unsigned char* op2, int op2_type);
 void exec_ADD_float(unsigned char* op1, int op1_type, unsigned char* op2, int op2_type);
 
-void exec_arithmetic(char* function, char dtype, unsigned char* op1, int op1_type, unsigned char* op2, int op2_type);
+void exec_arithmetic(char* function, char dtype, unsigned char* op1, unsigned char op1_type,
+                     unsigned char* op2, unsigned char op2_type);
 
 #endif //INTERPRETER_COMMANDS_H
