@@ -11,7 +11,8 @@ MOV eax 1
 MOV ebx 1
 loop MOV 2B temp eax
 ADD char eax ebx
-ADD short ebx temp
+;ADD short ebx temp
+MOV 2B ebx temp
 
 SUB char i 1
 MOV out eax
