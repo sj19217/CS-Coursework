@@ -14,6 +14,8 @@
 
 enum stage next_pause = s_start;
 
+int _gui_c_steps_remaining = 0;
+
 void pauseUntilPermitted(enum stage next_stage)
 {
     log_trace("pauseUntilPermitted(next_stage=%s)", stage_names[next_stage]);
@@ -26,6 +28,12 @@ void pauseUntilPermitted(enum stage next_stage)
     }
 
     if (next_pause != next_stage) {
+        return;
+    }
+
+    if (_gui_c_steps_remaining != 0) {
+        // The user still wants to go past.
+        _gui_c_steps_remaining--;
         return;
     }
 
@@ -47,8 +55,24 @@ void pauseUntilPermitted(enum stage next_stage)
 void handleCommand(char* inp)
 {
     log_trace("handleCommand(inp=%s)", inp);
-    if (startsWith(inp, "step"))
-    {
+    if (startsWith(inp, "stepn")) {
+        // Step a certain number.
+        sscanf(inp, "stepn %d", &_gui_c_steps_remaining);
+        switch (next_pause) {
+            case s_start:
+                next_pause = s_fetch;
+                break;
+            case s_fetch:
+                next_pause = s_decode;
+                break;
+            case s_decode:
+                next_pause = s_exec_func;
+                break;
+            case s_exec_func:
+                next_pause = s_fetch;
+                break;
+        }
+    } else if (startsWith(inp, "step")) {
         switch (next_pause) {
             case s_start:
                 next_pause = s_fetch;
