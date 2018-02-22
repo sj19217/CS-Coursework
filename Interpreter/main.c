@@ -393,6 +393,19 @@ if (config.interactive_mode) printf("exec_func mov_reg %s %i %s %s %s\n", getReg
         bytesAsJSONArray((unsigned char*) getOperandValue(op2_type, op2_str), \
         getOperandValueLength(op2_type, op2_str, size)));
 
+#define REPORT_MOV_MEM(size) \
+if (config.interactive_mode) printf("exec_func move_mem %i %i %s %s %s\n", convertTo_uint(op1_str), size, \
+        getOperandType(op2_type), bytesAsJSONArray(op2_str, op2_len), \
+        bytesAsJSONArray((unsigned char*) getOperandValue(op2_type, op2_str), \
+        getOperandValueLength(op2_type, op2_str, size)));
+
+#define REPORT_MOV_ARITH(size) \
+if (config.interactive_mode) printf("exec_func move_mem %i %i %s %s %s\n", getMAddrFromArithmetic(op1_str, op1_type), \
+        size, getOperandType(op2_type), bytesAsJSONArray(op2_str, op2_len), \
+        bytesAsJSONArray((unsigned char*) getOperandValue(op2_type, op2_str), \
+        getOperandValueLength(op2_type, op2_str, size)));
+
+
 #define FIT_DECODED_OPERAND(size) \
 unsigned char* bytes = calloc(1, size); \
 int len = getOperandValueLength(op2_type, op2_str, size); \
@@ -481,10 +494,13 @@ void execute(unsigned char opcode, char dtype,
             } else if (op1_type == 5) {
                 unsigned char* data = getOperandValue(op2_type, op2_str);
                 exec_MOV_mem(convertTo_uint(op1_str), 1, data);
+                REPORT_MOV_MEM(1)
             } else if (op1_type >= 6 && op1_type <= 10) {
                 exec_MOV_mem(getMAddrFromArithmetic(op1_type, op1_str),
                              1,
                              (unsigned char*) getOperandValue(op2_type, op2_str));
+                REPORT_MOV_ARITH(1)
+
             } else {
                 printf("Cannot move content to form %i\n", op1_type);
             }
@@ -498,9 +514,11 @@ void execute(unsigned char opcode, char dtype,
                 //unsigned char* bytes = (unsigned char*) getOperandValue(op2_type, op2_str);
                 FIT_DECODED_OPERAND(2)
                 exec_MOV_mem(convertTo_uint(op1_str), 2, bytes);
+                REPORT_MOV_MEM(2)
             } else if (op1_type >= 6 && op1_type <= 10) {
                 FIT_DECODED_OPERAND(2)
                 exec_MOV_mem(getMAddrFromArithmetic(op1_type, op1_str), 2, bytes);
+                REPORT_MOV_ARITH(2)
             } else {
                 printf("Cannot move content to form %i\n", op1_type);
             }
@@ -513,9 +531,11 @@ void execute(unsigned char opcode, char dtype,
             } else if (op1_type == 5) {
                 FIT_DECODED_OPERAND(4)
                 exec_MOV_mem(convertTo_uint(op1_str), 4, (unsigned char*) getOperandValue(op2_type, op2_str));
+                REPORT_MOV_MEM(4)
             } else if (op1_type >= 6 && op1_type <= 10) {
                 FIT_DECODED_OPERAND(4)
                 exec_MOV_mem(getMAddrFromArithmetic(op1_type, op1_str), 4, bytes);
+                REPORT_MOV_ARITH(4)
             } else {
                 printf("Cannot move content to form %i\n", op1_type);
             }

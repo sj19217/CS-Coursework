@@ -4,7 +4,7 @@ mem_amt=2
 
 section.data
 temp VAR uint 0
-i VAR char 50
+i VAR char 40
 
 section.text
 MOV 4B eax 1
@@ -15,6 +15,7 @@ ADD uint eax ebx
 MOV 4B ebx temp
 
 SUB char i 1
-MOV out eax
+MOV 4B out eax
 CMP char i 0
 JNE loop
+HLT

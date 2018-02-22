@@ -687,18 +687,21 @@ def divide_and_contextualise(section_dict: dict):
         # Now we can assume parts[0] is the opcode
         # Next is the type. parts[1] could be a data type or it could not be
         dtype = 0
-        if parts[1].lower() in ("char", "uchar", "short", "ushort", "int", "uint", "float"):
-            dtype = parts[1].lower()
-            del parts[1]
-        elif parts[1].upper() == "1B":
-            dtype = "char"
-            del parts[1]
-        elif parts[1].upper() == "2B":
-            dtype = "short"
-            del parts[1]
-        elif parts[1].upper() == "4B":
-            dtype = "int"
-            del parts[1]
+        if len(parts) > 1:
+            if parts[1].lower() in ("char", "uchar", "short", "ushort", "int", "uint", "float"):
+                dtype = parts[1].lower()
+                del parts[1]
+            elif parts[1].upper() == "1B":
+                dtype = "char"
+                del parts[1]
+            elif parts[1].upper() == "2B":
+                dtype = "short"
+                del parts[1]
+            elif parts[1].upper() == "4B":
+                dtype = "int"
+                del parts[1]
+            else:
+                dtype = "char"
 
         # If not then assume the data type is unspecified
         mnemonic = parts[0]
