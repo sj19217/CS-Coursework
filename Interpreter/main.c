@@ -400,7 +400,7 @@ if (config.interactive_mode) printf("exec_func move_mem %i %i %s %s %s\n", conve
         getOperandValueLength(op2_type, op2_str, size)));
 
 #define REPORT_MOV_ARITH(size) \
-if (config.interactive_mode) printf("exec_func move_mem %i %i %s %s %s\n", getMAddrFromArithmetic(op1_str, op1_type), \
+if (config.interactive_mode) printf("exec_func move_mem %i %i %s %s %s\n", getMAddrFromArithmetic(op1_type, op1_str), \
         size, getOperandType(op2_type), bytesAsJSONArray(op2_str, op2_len), \
         bytesAsJSONArray((unsigned char*) getOperandValue(op2_type, op2_str), \
         getOperandValueLength(op2_type, op2_str, size)));
