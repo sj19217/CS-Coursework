@@ -44,7 +44,7 @@ animate = (function () {
         console.log("Loading bytecode file " + filename + " (" + typeof filename + ")");
         console.log("Using executable " + INTERPRETER_EXECUTABLE);
 
-        interpreter_proc = execFile(INTERPRETER_EXECUTABLE, ["-i", "-f", filename]);
+        interpreter_proc = execFile(INTERPRETER_EXECUTABLE, ["-i", "-d", "2", "-f", filename]);
         //interpreter_proc.stdin.setEncoding("utf8");
         //interpreter_proc.stdout.pipe(process.stdout)
 
@@ -53,6 +53,7 @@ animate = (function () {
         });
 
         interpreter_proc.stdout.on("data", (data) => {
+            console.log("Program output received");
             handleOutput(data);
         });
     };
@@ -108,8 +109,34 @@ animate = (function () {
                 let table = document.getElementById("memtable");
                 table.children[Math.floor(i / 10) + 1].children[(i % 10) + 1].innerHTML = items[i];
             }
-        } else if (data.startsWith("fetch")) {
-            animate.fetch()
+        } else if (data.startsWith("data")) {
+            console.log("Reading environment data");
+            $.getJSON("../env.json", function (env) {
+                console.log("JSON taken from environment file, setting environment.");
+                // Been given all data about the environment
+
+                // Program counter
+                $("#box-PC").text(env["pc"]);
+
+                // Registers
+                let register_names = ["eax", "ebx", "ecx", "edx", "esi", "edi", "ebp", "esp"];
+                for (let i = 0; i < register_names.length; i++) {
+                    $("#reg-" + register_names[i]).text(env["genregs"][register_names[i]]);
+                }
+
+                // Comparison registers
+                $("#reg-cmp-p").text(env["cmp"]["p"]);
+                $("#reg-cmp-e").text(env["cmp"]["e"]);
+                $("#reg-cmp-n").text(env["cmp"]["n"]);
+
+                // Memory
+                for (let i = 0; i < env["memory"].length; i++) {
+                    let table = document.getElementById("memtable");
+                    table.children[Math.floor(i / 10) + 1].children[(i % 10) + 1].innerHTML = String(env["memory"][i]).padStart(3, "0");
+
+                }
+            });
+
         }
     }
 

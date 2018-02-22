@@ -54,3 +54,13 @@ table.bordered, td.bordered {
     width: 90%;
     margin: 0 auto;
 }
+
+table#memtable {
+    table-layout: fixed;
+}
+
+table#memtable td {
+    width: 30px;
+    overflow: hidden;
+    word-wrap: break-word;
+}

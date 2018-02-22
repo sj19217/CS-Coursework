@@ -159,38 +159,79 @@ char* convertTypeLetterToName(char letter)
 // Prints data about the environment in the JSON format specified in GUI/ipc.md
 void printEnvData()
 {
-    printf("data {");   // Intro to what this is and opening the JSON object
+    FILE* file = fopen("env.json", "w");
+
+    fprintf(file, "{");   // Opening the JSON object
 
     // Print out the current PC
-    printf("'pc': %i, ", (int) env.pc);
+    fprintf(file, "\"pc\": %i, ", (int) env.pc);
 
     // Print out the general registers
-    printf("'genregs': {");
-    printf("'eax': %i, ", (int) env.eax.eax);
-    printf("'ebx': %i, ", (int) env.ebx.ebx);
-    printf("'ecx': %i, ", (int) env.ecx.ecx);
-    printf("'edx': %i, ", (int) env.edx.edx);
-    printf("'esi': %i, ", (int) env.esi);
-    printf("'edi': %i, ", (int) env.edi);
-    printf("'ebp': %i, ", (int) env.ebp);
-    printf("'esp': %i}, ", (int) env.esp);
+    fprintf(file, "\"genregs\": {");
+    fprintf(file, "\"eax\": %i, ", (int) env.eax.eax);
+    fprintf(file, "\"ebx\": %i, ", (int) env.ebx.ebx);
+    fprintf(file, "\"ecx\": %i, ", (int) env.ecx.ecx);
+    fprintf(file, "\"edx\": %i, ", (int) env.edx.edx);
+    fprintf(file, "\"esi\": %i, ", (int) env.esi);
+    fprintf(file, "\"edi\": %i, ", (int) env.edi);
+    fprintf(file, "\"ebp\": %i, ", (int) env.ebp);
+    fprintf(file, "\"esp\": %i}, ", (int) env.esp);
 
     // Comparisons
-    printf("'cmp': {");
-    printf("'p': %i, ", env.cmp_p);
-    printf("'n': %i, ", env.cmp_n);
-    printf("'e': %i}, ", env.cmp_e);
+    fprintf(file, "\"cmp\": {");
+    fprintf(file, "\"p\": %i, ", env.cmp_p);
+    fprintf(file, "\"n\": %i, ", env.cmp_n);
+    fprintf(file, "\"e\": %i}, ", env.cmp_e);
 
     // Memory printout
-    printf("'memory': [");
-    printf("%i", env.memory[0]); // Use this arrangement to
+    fprintf(file, "\"memory\": [");
+    fprintf(file, "%i", env.memory[0]); // Use this arrangement to
     for (int i = 1; i < config.memorykb * 1024; i++) {
-        printf(", %i", env.memory[i]);
+        fprintf(file, ", %i", env.memory[i]);
+        fflush(file);
     }
-    printf("]");
+    fprintf(file, "]");
 
     // End the object and command
-    printf("}\n");
+    fprintf(file, "}\n");
+
+    fclose(file);
+
+    printf("data\n");
+//
+//    printf("{");   // Opening the JSON object
+//
+//    // Print out the current PC
+//    printf("'pc': %i, ", (int) env.pc);
+//
+//    // Print out the general registers
+//    printf("'genregs': {");
+//    printf("'eax': %i, ", (int) env.eax.eax);
+//    printf("'ebx': %i, ", (int) env.ebx.ebx);
+//    printf("'ecx': %i, ", (int) env.ecx.ecx);
+//    printf("'edx': %i, ", (int) env.edx.edx);
+//    printf("'esi': %i, ", (int) env.esi);
+//    printf("'edi': %i, ", (int) env.edi);
+//    printf("'ebp': %i, ", (int) env.ebp);
+//    printf("'esp': %i}, ", (int) env.esp);
+//
+//    // Comparisons
+//    printf("'cmp': {");
+//    printf("'p': %i, ", env.cmp_p);
+//    printf("'n': %i, ", env.cmp_n);
+//    printf("'e': %i}, ", env.cmp_e);
+//
+//    // Memory printout
+//    printf("'memory': [");
+//    printf("%i", env.memory[0]); // Use this arrangement to
+//    for (int i = 1; i < config.memorykb * 1024; i++) {
+//        printf(", %i", env.memory[i]);
+//        fflush(stdout);
+//    }
+//    printf("]");
+//
+//    // End the object and command
+//    printf("}\n");
 }
 
 char* getRegisterName(int regnum)

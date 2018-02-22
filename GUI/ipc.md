@@ -56,8 +56,7 @@ The types of data that can return are:
     "maddr" or "reg", and then `dest` is either the register name or memory address depending on which `desttype` is
     given. Then `op1` and `op2` are the decoded values (in bytes) of the operands and `res` is the result.
 * config <config_json> - Gives the content of the config dict in a JSON form
-* data <content> - Given frequently by the interpreter to give status information. `content` is a JSON string,
-  with these attributes:
+* data - Means that a JSON file containing the following information has been saved (env.json).
   * pc - The current value of the program counter
   * genregs - A nested JSON object with all of the registers ("eax", "ebx", etc)
   * cmp - A JSON object containing the values "e", "n" and "p", corresponding to those registers
