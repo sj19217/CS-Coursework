@@ -3,18 +3,18 @@ section.meta
 mem_amt=2
 
 section.data
-temp VAR ushort 0
+temp VAR uint 0
 i VAR char 50
 
 section.text
-MOV eax 1
-MOV ebx 1
-loop MOV 2B temp eax
-ADD ushort eax ebx
+MOV 4B eax 1
+MOV 4B ebx 1
+loop MOV 4B temp eax
+ADD uint eax ebx
 ;ADD short ebx temp
-MOV 2B ebx temp
+MOV 4B ebx temp
 
 SUB char i 1
-MOV 4B out eax
+MOV out eax
 CMP char i 0
 JNE loop

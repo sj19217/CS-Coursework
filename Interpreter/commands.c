@@ -183,10 +183,10 @@ void exec_MOV_reg(unsigned char regnum, int length, const unsigned char* str)
         bytes[2] = str[0];
         bytes[3] = str[1];
     } else if (length == 4) { // MOV 4B
-        bytes[0] = str[0];
-        bytes[1] = str[1];
-        bytes[2] = str[2];
-        bytes[3] = str[3];
+        bytes[0] = str[3];
+        bytes[1] = str[2];
+        bytes[2] = str[1];
+        bytes[3] = str[0];
     } else {
         log_error("Unknown length parameter %i", length);
     }
