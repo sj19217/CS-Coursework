@@ -15,6 +15,6 @@ ADD ushort eax ebx
 MOV 2B ebx temp
 
 SUB char i 1
-MOV out eax
+MOV 4B out eax
 CMP char i 0
 JNE loop

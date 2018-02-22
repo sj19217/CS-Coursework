@@ -217,7 +217,7 @@ void setRegisterValue(unsigned char regnum, void* data)
             log_error("Cannot set input value as a register");
             break;
         case 0xF0:
-            printf("Output: %i\n", *(unsigned int*) data);
+            printf("Output: %i\n", convertTo_int(data));
             break;
         default:
             log_error("Unknown register number in setRegisterValue: 0x%x", regnum);

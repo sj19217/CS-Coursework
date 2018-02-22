@@ -70,9 +70,9 @@ unsigned char* convertTo_str(int num)
 {
     unsigned char* str = (unsigned char*) malloc(sizeof(unsigned char)*4);
     str[0] = (unsigned char) (0x000000FF & num);
-    str[1] = (unsigned char) (0x0000FF00 & num) >> 8;
-    str[2] = (unsigned char) (0x00FF0000 & num) >> 16;
-    str[3] = (unsigned char) (0xFF000000 & num) >> 24;
+    str[1] = (unsigned char) ((0x0000FF00 & num) >> 8);
+    str[2] = (unsigned char) ((0x00FF0000 & num) >> 16);
+    str[3] = (unsigned char) ((0xFF000000 & num) >> 24);
     return str;
 }
 
