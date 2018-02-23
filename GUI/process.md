@@ -16,3 +16,7 @@
 * Make the table in the memory
 * Made the memory scroll and fill in values when "mem" info is given
 * Wrote the basic table in the centre and fiddled round with borders and labels
+* Wrote the rest of the HTML for registers, etc.
+* Made the interpreter print all of its information out properly
+* Changed "env" command to write to env.json. 
+* Wrote animation queue code

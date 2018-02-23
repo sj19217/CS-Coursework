@@ -3,12 +3,108 @@
 require("string-format");
 
 let beginInterpreter;
-let interpreter_proc;
+let interpreter = {
+    "process": null,
+    "running": false
+};
 
+// A few numbers defining how long certain animations take
+anim_times = {
+    fade_text: 500
+};
+
+// The animation object, containing all of its functions.
 animate = (function () {
     return {
+        queue: [],
         atomic: {
+            notification: function (text) {
+                return function () {
+                    // Called to execute the animation (i.e. pushing a notification to the box)
+                    $("#commentary").append("<br />" + text);
+                }
+            },
 
+            change_pc: function (pc) {
+                return function () {
+                    // Changes the PC to the given value
+                    $("#box-PC").fadeOut(anim_times.fade_text, function () {
+                        $("#box-PC").text(pc).fadeIn(anim_times.fade_text);
+                    });
+                }
+            },
+
+            push_pc_to_mar: function () {
+                return function () {
+                    // Make PC bold, make MDR fade out and back in with new content
+                    $("#box-PC").css("font-weight", "bold");
+                    $("#box-MAR").fadeOut(anim_times.fade_text, function () {
+                        // Fade out is finished, fade back in
+                        $(this).css("font-weight", "bold");
+                        $(this).text($("#box-PC").text()).fadeIn(anim_times.fade_text, function () {
+                            // Fade in is finished, reset away from bold
+                            $(this).css("font-weight", "normal");
+                            $("#box-PC").css("font-weight", "normal");
+                        });
+                    });
+                }
+            },
+
+            read_memory_to_mdr: function (pc, cmdlen) {
+                return function () {
+                    // First make the relevant memory boxes bold and record bytes to move
+                    let table = document.getElementById("memtable");
+                    let bytes = [];
+                    for (let i = pc; i < pc + cmdlen; i++) {
+                        let cell = $(`#memtable`).find(`tr:eq(${Math.floor(i/10)+1}) td:eq(${i%10 + 1})`);
+                        cell.css("font-weight", "bold");
+                        bytes.push(cell.text());
+                    }
+
+
+                    // Fade out the MDR
+                    $("#box-MDR").fadeOut(500, function () {
+                        //Change the value of the MDR and fade it back in
+                        $(this).text(bytes.toString()).fadeIn(anim_times.fade_text);
+                        // Now the animation is nearly over, stop stuff being bold
+                        $("#memtable").find("td").css("font-weight", "normal");
+                        $("#box-MDR").css("font-weight", "normal");
+                    });
+                }
+            },
+
+            push_mdr_to_cir: function () {
+                // Make MDR bold
+                $("#box-MDR").css("font-weight", "bold");
+                $("#box-CIR").fadeOut(anim_times.fade_text, function () {
+                    // Fade out is finished, fade back in
+                    $(this).css("font-weight", "bold");
+                    $(this).text($("#box-MDR").text()).fadeIn(anim_times.fade_text, function () {
+                        // Fade in is finished, reset away from bold
+                        $(this).css("font-weight", "normal");
+                        $("#box-MDR").css("font-weight", "normal");
+                    });
+                });
+            }
+        },
+
+        // The functions run when updates are given by the interpreter
+        // They don't do anything, just add atomic items to the queue.
+        fetch: function (pc, opcode, opbyte, operand1, operand2) {
+            // First find the total length of the command
+            let cmdlen = 2 + operand1.length + operand2.length;
+
+            // Set the PC
+            this.queue.push(this.atomic.notification("Incrementing PC"));
+            this.queue.push(this.atomic.change_pc(pc));
+            // Read the memory
+            this.queue.push(this.atomic.notification("Moving PC to MAR"));
+            this.queue.push(this.atomic.push_pc_to_mar());
+            this.queue.push(this.atomic.notification("Reading memory"));
+            this.queue.push(this.atomic.read_memory_to_mdr(pc, cmdlen));
+            // Move this to the CIR
+            this.queue.push(this.atomic.notification("Moving MAR to CIR"));
+            this.queue.push(this.atomic.push_mdr_to_cir());
         }
     };
 })();
@@ -44,18 +140,27 @@ animate = (function () {
         console.log("Loading bytecode file " + filename + " (" + typeof filename + ")");
         console.log("Using executable " + INTERPRETER_EXECUTABLE);
 
-        interpreter_proc = execFile(INTERPRETER_EXECUTABLE, ["-i", "-d", "2", "-f", filename]);
+        interpreter.process = execFile(INTERPRETER_EXECUTABLE, ["-i", "-d", "2", "-f", filename]);
+        interpreter.running = true;
         //interpreter_proc.stdin.setEncoding("utf8");
         //interpreter_proc.stdout.pipe(process.stdout)
 
-        interpreter_proc.stderr.on('data', (data) => {
+        interpreter.process.stderr.on('data', (data) => {
             console.log(`stderr: ${data}`);
         });
 
-        interpreter_proc.stdout.on("data", (data) => {
+        interpreter.process.stdout.on("data", (data) => {
             console.log("Program output received");
             handleOutput(data);
         });
+
+        interpreter.process.on("exit", (event) => {
+            interpreter.running = false;
+            console.log(`Interpreter process exited (code: ${event.code}, signal: ${event.signal}`);
+        });
+
+        // Now begin the animation loop
+        beginAnimationLoop();
     };
 
     function handleOutput(data)
@@ -133,11 +238,21 @@ animate = (function () {
                 for (let i = 0; i < env["memory"].length; i++) {
                     let table = document.getElementById("memtable");
                     table.children[Math.floor(i / 10) + 1].children[(i % 10) + 1].innerHTML = String(env["memory"][i]).padStart(3, "0");
-
                 }
             });
-
+        } else if (data.startsWith("fetch")) {
+            let parts = data.split(" ");
+            let pc = parts[1];
+            let opcode = parts[2];
+            let opbyte = parts[3];
+            let operand1 = JSON.parse(parts[4]);
+            let operand2 = JSON.parse(parts[5]);
+            animate.fetch(pc, opcode, opbyte, operand1, operand2);
         }
+    }
+
+    function beginAnimationLoop() {
+
     }
 
 })();

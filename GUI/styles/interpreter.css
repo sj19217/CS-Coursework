@@ -64,3 +64,8 @@ table#memtable td {
     overflow: hidden;
     word-wrap: break-word;
 }
+
+#commentary {
+    overflow-y: scroll;
+    text-align: left;
+}
