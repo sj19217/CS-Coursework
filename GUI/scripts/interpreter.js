@@ -86,6 +86,19 @@ animate = (function () {
                         $("#box-MDR").css("font-weight", "normal");
                     });
                 });
+            },
+
+            change_cmp_reg: function (reg) {
+                if (reg === "e") {
+                    $("#reg-cmp-e").text("1");
+                    $("#reg-cmp-n, #reg-cmp-p").text("0");
+                } else if (reg === "n") {
+                    $("#reg-cmp-n").text("1");
+                    $("#reg-cmp-e, #reg-cmp-p").text("0");
+                } else if (reg === "p") {
+                    $("#reg-cmp-p").text("1");
+                    $("#reg-cmp-e, #reg-cmp-n").text("0");
+                }
             }
         },
 
@@ -110,6 +123,30 @@ animate = (function () {
 
         decode: function (name) {
             this.queue.push(this.atomic.notification(`Decoded as ${name}`));
+        },
+
+        execute: function (funcname, args) {
+            // Corresponds to exec_func. Lots of variation.
+            if (funcname === "cmp") {
+                let parts = args.split(" ");
+                this.execute_cmp(parts[0], parts[1], parts[2]);
+            }
+        },
+
+        execute_cmp: function (arg1, arg2, result) {
+            let truth;
+            if (result === "e") {
+                truth = "equal";
+            } else if (result === "p") {
+                truth = "greater than";
+            } else if (result === "n") {
+                truth = "less than";
+            } else {
+                console.log("Invalid result given for comparison");
+                return;
+            }
+            this.queue.push(this.atomic.notification(`Comparing ${arg1} to ${arg2}: ${truth}`));
+            this.queue.push(this.atomic.change_cmp_reg(result));
         }
     };
 })();
@@ -258,6 +295,9 @@ animate = (function () {
         } else if (data.startsWith("decode")) {
             let parts = data.split(" ");
             animate.decode(parts[1]);
+        } else if (data.startsWith("exec_func")) {
+            let parts = data.split(data, 2);
+            animate.execute(parts[1], parts[2]);
         }
     }
 
