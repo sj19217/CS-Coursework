@@ -3,6 +3,7 @@
 require("string-format");
 
 let beginInterpreter;
+let animateInterpreterStep;
 let interpreter = {
     "process": null,
     "running": false
@@ -105,6 +106,10 @@ animate = (function () {
             // Move this to the CIR
             this.queue.push(this.atomic.notification("Moving MAR to CIR"));
             this.queue.push(this.atomic.push_mdr_to_cir());
+        },
+
+        decode: function (name) {
+            this.queue.push(this.atomic.notification(`Decoded as ${name}`));
         }
     };
 })();
@@ -159,8 +164,10 @@ animate = (function () {
             console.log(`Interpreter process exited (code: ${event.code}, signal: ${event.signal}`);
         });
 
-        // Now begin the animation loop
-        beginAnimationLoop();
+        interpreter.process.stdin.write("step\n");
+
+        // There is no central animation loop here any more
+        // It is all done via calls from controls.json
     };
 
     function handleOutput(data)
@@ -248,11 +255,25 @@ animate = (function () {
             let operand1 = JSON.parse(parts[4]);
             let operand2 = JSON.parse(parts[5]);
             animate.fetch(pc, opcode, opbyte, operand1, operand2);
+        } else if (data.startsWith("decode")) {
+            let parts = data.split(" ");
+            animate.decode(parts[1]);
         }
     }
 
-    function beginAnimationLoop() {
+    animateInterpreterStep = function () {
+        // Makes one animation. If no animations are available in the queue,
+        // step the interpreter and check again.
+        if (animate.queue.length === 0) {
+            interpreter.process.stdin.write("step\n");
+            return false;
+        }
 
+        // There is now something in the queue
+        let anim_function = animate.queue.shift();
+        anim_function();
+
+        return true;
     }
 
 })();

@@ -69,3 +69,11 @@ table#memtable td {
     overflow-y: scroll;
     text-align: left;
 }
+
+#box-MDR {
+    overflow-x: scroll;
+}
+
+table#playground td {
+    width: 25%;
+}
