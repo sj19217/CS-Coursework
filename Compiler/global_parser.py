@@ -37,3 +37,5 @@ def global_parser(tree):
                 logging.info("Found global function main")
             else:
                 logging.warning("Found global function that was not main; this is not yet supported")
+
+    return table

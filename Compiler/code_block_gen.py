@@ -53,6 +53,21 @@ class InstrIfStmt(Instruction):
         super().__init__()
         self._stmt = stmt
 
+class InstrPushValue(Instruction):
+    def __init__(self, value):
+        super().__init__()
+        self._value = value
+
+class InstrEvaluateUnary(Instruction):
+    def __init__(self, operation):
+        super().__init__()
+        self._op = operation
+
+class InstrEvaluateBinary(Instruction):
+    def __init__(self, operation):
+        super().__init__()
+        self._op = operation
+
 
 
 ### FUNCTIONS
@@ -124,3 +139,17 @@ def expression_instructions(expr):
     :param expr:
     :return:
     """
+    # For post-order traversal, first run down the left hand side, then the right, then the root
+    instructions = []
+
+    if isinstance(expr, (Constant, ID)):
+        instructions.append(InstrPushValue(expr))
+    elif isinstance(expr, UnaryOp):
+        instructions.extend(expression_instructions(expr.expr))
+        instructions.append(InstrEvaluateUnary(expr.op))
+    elif isinstance(expr, BinaryOp):
+        instructions.extend(expression_instructions(expr.left))
+        instructions.extend(expression_instructions(expr.right))
+        instructions.append(InstrEvaluateBinary(expr.op))
+
+    return instructions
