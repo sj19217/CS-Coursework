@@ -230,10 +230,13 @@ void exec_LEA_reg(unsigned char regnum, unsigned int maddr)
     unsigned char* bytes = convertTo_str(maddr);
     if (reg_size == 1) {
         setRegisterValue(regnum, (void *) &bytes[3]);
+        if (config.interactive_mode) printf("exec_func lea_reg %s $s\n", getRegisterName(regnum), bytesAsJSONArray(bytes, 1));
     } else if (reg_size == 2) {
         setRegisterValue(regnum, (void *) &bytes[2]);
+        if (config.interactive_mode) printf("exec_func lea_reg %s $s\n", getRegisterName(regnum), bytesAsJSONArray(bytes, 2));
     } else if (reg_size == 4) {
         setRegisterValue(regnum, (void *) bytes);
+        if (config.interactive_mode) printf("exec_func lea_reg %s $s\n", getRegisterName(regnum), bytesAsJSONArray(bytes, 4));
     }
     free(bytes);
 }
@@ -248,6 +251,7 @@ void exec_LEA_mem(unsigned int maddr_to, unsigned int pointer)
     env.memory[maddr_to+2] = bytes[2];
     env.memory[maddr_to+3] = bytes[3];
     free(bytes);
+    if (config.interactive_mode) printf("exec_func lea_mem %i %s", maddr_to, bytesAsJSONArray(bytes, 4));
 }
 
 // Arithmetic commands begin here. Rather than having two versions, they are included in the same function.
