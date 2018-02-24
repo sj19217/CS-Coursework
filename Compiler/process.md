@@ -36,3 +36,4 @@
   * Goes through any sub-blocks and runs itself on them
   * Goes through any expressions looking for variables and making sure they exist
   * This last one used "yield from" in a recursive generator, an astonishingly elegant Python solution
+* Wrote the code block generation so that it has a skeleton and can deal with very basic things

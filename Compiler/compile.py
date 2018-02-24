@@ -9,6 +9,7 @@ from preprocessor import process as preprocess
 from global_parser import global_parser
 from variable_traversal import parse_compound
 from code_block_gen import generate_code_block
+from assembly_writing import produce_data_section, produce_text_section
 
 def lexing_error(msg, line, column):
     print("Error on line {}, column {}: {}", line, column, msg)
@@ -42,6 +43,18 @@ def main(text):
     # STAGE 5 - HIERARCHICAL INSTRUCTION GENERATION
     main_block = generate_code_block(top_compound)
 
+    # STAGE 6 - ASSEMBLY GENERATION
+    assembly = """section.meta
+    mem_amt={mem_amt}
+    
+    section.data
+    {data_section}
+    
+    section.text
+    {text_section}
+    """.format(mem_amt=4,
+              data_section=produce_data_section(global_symbols),
+               text_section=produce_text_section(main_block));
 
 if __name__ == "__main__":
     argparser = ArgumentParser(description="Compile a C file into assembly")
