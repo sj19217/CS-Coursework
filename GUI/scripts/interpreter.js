@@ -130,6 +130,54 @@ animate = (function () {
             if (funcname === "cmp") {
                 let parts = args.split(" ");
                 this.execute_cmp(parts[0], parts[1], parts[2]);
+            } else if (funcname === "jmp") {
+                let parts = args.split(" ");
+                let type = parts[1];
+                let address = parts[2];
+                let performed = parts[3];
+
+                this.execute_jmp(type, address, performed);
+            } else if (funcname === "mov_reg") {
+                let parts = args.split(" ");
+                let regname = parts[1];
+                let size = parts[2];
+                let srctype = parts[3];
+                let srcdata = JSON.parse(parts[4]);
+                let srccontent = JSON.parse(parts[5]);
+
+                this.execute_mov_reg(regname, size, srctype, srcdata, srccontent);
+            } else if (funcname === "mov_mem") {
+                let parts = args.split(" ");
+                let destaddr = parts[1];
+                let size = parts[2];
+                let srctype = parts[3];
+                let srcdata = JSON.parse(parts[4]);
+                let srccontent = JSON.parse(parts[5]);
+
+                this.execute_mov_mem(destaddr, size, srctype, srcdata, srccontent);
+            } else if (funcname === "lea_reg") {
+                let parts = args.split(" ");
+                let regname = parts[1];
+                let addr = JSON.parse(parts[2]);
+
+                this.execute_lea_reg(regname, addr);
+            } else if (funcname === "lea_mem") {
+                let parts = args.split(" ");
+                let destaddr = parts[1];
+                let addr = JSON.parse(parts[2]);
+
+                this.execute_lea_mem(destaddr, addr);
+            } else if (funcname === "arithmetic") {
+                let parts = args.split(" ");
+                let opname = parts[1];
+                let type = parts[2];
+                let desttype = parts[3];
+                let dest = parts[4];
+                let op1 = JSON.parse(parts[5]);
+                let op2 = JSON.parse(parts[6]);
+                let res = parts[7];
+
+                this.execute_arithmetic(opname, type, desttype, dest, op1, op2, res);
             }
         },
 
@@ -147,6 +195,59 @@ animate = (function () {
             }
             this.queue.push(this.atomic.notification(`Comparing ${arg1} to ${arg2}: ${truth}`));
             this.queue.push(this.atomic.change_cmp_reg(result));
+        },
+
+        execute_jmp: function (type, address, performed) {
+            let status_message;
+            switch (type) {
+                case "always":
+                    status_message = "";
+                    break;
+                case "e":
+                    status_message = " if equal";
+                    break;
+                case "ne":
+                    status_message = " if not equal";
+                    break;
+                case "lt":
+                    status_message = " if less than";
+                    break;
+                case "le":
+                    status_message = " if less than or equal to";
+                    break;
+                case "gt":
+                    status_message = " if greater than";
+                    break;
+                case "ge":
+                    status_message = " if greater than or equal to";
+                    break;
+                default:
+                    console.log(`Invalid jump type '${type}'`);
+                    return;
+            }
+            let success;
+            if (performed === "true") {
+                success = "done";
+                this.queue.push(this.atomic.change_pc(address));
+            } else {
+                success = "not done";
+            }
+            this.queue.push(this.atomic.notification(`Jump${status_message} to ${address} - ${success}`));
+        },
+
+        execute_mov_reg: function (regname, size, srctype, srcdata, srccontent) {
+            if (srctype === "reg") {
+                this.queue.push(this.atomic.notification(`Reading register ${srcdata}`));
+                this.queue.push(this.atomic.make_register_bold(srcdata));
+                this.queue.push(this.atomic.change_register(regname, srccontent));
+            } else if (srctype === "maddr") {
+                this.queue.push(this.atomic.notification(`Reading from memory address ${srcdata}`));
+                // this.queue.push(this.atomic.change_register("mar", srcdata));
+                // this.queue.push(this.atomic.read_memory_to_mdr(parseInt(srcdata)), parseInt(size));
+
+            } else if (srctype === "immediate") {
+                this.queue.push(this.atomic.notification(`Given immediate value ${srcdata}`));
+            }
         }
     };
 })();

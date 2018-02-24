@@ -42,14 +42,14 @@ The types of data that can return are:
 * exec_func <funcname> <args> - The relevant exec function has been run. It can be any of these:
   * cmp <val1> <val2> <p|n|e> - Ran a comparison function. For commentary, gives the values (decoded) and the register
     that was set to 1 as a result.
-  * jmp <always|e|ne|lt|le|gt|ge> <addr> <val1> <val2> <true|false> - Any of the jump functions. Gives which jump
-    instruction, along with the memory address to jump to, the decoded values and whether the jump was made.
+  * jmp <always|e|ne|lt|le|gt|ge> <addr> <true|false> - Any of the jump functions. Gives which jump
+    instruction, along with the memory address to jump to, and whether the jump was made.
   * mov_reg <regname> <size> <srctype> <srcdata> <srccontent> - Moved data to a register. `srctype` is "maddr",  "reg" or
     "immediate". If it is "maddr" then `srcdata` is the memory address, if it is `reg` then it is a register name or if
     it is "immediate" then it is the immediate value. `srccontent` is the value extracted, as decimal bytes. 
   * mov_mem <destaddr> <size> <srctype> <srcdata> <srccontent> - Moved data to a memory address. The other arguments are
     the same as above.
-  * lea_reg <regname> <addr> - Moved the given data (`addr`) to the register of the specified name. 
+  * lea_reg <regname> <addr> - Moved the given JSON data (`addr`) to the register of the specified name. 
   * lea_mem <destaddr> <addr> - Moved the given data to the given memory location.
   * arithmetic <opname> <type> <desttype> <dest> <op1> <op2> <res> - Performed a piece of arithmetic. `opname` is the
     name of the operation (e.g. "ADD" or "IDIV"). `type` is the type of the data, like `char`. `desttype` is either
