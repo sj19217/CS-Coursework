@@ -968,6 +968,27 @@ class TypeDecl(Node):
         if self.type is not None:
             yield self.type
 
+    def get_type_name(self):
+        """
+        An addition for the compilation. Prints out the formatted name, like "uchar", of this type.
+        :return:
+        """
+        if "unsigned" in self.type:
+            type_name = "u"
+        else:
+            type_name = ""
+
+        if "char" in self.type:
+            type_name += "char"
+        elif "short" in self.type:
+            type_name += "short"
+        elif "int" in self.type:
+            type_name += "int"
+        elif "float" in self.type:
+            type_name = "float"
+
+        return type_name
+
     attr_names = ('declname', 'quals', )
 
 class Typedef(Node):
