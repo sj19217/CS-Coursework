@@ -1,3 +1,6 @@
+import io
+import logging
+
 from pycparser.c_ast import *
 
 ### CLASSES
@@ -7,6 +10,81 @@ class CodeBlock:
         self.instructions = []
         self.locals = []
         self.child_blocks = []
+
+    def generate_code(self, block_name):
+        # The assembly is written to here. More efficient than remaking strings.
+        assembly = io.StringIO()
+        # If the block has variables, this stores info about how far from
+        # the base pointer the variables are (as in, this index and the next
+        # few bytes are the number) and their type
+        stack_block_info = None
+
+        if len(self.locals) > 0:
+            stack_block_info, init_code = self.generate_init()
+            assembly.write(init_code)
+
+        for instr in self.instructions:
+            assembly.write(instr.generate_code(stack_block_info))
+
+        if len(self.locals) > 0:
+            assembly.write(self.generate_return())
+
+        assembly.seek(0)
+        return assembly.read()
+
+    def generate_init(self) -> (dict, str):
+        """
+        Generates the initialisation code that will handle the stack
+        :return:
+        """
+        # 1. Push old base pointer to stack
+        # 2. Change base pointer to one below the current stack pointer
+        # 3. Write the variables to the stack and record where they are
+
+        variable_data = {}
+
+        init_code = io.StringIO()
+        init_code.write("SUB uint esp 4\n")
+        init_code.write("MOV 4B [esp] ebp\n")
+        init_code.write("ADD uint esp 3\n") # esp is now 1 below where it was
+        init_code.write("MOV 4B ebp esp\n") # Set base pointer to where it should be
+
+        # This handles how far to the left of the base pointer the stack pointer is
+        virtual_esp = 0
+
+        # Handle the variables
+        for name, type_, initial in self.locals:
+            if isinstance(initial, Constant):
+                if initial.type in ("int", "float"):
+                    formatted_initial = initial.value
+                else:
+                    logging.error("As-yet unsupported constant type {init.type} for variable {var}".format(init=initial,
+                                                                                                           var=name))
+                    continue
+            else:
+                # If it is not a constant then it will be handled later
+                # TODO Write the code to initialise the variables which don't just have a simple initial constant
+                formatted_initial = 0
+
+            if type_ in ("char", "uchar"):   # 1B
+                virtual_esp += 1
+                init_code.write("SUB uint esp 1\n")
+                init_code.write("MOV 1B [esp] {initial}\n".format(initial=formatted_initial))
+            elif type_ in ("short", "ushort"): # 2B
+                virtual_esp += 2
+                init_code.write("SUB uint esp 2\n")
+                init_code.write("MOV 2B [esp] {initial}\n".format(initial=formatted_initial))
+            elif type_ in ("int", "uint", "float"):
+                virtual_esp += 4
+                init_code.write("SUB uint esp 4\n")
+                init_code.write("MOV 4B [esp] {initial}\n".format(initial=formatted_initial))
+            else:
+                logging.error("Unknown type {type} for variable {name}".format(type=type_, name=name))
+
+            variable_data[name] = (virtual_esp, type_)
+
+        init_code.seek(0)
+        return variable_data, init_code.read()
 
 
 class Instruction:
