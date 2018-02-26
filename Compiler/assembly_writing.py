@@ -4,6 +4,8 @@ code_block_gen.py.
 """
 
 import logging
+import collections
+import io
 
 from pycparser.c_ast import FuncDecl, FuncDef, Decl, Constant, TypeDecl
 from global_parser import GlobalVariable
@@ -34,4 +36,10 @@ def produce_data_section(global_symbols):
     return data_section
 
 def produce_text_section(top_block):
-    pass
+    code = io.StringIO()
+
+    # A queue of (name, block)
+    block_queue = collections.deque([("block", top_block)])
+    while len(block_queue):
+        name, block = block_queue.popleft()
+        code.write(block.generate_code(name, block_queue))

@@ -54,7 +54,7 @@ def main(text):
     {text_section}
     """.format(mem_amt=4,
               data_section=produce_data_section(global_symbols),
-               text_section=produce_text_section(main_block));
+               text_section=produce_text_section(main_block))
 
 if __name__ == "__main__":
     argparser = ArgumentParser(description="Compile a C file into assembly")

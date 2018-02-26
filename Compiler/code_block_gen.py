@@ -1,3 +1,5 @@
+import collections
+
 from pycparser.c_ast import *
 
 ### CLASSES
@@ -7,6 +9,24 @@ class CodeBlock:
         self.instructions = []
         self.locals = []
         self.child_blocks = []
+
+    def generate_code(self, name, block_queue: collections.deque):
+        code = ""
+
+        if len(self.locals) != 0:
+            code += self.generate_init()
+
+        for instr in self.instructions:
+            code += instr.generate_code()
+
+        if len(self.locals) != 0:
+            code += self.generate_return()
+        else:
+            block_queue.generate_return()
+
+    def generate_init(self):
+
+        pass
 
 
 class Instruction:
@@ -57,6 +77,12 @@ class InstrPushValue(Instruction):
     def __init__(self, value):
         super().__init__()
         self._value = value
+        # The value can be either a Constant or an ID
+
+    def to_bytes(self):
+        if isinstance(self._value, Constant):
+            pass
+
 
 class InstrEvaluateUnary(Instruction):
     def __init__(self, operation):
@@ -134,7 +160,7 @@ def expression_instructions(expr):
     The object given to this function will be one of these:
     * A UnaryOp - Means one value needs popping
     * A BinaryOp - Means two values need popping
-    * A Constant - Nothing needs popping, but a value needs popping on
+    * A Constant - Nothing needs popping, but a value needs pushing on
     * An ID - Nothing needs popping, but a variable needs getting and pushing on
     :param expr:
     :return:
