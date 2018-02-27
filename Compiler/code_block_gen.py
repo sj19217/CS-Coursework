@@ -48,9 +48,10 @@ class CodeBlock:
         init_code.write("MOV 4B [esp] ebp\n")
         init_code.write("ADD uint esp 3\n") # esp is now 1 below where it was
         init_code.write("MOV 4B ebp esp\n") # Set base pointer to where it should be
+        init_code.write("SUB uint esp 3\n") # Set stack pointer to beginning of old base pointer record
 
         # This handles how far to the left of the base pointer the stack pointer is
-        virtual_esp = 0
+        virtual_esp = 3
 
         # Handle the variables
         for name, type_, initial in self.locals:
@@ -133,8 +134,22 @@ class InstrIfStmt(Instruction):
 
 class InstrPushValue(Instruction):
     def __init__(self, value):
+        """
+        Represents the pushing of a value to the stack.
+        :param value:
+        :return:
+        """
         super().__init__()
         self._value = value
+
+    def generate_code(self, **kwargs):
+        # Move the stack pointer down by the right amount then write the data
+        if isinstance(self._value, Constant) and self._value.type == "int":
+            value = self._value.value
+        elif isinstance(self._value, ID):
+            value = get_assembly_var_ref(self._value.name, kwargs["block"])
+        code = """SUB uint esp {size}
+MOV {size}B [esp] {value}"""
 
 class InstrEvaluateUnary(Instruction):
     def __init__(self, operation):
@@ -184,7 +199,7 @@ def get_stmt_instructions(stmt) -> list:
     if isinstance(stmt, FuncCall):
         # Sort out the evaluation of the arguments
         for arg in stmt.args:
-            instr_list.append(expression_instructions(arg))
+            instr_list.extend(expression_instructions(arg))
         # Now do the actual FuncCall
         instr_list.append(InstrFuncCall(stmt.name))
     elif isinstance(stmt, Assignment):
@@ -203,7 +218,7 @@ def get_stmt_instructions(stmt) -> list:
     return instr_list
 
 
-def expression_instructions(expr):
+def expression_instructions(expr) -> list:
     """
     Performs post-order traversal and returns a list of expression evaluation objects.
     Each expression evaluation object has the job of taking (a) value(s) from the stack and processing it,

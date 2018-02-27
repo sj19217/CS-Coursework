@@ -43,7 +43,7 @@ def produce_text_section(top_block):
     # Set up the stack and base pointer
     # TODO Make the heap size change
     assembly.write("MOV 4B esp 2048\n")
-    assembly.write("MOV 4B ebp 2014\n")
+    assembly.write("MOV 4B ebp 2048\n")
 
     # Write the code blocks
     queue.append(("block", top_block))
