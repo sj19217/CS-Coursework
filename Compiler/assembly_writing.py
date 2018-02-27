@@ -4,8 +4,8 @@ code_block_gen.py.
 """
 
 import logging
-import collections
 import io
+import collections
 
 from pycparser.c_ast import FuncDecl, FuncDef, Decl, Constant, TypeDecl
 from global_parser import GlobalVariable
@@ -36,10 +36,22 @@ def produce_data_section(global_symbols):
     return data_section
 
 def produce_text_section(top_block):
-    code = io.StringIO()
+    assembly = io.StringIO()
+    # A queue containing (block name, block object)
+    queue = collections.deque()
 
-    # A queue of (name, block)
-    block_queue = collections.deque([("block", top_block)])
-    while len(block_queue):
-        name, block = block_queue.popleft()
-        code.write(block.generate_code(name, block_queue))
+    # Set up the stack and base pointer
+    # TODO Make the heap size change
+    assembly.write("MOV 4B esp 2048\n")
+    assembly.write("MOV 4B ebp 2048\n")
+
+    # Write the code blocks
+    queue.append(("block", top_block))
+    while len(queue) > 0:
+        name, block = queue.popleft()
+        assembly.write(block.generate_code(name))
+
+    # Add a HLT instruction to the end
+    assembly.write("HLT\n")
+
+    return assembly.read()

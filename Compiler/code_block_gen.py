@@ -1,4 +1,6 @@
 import collections
+import io
+import logging
 
 from pycparser.c_ast import *
 
@@ -10,23 +12,81 @@ class CodeBlock:
         self.locals = []
         self.child_blocks = []
 
-    def generate_code(self, name, block_queue: collections.deque):
-        code = ""
+    def generate_code(self, block_name):
+        # The assembly is written to here. More efficient than remaking strings.
+        assembly = io.StringIO()
+        # If the block has variables, this stores info about how far from
+        # the base pointer the variables are (as in, this index and the next
+        # few bytes are the number) and their type
+        stack_block_info = None
 
-        if len(self.locals) != 0:
-            code += self.generate_init()
+        if len(self.locals) > 0:
+            stack_block_info, init_code = self.generate_init()
+            assembly.write(init_code)
 
         for instr in self.instructions:
-            code += instr.generate_code()
+            assembly.write(instr.generate_code(stack_block_info))
 
-        if len(self.locals) != 0:
-            code += self.generate_return()
-        else:
-            block_queue.generate_return()
+        if len(self.locals) > 0:
+            assembly.write(self.generate_return())
 
-    def generate_init(self):
+        assembly.seek(0)
+        return assembly.read()
 
-        pass
+    def generate_init(self) -> (dict, str):
+        """
+        Generates the initialisation code that will handle the stack
+        :return:
+        """
+        # 1. Push old base pointer to stack
+        # 2. Change base pointer to one below the current stack pointer
+        # 3. Write the variables to the stack and record where they are
+
+        variable_data = {}
+
+        init_code = io.StringIO()
+        init_code.write("SUB uint esp 4\n")
+        init_code.write("MOV 4B [esp] ebp\n")
+        init_code.write("ADD uint esp 3\n") # esp is now 1 below where it was
+        init_code.write("MOV 4B ebp esp\n") # Set base pointer to where it should be
+        init_code.write("SUB uint esp 3\n") # Set stack pointer to beginning of old base pointer record
+
+        # This handles how far to the left of the base pointer the stack pointer is
+        virtual_esp = 3
+
+        # Handle the variables
+        for name, type_, initial in self.locals:
+            if isinstance(initial, Constant):
+                if initial.type in ("int", "float"):
+                    formatted_initial = initial.value
+                else:
+                    logging.error("As-yet unsupported constant type {init.type} for variable {var}".format(init=initial,
+                                                                                                           var=name))
+                    continue
+            else:
+                # If it is not a constant then it will be handled later
+                # TODO Write the code to initialise the variables which don't just have a simple initial constant
+                formatted_initial = 0
+
+            if type_ in ("char", "uchar"):   # 1B
+                virtual_esp += 1
+                init_code.write("SUB uint esp 1\n")
+                init_code.write("MOV 1B [esp] {initial}\n".format(initial=formatted_initial))
+            elif type_ in ("short", "ushort"): # 2B
+                virtual_esp += 2
+                init_code.write("SUB uint esp 2\n")
+                init_code.write("MOV 2B [esp] {initial}\n".format(initial=formatted_initial))
+            elif type_ in ("int", "uint", "float"):
+                virtual_esp += 4
+                init_code.write("SUB uint esp 4\n")
+                init_code.write("MOV 4B [esp] {initial}\n".format(initial=formatted_initial))
+            else:
+                logging.error("Unknown type {type} for variable {name}".format(type=type_, name=name))
+
+            variable_data[name] = (virtual_esp, type_)
+
+        init_code.seek(0)
+        return variable_data, init_code.read()
 
 
 class Instruction:
@@ -75,6 +135,11 @@ class InstrIfStmt(Instruction):
 
 class InstrPushValue(Instruction):
     def __init__(self, value):
+        """
+        Represents the pushing of a value to the stack.
+        :param value:
+        :return:
+        """
         super().__init__()
         self._value = value
         # The value can be either a Constant or an ID
@@ -83,6 +148,15 @@ class InstrPushValue(Instruction):
         if isinstance(self._value, Constant):
             pass
 
+
+    def generate_code(self, **kwargs):
+        # Move the stack pointer down by the right amount then write the data
+        if isinstance(self._value, Constant) and self._value.type == "int":
+            value = self._value.value
+        elif isinstance(self._value, ID):
+            value = get_assembly_var_ref(self._value.name, kwargs["block"])
+        code = """SUB uint esp {size}
+MOV {size}B [esp] {value}"""
 
 class InstrEvaluateUnary(Instruction):
     def __init__(self, operation):
@@ -132,7 +206,7 @@ def get_stmt_instructions(stmt) -> list:
     if isinstance(stmt, FuncCall):
         # Sort out the evaluation of the arguments
         for arg in stmt.args:
-            instr_list.append(expression_instructions(arg))
+            instr_list.extend(expression_instructions(arg))
         # Now do the actual FuncCall
         instr_list.append(InstrFuncCall(stmt.name))
     elif isinstance(stmt, Assignment):
@@ -151,7 +225,7 @@ def get_stmt_instructions(stmt) -> list:
     return instr_list
 
 
-def expression_instructions(expr):
+def expression_instructions(expr) -> list:
     """
     Performs post-order traversal and returns a list of expression evaluation objects.
     Each expression evaluation object has the job of taking (a) value(s) from the stack and processing it,
