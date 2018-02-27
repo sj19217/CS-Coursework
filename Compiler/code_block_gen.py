@@ -11,6 +11,18 @@ class CodeBlock:
         self.instructions = []
         self.locals = []
         self.child_blocks = []
+        self.parent = None
+
+    def get_local_var_data(self, name):
+        """
+        Returns a tuple of a LocalVariable object and an integer showing where its start is relative to the base pointer
+        (positive being below, in this block, and negative being above, in a calling block).
+        :param name:
+        :return:
+        """
+        for local in self.locals:
+
+            pass
 
     def generate_code(self, block_name):
         # The assembly is written to here. More efficient than remaking strings.
@@ -153,10 +165,15 @@ class InstrPushValue(Instruction):
         # Move the stack pointer down by the right amount then write the data
         if isinstance(self._value, Constant) and self._value.type == "int":
             value = self._value.value
+            size = 4
         elif isinstance(self._value, ID):
-            value = get_assembly_var_ref(self._value.name, kwargs["block"])
-        code = """SUB uint esp {size}
-MOV {size}B [esp] {value}"""
+            value = get_assembly_var_ref(self._value.name, kwargs["block"], kwargs["globals"])
+            size = self._value.memory_size()
+        else:
+            logging.error("Can only push a Constant or ID to the stack")
+            return
+        return """SUB uint esp {size}
+MOV {size}B [esp] {value}""".format(value=value, size=size)
 
 class InstrEvaluateUnary(Instruction):
     def __init__(self, operation):
@@ -176,7 +193,8 @@ def generate_code_block(compound: Compound) -> CodeBlock:
     # Create the code block everything will be added to
     code_block = CodeBlock()
 
-    # Assign locals
+    # Assign locals and parent blocks
+    code_block.parent = compound.parent
     code_block.locals = compound.locals
 
     # Loop through the statements

@@ -103,8 +103,15 @@ def parse_compound(block: Compound, parents: list, globals: list):
     """
     Parses through the block, registering any local variables it finds and running itself recursively on any sub-blocks.
     :param block:
+    :param parents:
+    :param globals:
     :return:
     """
+
+    if len(parents) == 0:
+        block.parent = None
+    else:
+        block.parent = parents[-1]
 
     for statement in block.block_items:
         if isinstance(statement, Decl):

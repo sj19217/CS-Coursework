@@ -309,11 +309,12 @@ class Cast(Node):
     attr_names = ()
 
 class Compound(Node):
-    __slots__ = ('block_items', 'coord', '__weakref__', 'locals')   # Added 'locals' as part of compiler
+    __slots__ = ('block_items', 'coord', '__weakref__', 'locals', 'parent')   # Added 'locals' and 'parent' as part of compiler
     def __init__(self, block_items, coord=None):
         self.block_items = block_items
         self.coord = coord
         self.locals = []
+        self.parent = None
 
     def children(self):
         nodelist = []
@@ -705,6 +706,13 @@ class ID(Node):
     def children(self):
         nodelist = []
         return tuple(nodelist)
+
+    def memory_size(self, container_block):
+        """
+        Returns the number of bytes this variable would take up in memory. The given block is where this ID is placed.
+        :return:
+        """
+        lv = container_block
 
     def __iter__(self):
         return
