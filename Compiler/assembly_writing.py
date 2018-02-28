@@ -52,6 +52,7 @@ def produce_text_section(top_block):
         assembly.write(block.generate_code(name))
 
     # Add a HLT instruction to the end
-    assembly.write("HLT\n")
+    assembly.write("exit HLT\n")
 
+    assembly.seek(0)
     return assembly.read()

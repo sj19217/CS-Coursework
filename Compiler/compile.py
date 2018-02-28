@@ -45,16 +45,18 @@ def main(text):
 
     # STAGE 6 - ASSEMBLY GENERATION
     assembly = """section.meta
-    mem_amt={mem_amt}
-    
-    section.data
-    {data_section}
-    
-    section.text
-    {text_section}
-    """.format(mem_amt=4,
+mem_amt={mem_amt}
+
+section.data
+{data_section}
+
+section.text
+{text_section}
+""".format(mem_amt=4,
               data_section=produce_data_section(global_symbols),
                text_section=produce_text_section(main_block))
+
+    print(assembly)
 
 if __name__ == "__main__":
     argparser = ArgumentParser(description="Compile a C file into assembly")

@@ -40,3 +40,5 @@
 * Wrote init section for a code block
 * Wrote code for pushing values, then did some fiddling about for debugging
 * Implemented printf
+* Wrote returning code
+* First apparently successful run

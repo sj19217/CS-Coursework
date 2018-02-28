@@ -14,6 +14,7 @@ class CodeBlock:
         self.locals = []
         self.child_blocks = []
         self.parent = None
+        self.return_label = "exit"
 
     def get_stack_block_size(self):
         """Returns the number of bytes this block will take on the stack"""
@@ -128,6 +129,17 @@ class CodeBlock:
         init_code.seek(0)
         return init_code.read()
 
+    def generate_return(self):
+        """
+        The assembly this returns will move the base pointer back to its old place and return control to the parent.
+        :return:
+        """
+        return """MOV 4B esi ebp
+SUB uint esi 4
+MOV 4B ebp [esi]
+JMP {return_label}
+""".format(return_label=self.return_label)
+
 
 class Instruction:
     def __init__(self):
@@ -227,8 +239,8 @@ class InstrPushValue(Instruction):
             (_, type_, _), rel_to_base = block.get_local_var_data(self._value.name)
             size = util.get_size_of_type(type_)
             code = """SUB uint esp {size}
-            MOV 4B esi ebp
-            """.format(size=size)
+MOV 4B esi ebp
+""".format(size=size)
             if rel_to_base < 0:
                 code += "ADD uint esi {rel}\n".format(rel=0-rel_to_base)
             elif rel_to_base > 0:
