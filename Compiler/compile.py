@@ -3,7 +3,7 @@ import logging
 from argparse import ArgumentParser
 
 from pycparser import CParser
-from pycparser.c_ast import Compound, FuncDef
+from pycparser.c_ast import Compound, FuncDef, ID
 
 from preprocessor import process as preprocess
 from global_parser import global_parser
@@ -28,6 +28,7 @@ def main(text):
 
     # STAGE 3 - GLOBAL VARIABLE TABLE
     global_symbols = global_parser(tree.ext)
+    ID.globals = global_symbols
 
     # STAGE 4 - Store local variables and perform type checking
     top_compound = None

@@ -42,8 +42,4 @@
 * Implemented printf
 * Wrote returning code
 * First apparently successful run
-
-
-# To-do list
-[-] Initialisation of variables using an expression
-[-]
+* Wrote code that *should* work to evaluate initial values of variables

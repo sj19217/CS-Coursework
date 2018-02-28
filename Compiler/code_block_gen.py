@@ -181,6 +181,16 @@ class InstrVariableAssignment(Instruction):
         self.var_name = lvalue.name
         self._stack_top_type = stack_top_type
 
+    def generate_code(self, block: CodeBlock, global_symbols):
+        var, rel = block.get_local_var_data(self.var_name)
+
+        if var is None:
+            # Could be a local
+            pass
+        else:
+            # It is a local
+            pass
+
 
 class InstrArrayAssignment(Instruction):
     def __init__(self, lvalue: ArrayRef, stack_top_type: str):
@@ -277,6 +287,48 @@ class InstrEvaluateBinary(Instruction):
         self._ltype = ltype
         self._rtype = rtype
 
+    @property
+    def lsize(self):
+        return util.get_size_of_type(self._ltype)
+
+    @property
+    def rsize(self):
+        return util.get_size_of_type(self._rtype)
+
+    def generate_code(self, block: CodeBlock, global_symbols):
+        if self._op == "+":
+            mnemonic = "ADD"
+        elif self._op == "-":
+            mnemonic = "SUB"
+        elif self._op == "*":
+            mnemonic = "MUL"
+        elif self._op == "/":
+            # Change this in future to correctly choose IDIV vs EDIV
+            mnemonic = "IDIV"
+        elif self._op == "%":
+            mnemonic = "MOD"
+        else:
+            logging.error("As-yet unsupported binary expression {}".format(self._op))
+            return
+
+        # Pop the right hand value into ecx
+        code = "MOV {size}B ecx [esp]\n".format(size=self.rsize)
+        code += "ADD uint esp {size}\n".format(size=self.rsize)
+        # Pop the left hand value into edx
+        code += "MOV {size}B edx [esp]\n".format(size=self.lsize)
+        code += "ADD uint esp {size}\n".format(size=self.lsize)
+
+        # Find the biggest type of these two
+        maxtype = max(self._ltype, self._rtype, key=util.get_size_of_type)
+
+        # Perform the operation
+        code += "{op} {maxtype} ecx edx\n".format(op=mnemonic, maxtype=maxtype)
+
+        # Push it to the stack
+        code += "SUB uint esp {size}\n".format(size=max(self._ltype, self._rtype))
+        code += "MOV {size}B [esp] ecx\n".format(size=max(self._ltype, self._rtype))
+
+        return code
 
 
 ### FUNCTIONS
