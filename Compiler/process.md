@@ -39,3 +39,4 @@
 * Wrote the code block generation so that it has a skeleton and can deal with very basic things
 * Wrote init section for a code block
 * Wrote code for pushing values, then did some fiddling about for debugging
+* Implemented printf

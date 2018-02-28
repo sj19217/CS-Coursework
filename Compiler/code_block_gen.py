@@ -133,12 +133,24 @@ class Instruction:
     def __init__(self):
         pass
 
+    def generate_code(self, block: CodeBlock):
+        raise NotImplementedError()
+
 
 class InstrFuncCall(Instruction):
     def __init__(self, name, arg_types):
         super().__init__()
         self.func_name = name
         self._arg_types = arg_types
+
+    def generate_code(self, block):
+        if isinstance(self.func_name, ID) and self.func_name.name == "printf":
+            # Currently only supports the ridiculously simple task of printing an integer type
+            size = util.get_size_of_type(self._arg_types[0])
+            # First line is doing it, second line is popping the item (no need to overwrite)
+            return "MOV {size}B out [esp]\nADD uint esp {size}\n".format(size=size)
+        else:
+            logging.error("Unsupported function: {}".format(self.func_name))
 
 
 class InstrVariableAssignment(Instruction):
