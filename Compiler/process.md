@@ -42,3 +42,8 @@
 * Implemented printf
 * Wrote returning code
 * First apparently successful run
+
+
+# To-do list
+[-] Initialisation of variables using an expression
+[-]

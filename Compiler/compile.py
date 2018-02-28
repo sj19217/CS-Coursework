@@ -41,7 +41,7 @@ def main(text):
     parse_compound(top_compound, [], global_symbols)
 
     # STAGE 5 - HIERARCHICAL INSTRUCTION GENERATION
-    main_block = generate_code_block(top_compound)
+    main_block = generate_code_block(top_compound, global_symbols)
 
     # STAGE 6 - ASSEMBLY GENERATION
     assembly = """section.meta
@@ -54,7 +54,7 @@ section.text
 {text_section}
 """.format(mem_amt=4,
               data_section=produce_data_section(global_symbols),
-               text_section=produce_text_section(main_block))
+               text_section=produce_text_section(main_block, global_symbols))
 
     print(assembly)
 

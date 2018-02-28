@@ -701,6 +701,7 @@ class Goto(Node):
 
 class ID(Node):
     __slots__ = ('name', 'coord', '__weakref__')
+    globals = []
     def __init__(self, name, coord=None):
         self.name = name
         self.coord = coord
@@ -724,7 +725,14 @@ class ID(Node):
         :return:
         """
         var, _ = container_block.get_local_var_data(self.name)
-        return var.type
+
+        if var is None:
+            # This might refer to a global
+            for global_var in [x for x in ID.globals if type(x).__name__ == "GlobalVariable"]:
+                if global_var.name == self.name:
+                    return global_var.type
+        else:
+            return var.type
 
     def __iter__(self):
         return

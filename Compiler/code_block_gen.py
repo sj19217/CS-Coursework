@@ -5,6 +5,7 @@ import logging
 from pycparser.c_ast import *
 
 import util
+from global_parser import GlobalVariable
 
 ### CLASSES
 
@@ -54,7 +55,7 @@ class CodeBlock:
 
         return var, rel_to_parent
 
-    def generate_code(self, block_name):
+    def generate_code(self, block_name, global_symbols):
         # The assembly is written to here. More efficient than remaking strings.
         assembly = io.StringIO()
         # If the block has variables, this stores info about how far from
@@ -65,8 +66,16 @@ class CodeBlock:
             init_code = self.generate_init(block_name)
             assembly.write(init_code)
 
+        # If ano locals need initialising to something complicated, create some Assignment expressions here
+        for local in self.locals:
+            if not isinstance(local.initial, (ID, Constant)):
+                asg = Assignment("=", ID(name=local.name), local.initial)
+                instructions = get_stmt_instructions(asg, self, global_symbols)
+                for i, instr in enumerate(instructions):
+                    self.instructions.insert(i, instr)
+
         for instr in self.instructions:
-            assembly.write(instr.generate_code(self))
+            assembly.write(instr.generate_code(self, global_symbols))
 
         if len(self.locals) > 0:
             assembly.write(self.generate_return())
@@ -145,7 +154,7 @@ class Instruction:
     def __init__(self):
         pass
 
-    def generate_code(self, block: CodeBlock):
+    def generate_code(self, block: CodeBlock, global_symbols):
         raise NotImplementedError()
 
 
@@ -155,7 +164,7 @@ class InstrFuncCall(Instruction):
         self.func_name = name
         self._arg_types = arg_types
 
-    def generate_code(self, block):
+    def generate_code(self, block, global_symbols):
         if isinstance(self.func_name, ID) and self.func_name.name == "printf":
             # Currently only supports the ridiculously simple task of printing an integer type
             size = util.get_size_of_type(self._arg_types[0])
@@ -211,12 +220,7 @@ class InstrPushValue(Instruction):
         self._value = value
         # The value can be either a Constant or an ID
 
-    def to_bytes(self):
-        if isinstance(self._value, Constant):
-            pass
-
-
-    def generate_code(self, block: CodeBlock):
+    def generate_code(self, block: CodeBlock, global_symbols):
         # Move the stack pointer down by the right amount then write the data
 #         if isinstance(self._value, Constant) and self._value.type == "int":
 #             value = self._value.value
@@ -236,17 +240,27 @@ class InstrPushValue(Instruction):
         elif isinstance(self._value, ID):
             # A variable, so its location has to be found. We need to know its size.
             # This unpacks the (LocalVariable, int) tuple.
-            (_, type_, _), rel_to_base = block.get_local_var_data(self._value.name)
-            size = util.get_size_of_type(type_)
-            code = """SUB uint esp {size}
+            var, rel_to_base = block.get_local_var_data(self._value.name)
+            if var is None:
+                # It could be a global variable
+                for global_var in [x for x in global_symbols if isinstance(x, GlobalVariable)]:
+                    if global_var.name == self._value.name:
+                        size = util.get_size_of_type(global_var.type)
+                        return "SUB uint exp {size}\n".format(size=size) + \
+                               "MOV {size}B [esp] {name}\n".format(size=size, name=global_var.name)
+            else:
+                # It is a local variable
+                _, type_, _ = var
+                size = util.get_size_of_type(type_)
+                code = """SUB uint esp {size}
 MOV 4B esi ebp
 """.format(size=size)
-            if rel_to_base < 0:
-                code += "ADD uint esi {rel}\n".format(rel=0-rel_to_base)
-            elif rel_to_base > 0:
-                code += "SUB uint esi {rel}\n".format(rel=rel_to_base)
-            code += "MOV {size}B [esp] [esi]\n".format(size=size)
-            return code
+                if rel_to_base < 0:
+                    code += "ADD uint esi {rel}\n".format(rel=0-rel_to_base)
+                elif rel_to_base > 0:
+                    code += "SUB uint esi {rel}\n".format(rel=rel_to_base)
+                code += "MOV {size}B [esp] [esi]\n".format(size=size)
+                return code
         else:
             logging.error("Can only push a Constant or ID, not {}".format(self._value))
 
@@ -267,7 +281,7 @@ class InstrEvaluateBinary(Instruction):
 
 ### FUNCTIONS
 
-def generate_code_block(compound: Compound) -> CodeBlock:
+def generate_code_block(compound: Compound, global_symbols) -> CodeBlock:
     # Create the code block everything will be added to
     code_block = CodeBlock()
 
@@ -278,20 +292,20 @@ def generate_code_block(compound: Compound) -> CodeBlock:
     # Loop through the statements
     for stmt in compound.block_items:
         # Get the instructions from the block
-        instrs = get_stmt_instructions(stmt, code_block)
+        instrs = get_stmt_instructions(stmt, code_block, global_symbols)
         code_block.instructions.extend(instrs)
 
         # See if it contains sub-blocks
         if isinstance(stmt, If):
-            code_block.child_blocks.append(generate_code_block(stmt.iftrue))
-            code_block.child_blocks.append(generate_code_block(stmt.iffalse))
+            code_block.child_blocks.append(generate_code_block(stmt.iftrue, global_symbols))
+            code_block.child_blocks.append(generate_code_block(stmt.iffalse, global_symbols))
         elif isinstance(stmt, (For, While)):
-            code_block.child_blocks.append(generate_code_block(stmt.stmt))
+            code_block.child_blocks.append(generate_code_block(stmt.stmt, global_symbols))
 
     return code_block
 
 
-def get_stmt_instructions(stmt, code_block) -> list:
+def get_stmt_instructions(stmt, code_block, global_symbols) -> list:
     """
     Takes a statement that is a node in the tree and turns it into a list of instructions.
     :param stmt:
@@ -311,7 +325,7 @@ def get_stmt_instructions(stmt, code_block) -> list:
         instr_list.append(InstrFuncCall(stmt.name, typelist))
     elif isinstance(stmt, Assignment):
         expr_instructions, type_ = expression_instructions(stmt.rvalue, code_block)
-        instr_list.append(expr_instructions)
+        instr_list.extend(expr_instructions)
         if isinstance(stmt.lvalue, ID):
             instr_list.append(InstrVariableAssignment(stmt.lvalue, type_))
         elif isinstance(stmt.lvalue, ArrayRef):
@@ -353,11 +367,11 @@ def expression_instructions(expr, code_block) -> (list, str):
         instrs, type_on_top = expression_instructions(expr.expr, code_block)
         instructions.extend(instrs)
         instructions.append(InstrEvaluateUnary(expr.op, type_on_top))
+        return instructions, type_on_top
     elif isinstance(expr, BinaryOp):
         lexpr, ltype = expression_instructions(expr.left, code_block)
         rexpr, rtype = expression_instructions(expr.right, code_block)
         instructions.extend(lexpr)
         instructions.extend(rexpr)
         instructions.append(InstrEvaluateBinary(expr.op, ltype, rtype))
-
-    return instructions
+        return instructions, (ltype, rtype)

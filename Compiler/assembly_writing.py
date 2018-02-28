@@ -35,7 +35,7 @@ def produce_data_section(global_symbols):
 
     return data_section
 
-def produce_text_section(top_block):
+def produce_text_section(top_block, global_symbols):
     assembly = io.StringIO()
     # A queue containing (block name, block object)
     queue = collections.deque()
@@ -49,7 +49,12 @@ def produce_text_section(top_block):
     queue.append(("block", top_block))
     while len(queue) > 0:
         name, block = queue.popleft()
-        assembly.write(block.generate_code(name))
+        assembly.write(block.generate_code(name, global_symbols))
+
+        # Add the child blocks
+        for i, child in enumerate(block.child_blocks):
+            if len(child.locals) > 0:
+                queue.append((name + "_" + str(i), child))
 
     # Add a HLT instruction to the end
     assembly.write("exit HLT\n")
