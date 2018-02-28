@@ -4,6 +4,8 @@ import logging
 
 from pycparser.c_ast import *
 
+import util
+
 ### CLASSES
 
 class CodeBlock:
@@ -13,6 +15,13 @@ class CodeBlock:
         self.child_blocks = []
         self.parent = None
 
+    def get_stack_block_size(self):
+        """Returns the number of bytes this block will take on the stack"""
+        size = 4    # BP reference
+        for local in self.locals:
+            size += util.get_size_of_type(local.type)
+        return size
+
     def get_local_var_data(self, name):
         """
         Returns a tuple of a LocalVariable object and an integer showing where its start is relative to the base pointer
@@ -20,9 +29,29 @@ class CodeBlock:
         :param name:
         :return:
         """
+        # Starts 4 below the base pointer because of the record of the old base pointer
+        relative = 4
         for local in self.locals:
+            relative += util.get_size_of_type(local.type)
+            if local.name != name:
+                continue
+            # This is the variable
+            return local, relative
 
-            pass
+        # If here then it wasn't a local variable
+        # Now set to be the next base pointer down and set based on that
+        if self.parent is None:
+            # It wasn't a local anywhere up the spectrum
+            return None, None
+        relative = -self.parent.get_stack_block_size()
+        var, rel_to_parent = self.parent.get_local_var_data(name)
+        if rel_to_parent is None:
+            # The parent has found it to not exist, so pass this down
+            return None, None
+        # It does exist
+        relative += rel_to_parent
+
+        return var, rel_to_parent
 
     def generate_code(self, block_name):
         # The assembly is written to here. More efficient than remaking strings.
@@ -30,14 +59,13 @@ class CodeBlock:
         # If the block has variables, this stores info about how far from
         # the base pointer the variables are (as in, this index and the next
         # few bytes are the number) and their type
-        stack_block_info = None
 
         if len(self.locals) > 0:
-            stack_block_info, init_code = self.generate_init()
+            init_code = self.generate_init(block_name)
             assembly.write(init_code)
 
         for instr in self.instructions:
-            assembly.write(instr.generate_code(stack_block_info))
+            assembly.write(instr.generate_code(self))
 
         if len(self.locals) > 0:
             assembly.write(self.generate_return())
@@ -45,7 +73,7 @@ class CodeBlock:
         assembly.seek(0)
         return assembly.read()
 
-    def generate_init(self) -> (dict, str):
+    def generate_init(self, block_name) -> (dict, str):
         """
         Generates the initialisation code that will handle the stack
         :return:
@@ -54,17 +82,17 @@ class CodeBlock:
         # 2. Change base pointer to one below the current stack pointer
         # 3. Write the variables to the stack and record where they are
 
-        variable_data = {}
+        #variable_data = {}
 
         init_code = io.StringIO()
-        init_code.write("SUB uint esp 4\n")
+        init_code.write("{block_name} SUB uint esp 4\n".format(block_name=block_name))
         init_code.write("MOV 4B [esp] ebp\n")
-        init_code.write("ADD uint esp 3\n") # esp is now 1 below where it was
+        init_code.write("ADD uint esp 4\n") # esp is now 1 below where it was
         init_code.write("MOV 4B ebp esp\n") # Set base pointer to where it should be
-        init_code.write("SUB uint esp 3\n") # Set stack pointer to beginning of old base pointer record
+        init_code.write("SUB uint esp 4\n") # Set stack pointer to beginning of old base pointer record
 
         # This handles how far to the left of the base pointer the stack pointer is
-        virtual_esp = 3
+        #virtual_esp = 4
 
         # Handle the variables
         for name, type_, initial in self.locals:
@@ -81,24 +109,24 @@ class CodeBlock:
                 formatted_initial = 0
 
             if type_ in ("char", "uchar"):   # 1B
-                virtual_esp += 1
+                #virtual_esp += 1
                 init_code.write("SUB uint esp 1\n")
                 init_code.write("MOV 1B [esp] {initial}\n".format(initial=formatted_initial))
             elif type_ in ("short", "ushort"): # 2B
-                virtual_esp += 2
+                #virtual_esp += 2
                 init_code.write("SUB uint esp 2\n")
                 init_code.write("MOV 2B [esp] {initial}\n".format(initial=formatted_initial))
             elif type_ in ("int", "uint", "float"):
-                virtual_esp += 4
+                #virtual_esp += 4
                 init_code.write("SUB uint esp 4\n")
                 init_code.write("MOV 4B [esp] {initial}\n".format(initial=formatted_initial))
             else:
                 logging.error("Unknown type {type} for variable {name}".format(type=type_, name=name))
 
-            variable_data[name] = (virtual_esp, type_)
+            #variable_data[name] = (virtual_esp, type_)
 
         init_code.seek(0)
-        return variable_data, init_code.read()
+        return init_code.read()
 
 
 class Instruction:
@@ -107,23 +135,26 @@ class Instruction:
 
 
 class InstrFuncCall(Instruction):
-    def __init__(self, name):
+    def __init__(self, name, arg_types):
         super().__init__()
         self.func_name = name
+        self._arg_types = arg_types
 
 
 class InstrVariableAssignment(Instruction):
-    def __init__(self, lvalue: ID):
+    def __init__(self, lvalue: ID, stack_top_type: str):
         super().__init__()
         self.lvalue = lvalue
         self.var_name = lvalue.name
+        self._stack_top_type = stack_top_type
 
 
 class InstrArrayAssignment(Instruction):
-    def __init__(self, lvalue: ArrayRef):
+    def __init__(self, lvalue: ArrayRef, stack_top_type: str):
         super().__init__()
         self.lvalue = lvalue
         self.var_name = lvalue.name
+        self._stack_top_type = stack_top_type
 
 
 class InstrForLoop(Instruction):
@@ -161,29 +192,52 @@ class InstrPushValue(Instruction):
             pass
 
 
-    def generate_code(self, **kwargs):
+    def generate_code(self, block: CodeBlock):
         # Move the stack pointer down by the right amount then write the data
+#         if isinstance(self._value, Constant) and self._value.type == "int":
+#             value = self._value.value
+#             size = 4
+#         elif isinstance(self._value, ID):
+#             value, _ = block.get_local_var_data(self._value.name)
+#             value = value.initial
+#             size = self._value.memory_size(block)
+#         else:
+#             logging.error("Can only push a Constant or ID to the stack")
+#             return
+#         return """SUB uint esp {size}
+# MOV {size}B [esp] {value}""".format(value=value, size=size)
         if isinstance(self._value, Constant) and self._value.type == "int":
-            value = self._value.value
-            size = 4
+            return "SUB uint esp 4\n" + \
+                   "MOV 4B [esp] {value}\n".format(value=self._value.value)
         elif isinstance(self._value, ID):
-            value = get_assembly_var_ref(self._value.name, kwargs["block"], kwargs["globals"])
-            size = self._value.memory_size()
+            # A variable, so its location has to be found. We need to know its size.
+            # This unpacks the (LocalVariable, int) tuple.
+            (_, type_, _), rel_to_base = block.get_local_var_data(self._value.name)
+            size = util.get_size_of_type(type_)
+            code = """SUB uint esp {size}
+            MOV 4B esi ebp
+            """.format(size=size)
+            if rel_to_base < 0:
+                code += "ADD uint esi {rel}\n".format(rel=0-rel_to_base)
+            elif rel_to_base > 0:
+                code += "SUB uint esi {rel}\n".format(rel=rel_to_base)
+            code += "MOV {size}B [esp] [esi]\n".format(size=size)
+            return code
         else:
-            logging.error("Can only push a Constant or ID to the stack")
-            return
-        return """SUB uint esp {size}
-MOV {size}B [esp] {value}""".format(value=value, size=size)
+            logging.error("Can only push a Constant or ID, not {}".format(self._value))
 
 class InstrEvaluateUnary(Instruction):
-    def __init__(self, operation):
+    def __init__(self, operation, type_):
         super().__init__()
         self._op = operation
+        self._type = type_
 
 class InstrEvaluateBinary(Instruction):
-    def __init__(self, operation):
+    def __init__(self, operation, ltype, rtype):
         super().__init__()
         self._op = operation
+        self._ltype = ltype
+        self._rtype = rtype
 
 
 
@@ -200,7 +254,7 @@ def generate_code_block(compound: Compound) -> CodeBlock:
     # Loop through the statements
     for stmt in compound.block_items:
         # Get the instructions from the block
-        instrs = get_stmt_instructions(stmt)
+        instrs = get_stmt_instructions(stmt, code_block)
         code_block.instructions.extend(instrs)
 
         # See if it contains sub-blocks
@@ -213,26 +267,31 @@ def generate_code_block(compound: Compound) -> CodeBlock:
     return code_block
 
 
-def get_stmt_instructions(stmt) -> list:
+def get_stmt_instructions(stmt, code_block) -> list:
     """
     Takes a statement that is a node in the tree and turns it into a list of instructions.
     :param stmt:
+    :param code_block:
     :return:
     """
     instr_list = []
 
     if isinstance(stmt, FuncCall):
         # Sort out the evaluation of the arguments
+        typelist = []
         for arg in stmt.args:
-            instr_list.extend(expression_instructions(arg))
+            instructions, type_ = expression_instructions(arg, code_block)
+            instr_list.extend(instructions)
+            typelist.append(type_)
         # Now do the actual FuncCall
-        instr_list.append(InstrFuncCall(stmt.name))
+        instr_list.append(InstrFuncCall(stmt.name, typelist))
     elif isinstance(stmt, Assignment):
-        instr_list.append(expression_instructions(stmt.rvalue))
+        expr_instructions, type_ = expression_instructions(stmt.rvalue, code_block)
+        instr_list.append(expr_instructions)
         if isinstance(stmt.lvalue, ID):
-            instr_list.append(InstrVariableAssignment(stmt.lvalue))
+            instr_list.append(InstrVariableAssignment(stmt.lvalue, type_))
         elif isinstance(stmt.lvalue, ArrayRef):
-            instr_list.append(InstrArrayAssignment(stmt.lvalue))
+            instr_list.append(InstrArrayAssignment(stmt.lvalue, type_))
     elif isinstance(stmt, For):
         instr_list.append(InstrForLoop(stmt))
     elif isinstance(stmt, While):
@@ -243,11 +302,11 @@ def get_stmt_instructions(stmt) -> list:
     return instr_list
 
 
-def expression_instructions(expr) -> list:
+def expression_instructions(expr, code_block) -> (list, str):
     """
     Performs post-order traversal and returns a list of expression evaluation objects.
     Each expression evaluation object has the job of taking (a) value(s) from the stack and processing it,
-    then pushing the result back on.
+    then pushing the result back on. This function returns (instruction list, type on top of stack)
 
     The object given to this function will be one of these:
     * A UnaryOp - Means one value needs popping
@@ -255,19 +314,26 @@ def expression_instructions(expr) -> list:
     * A Constant - Nothing needs popping, but a value needs pushing on
     * An ID - Nothing needs popping, but a variable needs getting and pushing on
     :param expr:
+    :param code_block:
     :return:
     """
     # For post-order traversal, first run down the left hand side, then the right, then the root
     instructions = []
 
     if isinstance(expr, (Constant, ID)):
-        instructions.append(InstrPushValue(expr))
+        if isinstance(expr, Constant):
+            return [InstrPushValue(expr)], expr.type
+        elif isinstance(expr, ID):
+            return [InstrPushValue(expr)], expr.get_type(code_block)
     elif isinstance(expr, UnaryOp):
-        instructions.extend(expression_instructions(expr.expr))
-        instructions.append(InstrEvaluateUnary(expr.op))
+        instrs, type_on_top = expression_instructions(expr.expr, code_block)
+        instructions.extend(instrs)
+        instructions.append(InstrEvaluateUnary(expr.op, type_on_top))
     elif isinstance(expr, BinaryOp):
-        instructions.extend(expression_instructions(expr.left))
-        instructions.extend(expression_instructions(expr.right))
-        instructions.append(InstrEvaluateBinary(expr.op))
+        lexpr, ltype = expression_instructions(expr.left, code_block)
+        rexpr, rtype = expression_instructions(expr.right, code_block)
+        instructions.extend(lexpr)
+        instructions.extend(rexpr)
+        instructions.append(InstrEvaluateBinary(expr.op, ltype, rtype))
 
     return instructions

@@ -18,6 +18,8 @@
 
 import sys
 
+import util
+
 def _repr(obj):
     """
     Get the representation of an object, with dedicated pprint-like format for lists and tuples.
@@ -712,7 +714,17 @@ class ID(Node):
         Returns the number of bytes this variable would take up in memory. The given block is where this ID is placed.
         :return:
         """
-        lv = container_block
+        var, _ = container_block.get_local_var_data(self.name)
+        return util.get_size_of_type(var.type)
+
+    def get_type(self, container_block):
+        """
+        Returns the type of this variable.
+        :param container_block:
+        :return:
+        """
+        var, _ = container_block.get_local_var_data(self.name)
+        return var.type
 
     def __iter__(self):
         return
