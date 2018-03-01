@@ -43,3 +43,5 @@
 * Wrote returning code
 * First apparently successful run
 * Wrote code that *should* work to evaluate initial values of variables
+* Implemented binary operations, then assignment. Got a bug to do with the type on top of the stack.
+* Traced output with pen and paper, and it should be working.

@@ -182,14 +182,43 @@ class InstrVariableAssignment(Instruction):
         self._stack_top_type = stack_top_type
 
     def generate_code(self, block: CodeBlock, global_symbols):
+        code = ""
         var, rel = block.get_local_var_data(self.var_name)
 
+        # Depending on whether it is global or local, set edi to point to it
         if var is None:
-            # Could be a local
-            pass
+            # Could be a global
+            for global_ in [x for x in ID.globals if isinstance(x, GlobalVariable)]:
+                if global_.name == self.var_name:
+                    var = global_
+                    code += "LEA edi {}\n".format(self.var_name)
+                    break
+            else:
+                # A for-else is an odd construct
+                # But this will only run if no global was found
+                logging.error("No variable found for assignment: {}".format(self.var_name))
+                return
         else:
             # It is a local
-            pass
+            code += "MOV 4B edi ebp\n"
+
+            if rel > 0:
+                code += "SUB uint edi {}\n".format(rel)
+            elif rel < 0:
+                code += "ADD uint edi {}\n".format(0-rel)
+
+        # edi has the address of the variable now. Get the size.
+        size_var = util.get_size_of_type(var.type)
+        size_stack = util.get_size_of_type(self._stack_top_type)
+
+        # Move the thing from the stack to a register
+        code += "MOV {size}B ecx [esp]\n".format(size=size_stack)
+        code += "ADD uint esp {size}\n".format(size=size_stack)
+
+        # Move it from the register to the variable location
+        code += "MOV {size}B [edi] ecx\n".format(size=size_var)
+
+        return code
 
 
 class InstrArrayAssignment(Instruction):
@@ -256,7 +285,7 @@ class InstrPushValue(Instruction):
                 for global_var in [x for x in global_symbols if isinstance(x, GlobalVariable)]:
                     if global_var.name == self._value.name:
                         size = util.get_size_of_type(global_var.type)
-                        return "SUB uint exp {size}\n".format(size=size) + \
+                        return "SUB uint esp {size}\n".format(size=size) + \
                                "MOV {size}B [esp] {name}\n".format(size=size, name=global_var.name)
             else:
                 # It is a local variable
@@ -325,8 +354,9 @@ class InstrEvaluateBinary(Instruction):
         code += "{op} {maxtype} ecx edx\n".format(op=mnemonic, maxtype=maxtype)
 
         # Push it to the stack
-        code += "SUB uint esp {size}\n".format(size=max(self._ltype, self._rtype))
-        code += "MOV {size}B [esp] ecx\n".format(size=max(self._ltype, self._rtype))
+        s = util.get_size_of_type
+        code += "SUB uint esp {size}\n".format(size=max(s(self._ltype), s(self._rtype)))
+        code += "MOV {size}B [esp] ecx\n".format(size=max(s(self._ltype), s(self._rtype)))
 
         return code
 
@@ -426,4 +456,5 @@ def expression_instructions(expr, code_block) -> (list, str):
         instructions.extend(lexpr)
         instructions.extend(rexpr)
         instructions.append(InstrEvaluateBinary(expr.op, ltype, rtype))
-        return instructions, (ltype, rtype)
+        top_type = max(ltype, rtype, key=util.get_size_of_type)
+        return instructions, top_type
