@@ -28,8 +28,8 @@ for regname, regnum in REGISTERS.copy().items():
 
 # A dict to map from the name of a data type to its struct designation
 DTYPE_STRUCT_FMT_STRINGS = {
-    "byte": ">b",
-    "ubyte": ">B",
+    "char": ">b",
+    "uchar": ">B",
     "short": ">h",
     "ushort": ">H",
     "int": ">i",
