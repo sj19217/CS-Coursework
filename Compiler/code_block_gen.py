@@ -258,6 +258,37 @@ class InstrWhileLoop(Instruction):
         super().__init__()
         self._stmt = stmt
 
+    def generate_code(self, block: CodeBlock, global_symbols, queue):
+        code = io.StringIO()
+        hash_obj = hashlib.md5()
+        hash_obj.update(bytes(id(self)))
+        block_rand = hash_obj.hexdigest()[-8:]
+
+
+        # Start with a label to signify the beginning of the block, and a check for the condition
+        code.write("while_{rand} ")
+        condition_instrs, top_type = expression_instructions(self._stmt.cond, block)
+        for instr in condition_instrs:
+            code.write(instr.generate_code(block, global_symbols, queue))
+        code.write("CMP {type} [esp] 1\n".format(type=top_type))
+        code.write("JNE endwhile_{rand}\n")
+
+        # Next up is the actual code block
+        child_block = generate_code_block(self._stmt.stmt, global_symbols, parent=block)
+        child_block.return_label = "endwhile_{rand}".format(rand=block_rand)
+        child_block.name = block.name + "_" + str(block.get_child_index(child_block))
+
+        if len(child_block.locals) > 0:
+            code.write("JMP " + child_block.name + "\n")
+            queue.append(child_block)
+        else:
+            code.write(child_block.generate_code(child_block.name, global_symbols, queue))
+
+        code.write("endwhile_{rand} MOV 4B eax eax\n")
+
+        code.seek(0)
+        return code.read().format(rand=block_rand)
+
 
 class InstrIfStmt(Instruction):
     def __init__(self, stmt: If):
@@ -272,7 +303,7 @@ class InstrIfStmt(Instruction):
             code.write(instr.generate_code(block, global_symbols, queue))
 
         hash_obj = hashlib.md5()
-        hash_obj.update((bytes(id(self))))
+        hash_obj.update(bytes(id(self)))
         block_rand = hash_obj.hexdigest()[-8:]
 
         # At this point, on the top of the stack should be the result (i.e. 0 being false, 1 being true)
