@@ -1,6 +1,8 @@
 import collections
 import io
 import logging
+import random
+import hashlib
 
 from pycparser.c_ast import *
 
@@ -16,6 +18,8 @@ class CodeBlock:
         self.child_blocks = []
         self.parent = None
         self.return_label = "exit"
+        self.name = ""
+        self.coord = ""
 
     def get_stack_block_size(self):
         """Returns the number of bytes this block will take on the stack"""
@@ -55,7 +59,18 @@ class CodeBlock:
 
         return var, rel_to_parent
 
-    def generate_code(self, block_name, global_symbols):
+    def get_child_index(self, block):
+        """
+        Look through the child blocks and compare the coord, returning the correct index, or -1 if it is not present.
+        :param block:
+        :return:
+        """
+        for i, child in enumerate(self.child_blocks):
+            if child.coord == block.coord:
+                return i
+        return -1
+
+    def generate_code(self, block_name, global_symbols, queue):
         # The assembly is written to here. More efficient than remaking strings.
         assembly = io.StringIO()
         # If the block has variables, this stores info about how far from
@@ -75,7 +90,7 @@ class CodeBlock:
                     self.instructions.insert(i, instr)
 
         for instr in self.instructions:
-            assembly.write(instr.generate_code(self, global_symbols))
+            assembly.write(instr.generate_code(self, global_symbols, queue))
 
         if len(self.locals) > 0:
             assembly.write(self.generate_return())
@@ -88,6 +103,7 @@ class CodeBlock:
         Generates the initialisation code that will handle the stack
         :return:
         """
+        self.name = block_name
         # 1. Push old base pointer to stack
         # 2. Change base pointer to one below the current stack pointer
         # 3. Write the variables to the stack and record where they are
@@ -154,7 +170,7 @@ class Instruction:
     def __init__(self):
         pass
 
-    def generate_code(self, block: CodeBlock, global_symbols):
+    def generate_code(self, block: CodeBlock, global_symbols, queue):
         raise NotImplementedError()
 
 
@@ -164,7 +180,7 @@ class InstrFuncCall(Instruction):
         self.func_name = name
         self._arg_types = arg_types
 
-    def generate_code(self, block, global_symbols):
+    def generate_code(self, block, global_symbols, queue):
         if isinstance(self.func_name, ID) and self.func_name.name == "printf":
             # Currently only supports the ridiculously simple task of printing an integer type
             size = util.get_size_of_type(self._arg_types[0])
@@ -181,7 +197,7 @@ class InstrVariableAssignment(Instruction):
         self.var_name = lvalue.name
         self._stack_top_type = stack_top_type
 
-    def generate_code(self, block: CodeBlock, global_symbols):
+    def generate_code(self, block: CodeBlock, global_symbols, queue):
         code = ""
         var, rel = block.get_local_var_data(self.var_name)
 
@@ -244,9 +260,56 @@ class InstrWhileLoop(Instruction):
 
 
 class InstrIfStmt(Instruction):
-    def __init__(self, stmt):
+    def __init__(self, stmt: If):
         super().__init__()
         self._stmt = stmt
+
+    def generate_code(self, block: CodeBlock, global_symbols, queue):
+        # First, evaluate the truth expression
+        code = io.StringIO()
+        instrs, type_ = expression_instructions(self._stmt.cond, block)
+        for instr in instrs:
+            code.write(instr.generate_code(block, global_symbols, queue))
+
+        hash_obj = hashlib.md5()
+        hash_obj.update((bytes(id(self))))
+        block_rand = hash_obj.hexdigest()[-8:]
+
+        # At this point, on the top of the stack should be the result (i.e. 0 being false, 1 being true)
+        code.write("CMP {type} [esp] 1\n".format(type=type_))
+        code.write("ADD uint esp {}\n".format(util.get_size_of_type(type_)))
+
+        # Jump if not equal (i.e., if the expression evaluated to false)
+        code.write("JNE else_{rand}\n".format(rand=block_rand))
+
+        # This bit will be jumped over if the expression was false
+        # Check if it has locals. If it does, jump to its block. If not, put the code here.
+        true_block = generate_code_block(self._stmt.iftrue, global_symbols)
+        if len(self._stmt.iftrue.locals) == 0:
+            code.write(true_block.generate_code(block.name + "_" + str(block.get_child_index(true_block)),
+                                                global_symbols,
+                                                queue))
+        else:
+            code.write("JMP " + block.name + "_" + str(block.get_child_index(true_block)) + "\n")
+            true_block.return_label = "endif_" + block_rand
+            queue.append(true_block)
+
+        # Got the true part done, now for the else part
+        if self._stmt.iffalse is not None:
+            false_block = generate_code_block(self._stmt.iffalse, global_symbols)
+            if len(self._stmt.iffalse.locals) == 0:
+                code.write(false_block.generate_code(block.name + "_" + str(block.get_child_index(false_block)),
+                                                     global_symbols,
+                                                     queue))
+            else:
+                code.write("JMP " + block.name + "_" + str(block.get_child_index(false_block)))
+                false_block.return_label = "endif_" + block_rand
+                queue.append(false_block)
+
+        code.write("endif_{rand} MOV 4B eax eax\n".format(rand=block_rand))
+
+        code.seek(0)
+        return code.read()
 
 class InstrPushValue(Instruction):
     def __init__(self, value):
@@ -259,7 +322,7 @@ class InstrPushValue(Instruction):
         self._value = value
         # The value can be either a Constant or an ID
 
-    def generate_code(self, block: CodeBlock, global_symbols):
+    def generate_code(self, block: CodeBlock, global_symbols, queue):
         # Move the stack pointer down by the right amount then write the data
 #         if isinstance(self._value, Constant) and self._value.type == "int":
 #             value = self._value.value
@@ -324,7 +387,14 @@ class InstrEvaluateBinary(Instruction):
     def rsize(self):
         return util.get_size_of_type(self._rtype)
 
-    def generate_code(self, block: CodeBlock, global_symbols):
+    def generate_code(self, block: CodeBlock, global_symbols, queue):
+        # Pop the right hand value into edx
+        code = "MOV {size}B edx [esp]\n".format(size=self.rsize)
+        code += "ADD uint esp {size}\n".format(size=self.rsize)
+        # Pop the left hand value into ecx
+        code += "MOV {size}B ecx [esp]\n".format(size=self.lsize)
+        code += "ADD uint esp {size}\n".format(size=self.lsize)
+
         if self._op == "+":
             mnemonic = "ADD"
         elif self._op == "-":
@@ -332,21 +402,15 @@ class InstrEvaluateBinary(Instruction):
         elif self._op == "*":
             mnemonic = "MUL"
         elif self._op == "/":
-            # Change this in future to correctly choose IDIV vs EDIV
+            # TODO Change this in future to correctly choose IDIV vs EDIV
             mnemonic = "IDIV"
         elif self._op == "%":
             mnemonic = "MOD"
         else:
-            logging.error("As-yet unsupported binary expression {}".format(self._op))
-            return
+            # Not one of the standard arithmetic types
+            return self._generate_code_comparison(code, block, global_symbols)
 
-        # Pop the right hand value into ecx
-        code = "MOV {size}B ecx [esp]\n".format(size=self.rsize)
-        code += "ADD uint esp {size}\n".format(size=self.rsize)
-        # Pop the left hand value into edx
-        code += "MOV {size}B edx [esp]\n".format(size=self.lsize)
-        code += "ADD uint esp {size}\n".format(size=self.lsize)
-
+        # It is one of the normal arithmetic types
         # Find the biggest type of these two
         maxtype = max(self._ltype, self._rtype, key=util.get_size_of_type)
 
@@ -360,16 +424,52 @@ class InstrEvaluateBinary(Instruction):
 
         return code
 
+    def _generate_code_comparison(self, pop_code, block: CodeBlock, global_symbols):
+        code = pop_code
+        # ecx and edx contain the things to be compared
+        code += "CMP uint ecx edx\n"
+        # The comparison registers are now set correctly
+
+        hash_obj = hashlib.md5()
+        hash_obj.update(bytes(random.randint(0, 100000000)))
+        block_rand = hash_obj.hexdigest()[-8:]
+
+        if self._op == "==":
+            code += "JE jmptrue_{rand}\n"
+        elif self._op == "!=":
+            code += "JNE jmptrue_{rand}\n"
+        elif self._op == "<":
+            code += "JLT jmptrue_{rand}\n"
+        elif self._op == ">":
+            code += "JGT jmptrue_{rand}\n"
+        elif self._op == "<=":
+            code += "JLE jmptrue_{rand}\n"
+        elif self._op == ">=":
+            code += "JGE jmptrue_{rand}\n"
+
+        code += "JMP jmpfalse_{rand}\n"
+        code += "jmptrue SUB esp 4\n"
+        code += "MOV 4B [esp] 1\n"
+        code += "JMP jmpcmpend_{rand}\n"
+        code += "jmpfalse_{rand} SUB esp 4\n"
+        code += "MOV 4B [esp] 0\n"
+        code += "jmpcmpend_{rand} MOV 4B eax eax\n"
+
+        code = code.format(rand=block_rand)
+
+        return code
+
 
 ### FUNCTIONS
 
-def generate_code_block(compound: Compound, global_symbols) -> CodeBlock:
+def generate_code_block(compound: Compound, global_symbols, parent=None) -> CodeBlock:
     # Create the code block everything will be added to
     code_block = CodeBlock()
 
     # Assign locals and parent blocks
-    code_block.parent = compound.parent
+    code_block.parent = parent
     code_block.locals = compound.locals
+    code_block.coord = compound.coord
 
     # Loop through the statements
     for stmt in compound.block_items:
@@ -379,10 +479,10 @@ def generate_code_block(compound: Compound, global_symbols) -> CodeBlock:
 
         # See if it contains sub-blocks
         if isinstance(stmt, If):
-            code_block.child_blocks.append(generate_code_block(stmt.iftrue, global_symbols))
-            code_block.child_blocks.append(generate_code_block(stmt.iffalse, global_symbols))
+            code_block.child_blocks.append(generate_code_block(stmt.iftrue, global_symbols, code_block))
+            code_block.child_blocks.append(generate_code_block(stmt.iffalse, global_symbols, code_block))
         elif isinstance(stmt, (For, While)):
-            code_block.child_blocks.append(generate_code_block(stmt.stmt, global_symbols))
+            code_block.child_blocks.append(generate_code_block(stmt.stmt, global_symbols, code_block))
 
     return code_block
 

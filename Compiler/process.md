@@ -45,3 +45,5 @@
 * Wrote code that *should* work to evaluate initial values of variables
 * Implemented binary operations, then assignment. Got a bug to do with the type on top of the stack.
 * Traced output with pen and paper, and it should be working.
+* Wrote binary comparison operation code
+* After a long and arduous attempt, finally managed to get if statements to (seem to) work
