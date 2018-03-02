@@ -298,11 +298,13 @@ class InstrIfStmt(Instruction):
         if self._stmt.iffalse is not None:
             false_block = generate_code_block(self._stmt.iffalse, global_symbols)
             if len(self._stmt.iffalse.locals) == 0:
+                code.write("else_{rand} ".format(rand=block_rand))
                 code.write(false_block.generate_code(block.name + "_" + str(block.get_child_index(false_block)),
                                                      global_symbols,
                                                      queue))
             else:
-                code.write("JMP " + block.name + "_" + str(block.get_child_index(false_block)))
+                code.write("else_{rand} JMP ".format(rand=block_rand) + block.name + \
+                           "_" + str(block.get_child_index(false_block)))
                 false_block.return_label = "endif_" + block_rand
                 queue.append(false_block)
 
@@ -448,7 +450,7 @@ class InstrEvaluateBinary(Instruction):
             code += "JGE jmptrue_{rand}\n"
 
         code += "JMP jmpfalse_{rand}\n"
-        code += "jmptrue SUB esp 4\n"
+        code += "jmptrue_{rand} SUB esp 4\n"
         code += "MOV 4B [esp] 1\n"
         code += "JMP jmpcmpend_{rand}\n"
         code += "jmpfalse_{rand} SUB esp 4\n"
