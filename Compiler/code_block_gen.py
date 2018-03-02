@@ -278,6 +278,7 @@ class InstrWhileLoop(Instruction):
         for instr in condition_instrs:
             code.write(instr.generate_code(block, global_symbols, queue))
         code.write("CMP {type} [esp] 1  ; See if true and jump accordingly\n".format(type=top_type))
+        code.write("ADD uint esp {size}\n".format(size=util.get_size_of_type(top_type)))
         code.write("JNE endwhile_{rand}\n")
 
         # Next up is the actual code block
@@ -292,6 +293,7 @@ class InstrWhileLoop(Instruction):
         else:
             code.write("; Running child block\n")
             code.write(child_block.generate_code(child_block.name, global_symbols, queue))
+            code.write("JMP while_{rand}\n")
 
         code.write("endwhile_{rand} MOV 4B eax eax\n")
 
