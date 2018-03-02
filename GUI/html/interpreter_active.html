@@ -9,6 +9,9 @@
 
     <link rel="stylesheet" type="text/css" href="../styles/interpreter.css" />
     <link rel="stylesheet" type="text/css" href="../styles/controls.css" />
+
+    <!--<link rel="stylesheet" type="test/css" href="../libs/fontawesome-free-5.0.6/web-fonts-with-css/css/fontawesome.min.css" />-->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 </head>
 <body onload="beginInterpreter()">
 
@@ -76,6 +79,8 @@
 
 <div id="centre" class="page_part">
     <div id="play-controls">
+        <a href="#" onclick="alert('Play');"><i class="fa fa-play" style="font-size:36px;"></i></a>
+        <a href="#" onclick="alert('Step');"><i class="fa fa-step-forward" style="font-size:36px;"></i></a>
         <input type="range" min="1" max="100" value="50" class="speed-slider" id="speed_slider" title="Speed">
         <script src="../scripts/controls.js"></script>
     </div>
