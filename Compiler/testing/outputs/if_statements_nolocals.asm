@@ -17,17 +17,17 @@ ADD uint esp 4
 MOV 4B ecx [esp]
 ADD uint esp 4
 CMP uint ecx edx
-JE jmptrue_3aea7788
-JMP jmpfalse_3aea7788
-jmptrue_3aea7788 SUB esp 4
+JE jmptrue_3c5d585a
+JMP jmpfalse_3c5d585a
+jmptrue_3c5d585a SUB esp 4
 MOV 4B [esp] 1
-JMP jmpcmpend_3aea7788
-jmpfalse_3aea7788 SUB esp 4
+JMP jmpcmpend_3c5d585a
+jmpfalse_3c5d585a SUB esp 4
 MOV 4B [esp] 0
-jmpcmpend_3aea7788 MOV 4B eax eax
+jmpcmpend_3c5d585a MOV 4B eax eax
 CMP int [esp] 1
 ADD uint esp 4
-JNE else_caae8682
+JNE else_95fb3b7f
 SUB uint esp 4
 MOV 4B [esp] a
 SUB uint esp 4
@@ -41,9 +41,10 @@ SUB uint esp 4
 MOV 4B [esp] ecx
 MOV 4B out [esp]
 ADD uint esp 4
-else_caae8682 SUB uint esp 4
+JMP endif_95fb3b7f
+else_95fb3b7f SUB uint esp 4
 MOV 4B [esp] a
 MOV 4B out [esp]
 ADD uint esp 4
-endif_caae8682 MOV 4B eax eax
+endif_95fb3b7f MOV 4B eax eax
 exit HLT

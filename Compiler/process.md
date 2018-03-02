@@ -47,3 +47,6 @@
 * Traced output with pen and paper, and it should be working.
 * Wrote binary comparison operation code
 * After a long and arduous attempt, finally managed to get if statements to (seem to) work
+* Oddly, it actually pretty much worked alright. A manual trace of the assembled then disassembled code
+  worked except for a missing jump to endif.
+* Added in the jump to the end of the if statement, output now works.

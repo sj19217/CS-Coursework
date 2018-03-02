@@ -289,6 +289,7 @@ class InstrIfStmt(Instruction):
             code.write(true_block.generate_code(block.name + "_" + str(block.get_child_index(true_block)),
                                                 global_symbols,
                                                 queue))
+            code.write("JMP endif_{rand}\n".format(rand=block_rand))
         else:
             code.write("JMP " + block.name + "_" + str(block.get_child_index(true_block)) + "\n")
             true_block.return_label = "endif_" + block_rand
