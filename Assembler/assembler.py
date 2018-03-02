@@ -237,7 +237,14 @@ class DataInstruction(Instruction):
 
     def get_bytes(self, mem_table):
         # The instruction byte
-        instr = struct.pack(">B", OPCODES["MOV_{}B".format(self._calculate_valsize())])
+        if self.data_type in ("char", "uchar"):
+            instr = struct.pack(">B", OPCODES["MOV_1B"])
+        elif self.data_type in ("short", "ushort"):
+            instr = struct.pack(">B", OPCODES["MOV_2B"])
+        elif self.data_type in ("int", "uint", "float"):
+            instr = struct.pack(">B", OPCODES["MOV_4B"])
+        else:
+            raise ValueError("Cannot find size of type {}".format(self.data_type))
 
         valsize = self._calculate_valsize()
         # The byte to describe the operands and the format string for how to turn the immediate value into binary
@@ -763,7 +770,7 @@ def interpret_operand(string: str) -> Operand:
             pass        # Not an immediate value
 
     # Is it an address label/variable?
-    if string.isalnum():
+    if string.isidentifier():
         return AddressOperand(string)
 
     # Is it an arithmetic expression?
