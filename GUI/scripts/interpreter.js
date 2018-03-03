@@ -51,13 +51,14 @@ animate = (function () {
                 }
             },
 
-            read_memory_to_mdr: function (pc, cmdlen) {
+            read_memory_to_mdr: function (address, size) {
                 return function () {
                     // First make the relevant memory boxes bold and record bytes to move
-                    let table = document.getElementById("memtable");
+                    console.log(`Reading ${typeof size} bytes to MDR from ${typeof address}`);
                     let bytes = [];
-                    for (let i = pc; i < pc + cmdlen; i++) {
+                    for (let i = address; i < address + size; i++) {
                         let cell = $(`#memtable`).find(`tr:eq(${Math.floor(i/10)+1}) td:eq(${i%10 + 1})`);
+                        console.log(`Reading ${cell.length} cells`);
                         cell.css("font-weight", "bold");
                         bytes.push(cell.text());
                     }
@@ -148,7 +149,7 @@ animate = (function () {
             this.queue.push(this.atomic.notification("Moving PC to MAR"));
             this.queue.push(this.atomic.push_pc_to_mar());
             this.queue.push(this.atomic.notification("Reading memory"));
-            this.queue.push(this.atomic.read_memory_to_mdr(pc, cmdlen));
+            this.queue.push(this.atomic.read_memory_to_mdr(parseInt(pc), parseInt(cmdlen)));
             // Move this to the CIR
             this.queue.push(this.atomic.notification("Moving MAR to CIR"));
             this.queue.push(this.atomic.push_mdr_to_cir());
@@ -173,7 +174,7 @@ animate = (function () {
             } else if (funcname === "mov_reg") {
                 let parts = args.split(" ");
                 let regname = parts[1];
-                let size = parts[2];
+                let size = parseInt(parts[2]);
                 let srctype = parts[3];
                 let srcdata = JSON.parse(parts[4]);
                 let srccontent = JSON.parse(parts[5]);
@@ -181,8 +182,8 @@ animate = (function () {
                 this.execute_mov_reg(regname, size, srctype, srcdata, srccontent);
             } else if (funcname === "mov_mem") {
                 let parts = args.split(" ");
-                let destaddr = parts[1];
-                let size = parts[2];
+                let destaddr = parseInt(parts[1]);
+                let size = parseInt(parts[2]);
                 let srctype = parts[3];
                 let srcdata = JSON.parse(parts[4]);
                 let srccontent = JSON.parse(parts[5]);
@@ -291,11 +292,11 @@ animate = (function () {
             if (srctype === "reg") {
                 this.queue.push(this.atomic.notification(`Reading register ${srcdata}`));
                 this.queue.push(this.atomic.make_register_bold(srcdata));
-                this.queue.push(this.atomic.change_memory(destaddr, srccontent));
+                this.queue.push(this.atomic.change_memory(parseInt(destaddr), srccontent));
                 this.queue.push(this.atomic.make_register_not_bold(srcdata));
             } else if (srctype === "immediate") {
                 this.queue.push(this.atomic.notification(`Given immediate value ${srcdata}`));
-                this.queue.push(this.atomic.change_memory(destaddr, integerToBytes(srcdata).slice()));
+                this.queue.push(this.atomic.change_memory(parseInt(destaddr), integerToBytes(srcdata).slice()));
             }
         },
 
@@ -469,6 +470,7 @@ animate = (function () {
         // Makes one animation. If no animations are available in the queue,
         // step the interpreter and check again.
         if (animate.queue.length === 0) {
+            interpreter.process.stdin.write("env\n");
             interpreter.process.stdin.write("step\n");
             return false;
         }

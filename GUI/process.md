@@ -20,3 +20,5 @@
 * Made the interpreter print all of its information out properly
 * Changed "env" command to write to env.json. 
 * Wrote animation queue code
+* Wrote the high-level step functions to add animations to the loop
+* Wrote atomic functions but there are some graphical bugs still
