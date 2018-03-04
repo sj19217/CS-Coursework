@@ -338,7 +338,7 @@ class InstrIfStmt(Instruction):
             code.write("; Jumping to true section\n")
             code.write("JMP " + block.name + "_" + str(block.get_child_index(true_block)) + "\n")
             true_block.return_label = "endif_" + block_rand
-            queue.append(true_block)
+            queue.append((block.name + "_" + str(block.get_child_index(true_block)), true_block))
 
         # Got the true part done, now for the else part
         if self._stmt.iffalse is not None:
@@ -354,7 +354,7 @@ class InstrIfStmt(Instruction):
                 code.write("else_{rand} JMP ".format(rand=block_rand) + block.name + \
                            "_" + str(block.get_child_index(false_block)))
                 false_block.return_label = "endif_" + block_rand
-                queue.append(false_block)
+                queue.append((block.name + "_" + str(block.get_child_index(false_block)), false_block))
 
         code.write("endif_{rand} MOV 4B eax eax\n".format(rand=block_rand))
 
