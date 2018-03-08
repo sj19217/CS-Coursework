@@ -112,7 +112,7 @@ def process(text):
         # Split up into lines to make individual replacements
         lines = text.split("\n")
         for i, line in enumerate(lines):
-            if start_def <= i <= end_def:
+            if start_def <= i <= end_def and not line.lstrip().startswith("#"):
                 lines[i] = line.replace(name, value)
         del lines[start_def]
         try:
@@ -182,6 +182,7 @@ def process(text):
 
         if erase:
             lines[i] = ""
+    text = "\n".join(lines)
 
     # -------- Remove all remaining lines beginning with a #
     lines = text.split("\n")
