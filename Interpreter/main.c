@@ -12,6 +12,7 @@
 #include "headers/util.h"
 #include "headers/log.h"
 #include "headers/gui.h"
+#include "headers/testing.h"
 
 #define MAX_META_SECTION_LENGTH 100
 #define MAX_CONFIG_KEY_LENGTH 10
@@ -759,12 +760,13 @@ int main(int argc, char** argv)
     int has_fname = 0;
     long logLevel = 0;
     char* end;
+    _Bool testMode = FALSE;
 
     // -i means instructions, meaning that the GUI program is listening and wants display instructions
     // -f <filename>, meaning the filename
 
     int c;
-    while ((c = getopt(argc, argv, "id:f:")) != -1)
+    while ((c = getopt(argc, argv, "itd:f:")) != -1)
     {
         switch (c){
             case 'i':
@@ -776,12 +778,21 @@ int main(int argc, char** argv)
                 break;
             case 'd':
                 logLevel = strtol(optarg, &end, 10);
+                break;
+            case 't':
+                testMode = TRUE;
+                break;
             default:
                 break;
         }
     }
 
     log_set_level(logLevel);
+
+    if (testMode) {
+        runTests();
+        return 0;
+    }
 
     // Check that a filename was given
     if (has_fname == 0) {
