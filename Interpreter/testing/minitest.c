@@ -2,6 +2,8 @@
 
 #include <stdio.h>
 #include <windef.h>
+#include <stdarg.h>
+#include <malloc.h>
 
 char* testName;
 char* subtestName;
@@ -17,10 +19,16 @@ _Bool inSubTest = FALSE;            // A bool that is true if a sub-test is curr
 int numMajorTests = 0;            // The number of major tests that have been done
 int failedTests = 0;              // The overall number of tests that have failed
 
-void startTest(char* name)
+void startTest(char* name, ...)
 {
+    va_list va;
+    va_start(va, name);
+    char* formattedName = (char*) malloc((size_t) snprintf(NULL, 0, name, va) + 1);
+    vsprintf(formattedName, name, va);
+    va_end(va);
+
     // Reset everything, increment the number of names and set the test name.
-    testName = name;
+    testName = formattedName;
     subtestName = "";
     numSubTestsInTest = 0;
     subTestHasFailed = FALSE;
@@ -34,7 +42,7 @@ void startTest(char* name)
 
 void endTest()
 {
-    if (majorTestHasFailed) {
+    if (!majorTestHasFailed) {
         printf("Test %i (%s) has succeeded. ", numMajorTests, testName);
     } else {
         printf("Test %i (%s) has failed: %s. ", numMajorTests, testName, majorFailMessage);
@@ -51,10 +59,16 @@ void endTest()
     }
 }
 
-void startSubTest(char* name)
+void startSubTest(char* name, ...)
 {
+    va_list va;
+    va_start(va, name);
+    char* formattedName = (char*) malloc((size_t) snprintf(NULL, 0, name, va) + 1);
+    vsprintf(formattedName, name, va);
+    va_end(va);
+
     numSubTestsInTest++;
-    subtestName = name;
+    subtestName = formattedName;
     subTestHasFailed = FALSE;
     subFailMessage = "";
     inSubTest = TRUE;
@@ -76,17 +90,23 @@ void finalReport()
     printf(" - %i test procedures failed (including sub-tests)\n", failedTests);
 }
 
-void assert(_Bool test, char* failMessage)
+void assert(_Bool test, char* failMessage, ...)
 {
+    va_list va;
+    va_start(va, failMessage);
+    char* message = (char*) malloc((size_t) snprintf(NULL, 0, failMessage, va) + 1);
+    vsprintf(message, failMessage, va);
+    va_end(va);
+
     if (!test) {
         // The assertion failed
         if (inSubTest) {
             numSubTestFailures++;
             subTestHasFailed = TRUE;
-            subFailMessage = failMessage;
+            subFailMessage = message;
         } else {
             majorTestHasFailed = TRUE;
-            majorFailMessage = failMessage;
+            majorFailMessage = message;
         }
     }
 }
