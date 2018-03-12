@@ -111,6 +111,7 @@ class CodeBlock:
         #variable_data = {}
 
         init_code = io.StringIO()
+        init_code.write("; Initialising frame on stack\n")
         init_code.write("{block_name} SUB uint esp 4\n".format(block_name=block_name))
         init_code.write("MOV 4B [esp] ebp\n")
         init_code.write("ADD uint esp 4\n") # esp is now 1 below where it was
@@ -133,6 +134,9 @@ class CodeBlock:
                 # If it is not a constant then it will be handled later
                 # TODO Write the code to initialise the variables which don't just have a simple initial constant
                 formatted_initial = 0
+
+            if type_ in ("char", "uchar", "short", "ushort", "int", "uint", "float"):
+                init_code.write("; Adding variable {} to stack\n".format(name))
 
             if type_ in ("char", "uchar"):   # 1B
                 #virtual_esp += 1
@@ -159,7 +163,8 @@ class CodeBlock:
         The assembly this returns will move the base pointer back to its old place and return control to the parent.
         :return:
         """
-        return """MOV 4B esi ebp
+        return """; Removing stack frame and returning
+MOV 4B esi ebp
 SUB uint esi 4
 MOV 4B ebp [esi]
 JMP {return_label}
@@ -185,7 +190,7 @@ class InstrFuncCall(Instruction):
             # Currently only supports the ridiculously simple task of printing an integer type
             size = util.get_size_of_type(self._arg_types[0])
             # First line is doing it, second line is popping the item (no need to overwrite)
-            return "MOV {size}B out [esp]\nADD uint esp {size}\n".format(size=size)
+            return "; Calling printf\nMOV {size}B out [esp]\nADD uint esp {size}\n".format(size=size)
         else:
             logging.error("Unsupported function: {}".format(self.func_name))
 
@@ -198,7 +203,7 @@ class InstrVariableAssignment(Instruction):
         self._stack_top_type = stack_top_type
 
     def generate_code(self, block: CodeBlock, global_symbols, queue):
-        code = ""
+        code = "; Assigning top of stack to variable {}\n".format(self.var_name)
         var, rel = block.get_local_var_data(self.var_name)
 
         # Depending on whether it is global or local, set edi to point to it
@@ -207,7 +212,7 @@ class InstrVariableAssignment(Instruction):
             for global_ in [x for x in ID.globals if isinstance(x, GlobalVariable)]:
                 if global_.name == self.var_name:
                     var = global_
-                    code += "LEA edi {}\n".format(self.var_name)
+                    code += "LEA edi {}      ; Pointer to a global\n".format(self.var_name)
                     break
             else:
                 # A for-else is an odd construct
@@ -216,7 +221,7 @@ class InstrVariableAssignment(Instruction):
                 return
         else:
             # It is a local
-            code += "MOV 4B edi ebp\n"
+            code += "MOV 4B edi ebp  ; Getting pointer to a local\n"
 
             if rel > 0:
                 code += "SUB uint edi {}\n".format(rel)
@@ -228,6 +233,7 @@ class InstrVariableAssignment(Instruction):
         size_stack = util.get_size_of_type(self._stack_top_type)
 
         # Move the thing from the stack to a register
+        code += "; Move from stack to variable\n"
         code += "MOV {size}B ecx [esp]\n".format(size=size_stack)
         code += "ADD uint esp {size}\n".format(size=size_stack)
 
@@ -258,6 +264,42 @@ class InstrWhileLoop(Instruction):
         super().__init__()
         self._stmt = stmt
 
+    def generate_code(self, block: CodeBlock, global_symbols, queue):
+        code = io.StringIO()
+        hash_obj = hashlib.md5()
+        hash_obj.update(bytes(id(self)))
+        block_rand = hash_obj.hexdigest()[-8:]
+
+
+        # Start with a label to signify the beginning of the block, and a check for the condition
+        code.write("; Beginning while loop\n")
+        code.write("while_{rand} ")
+        condition_instrs, top_type = expression_instructions(self._stmt.cond, block)
+        for instr in condition_instrs:
+            code.write(instr.generate_code(block, global_symbols, queue))
+        code.write("CMP {type} [esp] 1  ; See if true and jump accordingly\n".format(type=top_type))
+        code.write("ADD uint esp {size}\n".format(size=util.get_size_of_type(top_type)))
+        code.write("JNE endwhile_{rand}\n")
+
+        # Next up is the actual code block
+        child_block = generate_code_block(self._stmt.stmt, global_symbols, parent=block)
+        child_block.return_label = "endwhile_{rand}".format(rand=block_rand)
+        child_block.name = block.name + "_" + str(block.get_child_index(child_block))
+
+        if len(child_block.locals) > 0:
+            code.write("; Jumping to child block\n")
+            code.write("JMP " + child_block.name + "\n")
+            queue.append(child_block)
+        else:
+            code.write("; Running child block\n")
+            code.write(child_block.generate_code(child_block.name, global_symbols, queue))
+            code.write("JMP while_{rand}\n")
+
+        code.write("endwhile_{rand} MOV 4B eax eax\n")
+
+        code.seek(0)
+        return code.read().format(rand=block_rand)
+
 
 class InstrIfStmt(Instruction):
     def __init__(self, stmt: If):
@@ -268,43 +310,51 @@ class InstrIfStmt(Instruction):
         # First, evaluate the truth expression
         code = io.StringIO()
         instrs, type_ = expression_instructions(self._stmt.cond, block)
+        code.write("; Evaluating condition")
         for instr in instrs:
             code.write(instr.generate_code(block, global_symbols, queue))
 
         hash_obj = hashlib.md5()
-        hash_obj.update((bytes(id(self))))
+        hash_obj.update(bytes(id(self)))
         block_rand = hash_obj.hexdigest()[-8:]
 
         # At this point, on the top of the stack should be the result (i.e. 0 being false, 1 being true)
-        code.write("CMP {type} [esp] 1\n".format(type=type_))
+        code.write("CMP {type} [esp] 1  ; See if true\n".format(type=type_))
         code.write("ADD uint esp {}\n".format(util.get_size_of_type(type_)))
 
         # Jump if not equal (i.e., if the expression evaluated to false)
-        code.write("JNE else_{rand}\n".format(rand=block_rand))
+        code.write("JNE else_{rand} ; Not true so jump to else\n".format(rand=block_rand))
 
         # This bit will be jumped over if the expression was false
         # Check if it has locals. If it does, jump to its block. If not, put the code here.
         true_block = generate_code_block(self._stmt.iftrue, global_symbols)
         if len(self._stmt.iftrue.locals) == 0:
+            code.write("Running true section\n")
             code.write(true_block.generate_code(block.name + "_" + str(block.get_child_index(true_block)),
                                                 global_symbols,
                                                 queue))
+            code.write("JMP endif_{rand}\n".format(rand=block_rand))
         else:
+            code.write("; Jumping to true section\n")
             code.write("JMP " + block.name + "_" + str(block.get_child_index(true_block)) + "\n")
             true_block.return_label = "endif_" + block_rand
-            queue.append(true_block)
+            queue.append((block.name + "_" + str(block.get_child_index(true_block)), true_block))
 
         # Got the true part done, now for the else part
         if self._stmt.iffalse is not None:
             false_block = generate_code_block(self._stmt.iffalse, global_symbols)
             if len(self._stmt.iffalse.locals) == 0:
+                code.write("; Running else section\n")
+                code.write("else_{rand} ".format(rand=block_rand))
                 code.write(false_block.generate_code(block.name + "_" + str(block.get_child_index(false_block)),
                                                      global_symbols,
                                                      queue))
             else:
-                code.write("JMP " + block.name + "_" + str(block.get_child_index(false_block)))
+                code.write("; Jumping to else section\n")
+                code.write("else_{rand} JMP ".format(rand=block_rand) + block.name + \
+                           "_" + str(block.get_child_index(false_block)))
                 false_block.return_label = "endif_" + block_rand
-                queue.append(false_block)
+                queue.append((block.name + "_" + str(block.get_child_index(false_block)), false_block))
 
         code.write("endif_{rand} MOV 4B eax eax\n".format(rand=block_rand))
 
@@ -337,7 +387,8 @@ class InstrPushValue(Instruction):
 #         return """SUB uint esp {size}
 # MOV {size}B [esp] {value}""".format(value=value, size=size)
         if isinstance(self._value, Constant) and self._value.type == "int":
-            return "SUB uint esp 4\n" + \
+            return "; Pushing constant to stack\n" + \
+                   "SUB uint esp 4\n" + \
                    "MOV 4B [esp] {value}\n".format(value=self._value.value)
         elif isinstance(self._value, ID):
             # A variable, so its location has to be found. We need to know its size.
@@ -348,13 +399,15 @@ class InstrPushValue(Instruction):
                 for global_var in [x for x in global_symbols if isinstance(x, GlobalVariable)]:
                     if global_var.name == self._value.name:
                         size = util.get_size_of_type(global_var.type)
-                        return "SUB uint esp {size}\n".format(size=size) + \
+                        return "; Pushing global variable to stack\n" +\
+                               "SUB uint esp {size}\n".format(size=size) + \
                                "MOV {size}B [esp] {name}\n".format(size=size, name=global_var.name)
             else:
                 # It is a local variable
                 _, type_, _ = var
                 size = util.get_size_of_type(type_)
-                code = """SUB uint esp {size}
+                code = """; Pushing local variable to stack
+SUB uint esp {size}
 MOV 4B esi ebp
 """.format(size=size)
                 if rel_to_base < 0:
@@ -389,7 +442,8 @@ class InstrEvaluateBinary(Instruction):
 
     def generate_code(self, block: CodeBlock, global_symbols, queue):
         # Pop the right hand value into edx
-        code = "MOV {size}B edx [esp]\n".format(size=self.rsize)
+        code = "; Evaluating binary expression: Popping values to registers.\n"
+        code += "MOV {size}B edx [esp]\n".format(size=self.rsize)
         code += "ADD uint esp {size}\n".format(size=self.rsize)
         # Pop the left hand value into ecx
         code += "MOV {size}B ecx [esp]\n".format(size=self.lsize)
@@ -415,6 +469,7 @@ class InstrEvaluateBinary(Instruction):
         maxtype = max(self._ltype, self._rtype, key=util.get_size_of_type)
 
         # Perform the operation
+        code += "; Performing {} and pushing to stack\n".format(self._op)
         code += "{op} {maxtype} ecx edx\n".format(op=mnemonic, maxtype=maxtype)
 
         # Push it to the stack
@@ -427,6 +482,7 @@ class InstrEvaluateBinary(Instruction):
     def _generate_code_comparison(self, pop_code, block: CodeBlock, global_symbols):
         code = pop_code
         # ecx and edx contain the things to be compared
+        code += "; Making comparison ({})\n".format(self._op)
         code += "CMP uint ecx edx\n"
         # The comparison registers are now set correctly
 
@@ -448,12 +504,12 @@ class InstrEvaluateBinary(Instruction):
             code += "JGE jmptrue_{rand}\n"
 
         code += "JMP jmpfalse_{rand}\n"
-        code += "jmptrue SUB esp 4\n"
+        code += "jmptrue_{rand} SUB esp 4\n"
         code += "MOV 4B [esp] 1\n"
         code += "JMP jmpcmpend_{rand}\n"
         code += "jmpfalse_{rand} SUB esp 4\n"
         code += "MOV 4B [esp] 0\n"
-        code += "jmpcmpend_{rand} MOV 4B eax eax\n"
+        code += "jmpcmpend_{rand} MOV 4B eax eax    ; Determined truth and added to stack\n"
 
         code = code.format(rand=block_rand)
 

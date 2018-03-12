@@ -29,8 +29,8 @@ animate = (function () {
             change_pc: function (pc) {
                 return function () {
                     // Changes the PC to the given value
-                    $("#box-PC").fadeOut(anim_times.fade_text, function () {
-                        $("#box-PC").text(pc).fadeIn(anim_times.fade_text);
+                    $("#reg-PC").fadeOut(anim_times.fade_text, function () {
+                        $("#reg-PC").text(pc).fadeIn(anim_times.fade_text);
                     });
                 }
             },
@@ -38,66 +38,100 @@ animate = (function () {
             push_pc_to_mar: function () {
                 return function () {
                     // Make PC bold, make MDR fade out and back in with new content
-                    $("#box-PC").css("font-weight", "bold");
-                    $("#box-MAR").fadeOut(anim_times.fade_text, function () {
+                    $("#reg-PC").css("font-weight", "bold");
+                    $("#reg-MAR").fadeOut(anim_times.fade_text, function () {
                         // Fade out is finished, fade back in
                         $(this).css("font-weight", "bold");
-                        $(this).text($("#box-PC").text()).fadeIn(anim_times.fade_text, function () {
+                        $(this).text($("#reg-PC").text()).fadeIn(anim_times.fade_text, function () {
                             // Fade in is finished, reset away from bold
                             $(this).css("font-weight", "normal");
-                            $("#box-PC").css("font-weight", "normal");
+                            $("#reg-PC").css("font-weight", "normal");
                         });
                     });
                 }
             },
 
-            read_memory_to_mdr: function (pc, cmdlen) {
+            read_memory_to_mdr: function (address, size) {
                 return function () {
                     // First make the relevant memory boxes bold and record bytes to move
-                    let table = document.getElementById("memtable");
+                    console.log(`Reading ${typeof size} bytes to MDR from ${typeof address}`);
                     let bytes = [];
-                    for (let i = pc; i < pc + cmdlen; i++) {
+                    for (let i = address; i < address + size; i++) {
                         let cell = $(`#memtable`).find(`tr:eq(${Math.floor(i/10)+1}) td:eq(${i%10 + 1})`);
+                        console.log(`Reading ${cell.length} cells`);
                         cell.css("font-weight", "bold");
                         bytes.push(cell.text());
                     }
 
 
                     // Fade out the MDR
-                    $("#box-MDR").fadeOut(500, function () {
+                    $("#reg-MDR").fadeOut(500, function () {
                         //Change the value of the MDR and fade it back in
                         $(this).text(bytes.toString()).fadeIn(anim_times.fade_text);
                         // Now the animation is nearly over, stop stuff being bold
                         $("#memtable").find("td").css("font-weight", "normal");
-                        $("#box-MDR").css("font-weight", "normal");
+                        $("#reg-MDR").css("font-weight", "normal");
                     });
                 }
             },
 
             push_mdr_to_cir: function () {
-                // Make MDR bold
-                $("#box-MDR").css("font-weight", "bold");
-                $("#box-CIR").fadeOut(anim_times.fade_text, function () {
-                    // Fade out is finished, fade back in
-                    $(this).css("font-weight", "bold");
-                    $(this).text($("#box-MDR").text()).fadeIn(anim_times.fade_text, function () {
-                        // Fade in is finished, reset away from bold
-                        $(this).css("font-weight", "normal");
-                        $("#box-MDR").css("font-weight", "normal");
+                return function () {
+                    // Make MDR bold
+                    $("#reg-MDR").css("font-weight", "bold");
+                    $("#reg-CIR").fadeOut(anim_times.fade_text, function () {
+                        // Fade out is finished, fade back in
+                        $(this).css("font-weight", "bold");
+                        $(this).text($("#reg-MDR").text()).fadeIn(anim_times.fade_text, function () {
+                            // Fade in is finished, reset away from bold
+                            $(this).css("font-weight", "normal");
+                            $("#reg-MDR").css("font-weight", "normal");
+                        });
                     });
-                });
+                }
             },
 
             change_cmp_reg: function (reg) {
-                if (reg === "e") {
-                    $("#reg-cmp-e").text("1");
-                    $("#reg-cmp-n, #reg-cmp-p").text("0");
-                } else if (reg === "n") {
-                    $("#reg-cmp-n").text("1");
-                    $("#reg-cmp-e, #reg-cmp-p").text("0");
-                } else if (reg === "p") {
-                    $("#reg-cmp-p").text("1");
-                    $("#reg-cmp-e, #reg-cmp-n").text("0");
+                return function () {
+                    if (reg === "e") {
+                        $("#reg-cmp-e").text("1");
+                        $("#reg-cmp-n, #reg-cmp-p").text("0");
+                    } else if (reg === "n") {
+                        $("#reg-cmp-n").text("1");
+                        $("#reg-cmp-e, #reg-cmp-p").text("0");
+                    } else if (reg === "p") {
+                        $("#reg-cmp-p").text("1");
+                        $("#reg-cmp-e, #reg-cmp-n").text("0");
+                    }
+                }
+            },
+
+            make_register_bold: function (reg) {
+                return function () {
+                    $(`#reg-${reg in ["e", "n", "p"] ? "cmp-" + reg : reg}`).css("font-weight", "bold");
+                }
+            },
+
+            make_register_not_bold: function (reg) {
+                return function () {
+                    $(`#reg-${reg in ["e", "n", "p"] ? "cmp-" + reg : reg}`).css("font-weight", "normal");
+                }
+            },
+
+            change_register(regname, srccontent) {
+                return function () {
+                    $(`#reg-${regname in ["e", "n", "p"] ? "cmp-" + regname : regname}`).text(srccontent.toString())
+                }
+            },
+
+            change_memory: function (destaddr, memarr, size) {
+                return function () {
+                    // Starting at destaddr and ending below destaddr+size
+                    // Change to be the value in the list
+                    for (let i = destaddr; i < destaddr + size; i++) {
+                        let cell = $(`#memtable`).find(`tr:eq(${Math.floor(i/10)+1}) td:eq(${i%10 + 1})`);
+                        cell.text(memarr[destaddr - i]);
+                    }
                 }
             }
         },
@@ -115,7 +149,7 @@ animate = (function () {
             this.queue.push(this.atomic.notification("Moving PC to MAR"));
             this.queue.push(this.atomic.push_pc_to_mar());
             this.queue.push(this.atomic.notification("Reading memory"));
-            this.queue.push(this.atomic.read_memory_to_mdr(pc, cmdlen));
+            this.queue.push(this.atomic.read_memory_to_mdr(parseInt(pc), parseInt(cmdlen)));
             // Move this to the CIR
             this.queue.push(this.atomic.notification("Moving MAR to CIR"));
             this.queue.push(this.atomic.push_mdr_to_cir());
@@ -140,7 +174,7 @@ animate = (function () {
             } else if (funcname === "mov_reg") {
                 let parts = args.split(" ");
                 let regname = parts[1];
-                let size = parts[2];
+                let size = parseInt(parts[2]);
                 let srctype = parts[3];
                 let srcdata = JSON.parse(parts[4]);
                 let srccontent = JSON.parse(parts[5]);
@@ -148,8 +182,8 @@ animate = (function () {
                 this.execute_mov_reg(regname, size, srctype, srcdata, srccontent);
             } else if (funcname === "mov_mem") {
                 let parts = args.split(" ");
-                let destaddr = parts[1];
-                let size = parts[2];
+                let destaddr = parseInt(parts[1]);
+                let size = parseInt(parts[2]);
                 let srctype = parts[3];
                 let srcdata = JSON.parse(parts[4]);
                 let srccontent = JSON.parse(parts[5]);
@@ -240,14 +274,44 @@ animate = (function () {
                 this.queue.push(this.atomic.notification(`Reading register ${srcdata}`));
                 this.queue.push(this.atomic.make_register_bold(srcdata));
                 this.queue.push(this.atomic.change_register(regname, srccontent));
+                this.queue.push(this.atomic.make_register_not_bold(srcdata));
             } else if (srctype === "maddr") {
                 this.queue.push(this.atomic.notification(`Reading from memory address ${srcdata}`));
-                // this.queue.push(this.atomic.change_register("mar", srcdata));
-                // this.queue.push(this.atomic.read_memory_to_mdr(parseInt(srcdata)), parseInt(size));
-
+                this.queue.push(this.atomic.change_register("mar", srcdata));
+                this.queue.push(this.atomic.read_memory_to_mdr(parseInt(srcdata)), parseInt(size));
+                this.queue.push(this.atomic.make_register_bold("mdr"));
+                this.queue.push(this.atomic.change_register(regname, $("#reg-mdr").text()));
+                this.queue.push(this.atomic.make_register_not_bold("mdr"));
             } else if (srctype === "immediate") {
                 this.queue.push(this.atomic.notification(`Given immediate value ${srcdata}`));
+                this.queue.push(this.atomic.change_register(regname, srccontent));
             }
+        },
+
+        execute_mov_mem: function (destaddr, size, srctype, srcdata, srccontent) {
+            if (srctype === "reg") {
+                this.queue.push(this.atomic.notification(`Reading register ${srcdata}`));
+                this.queue.push(this.atomic.make_register_bold(srcdata));
+                this.queue.push(this.atomic.change_memory(parseInt(destaddr), srccontent));
+                this.queue.push(this.atomic.make_register_not_bold(srcdata));
+            } else if (srctype === "immediate") {
+                this.queue.push(this.atomic.notification(`Given immediate value ${srcdata}`));
+                this.queue.push(this.atomic.change_memory(parseInt(destaddr), integerToBytes(srcdata).slice()));
+            }
+        },
+
+        execute_lea_reg: function (regname, addr) {
+            this.queue.push(this.atomic.notification(`Load effective address ${addr} to ${regname}`));
+            this.queue.push(this.atomic.change_register(regname, addr));
+        },
+
+        execute_lea_mem: function (destaddr, addr) {
+            this.queue.push(this.atomic.notification(`Load effective address ${addr} to ${destaddr}`));
+            this.queue.push(this.atomic.change_memory(destaddr, integerToBytes(addr), 4));
+        },
+
+        execute_arithmetic: function (opname, type, desttype, dest, op1, op2, res) {
+
         }
     };
 })();
@@ -366,7 +430,7 @@ animate = (function () {
                 // Been given all data about the environment
 
                 // Program counter
-                $("#box-PC").text(env["pc"]);
+                $("#reg-PC").text(env["pc"]);
 
                 // Registers
                 let register_names = ["eax", "ebx", "ecx", "edx", "esi", "edi", "ebp", "esp"];
@@ -406,6 +470,7 @@ animate = (function () {
         // Makes one animation. If no animations are available in the queue,
         // step the interpreter and check again.
         if (animate.queue.length === 0) {
+            interpreter.process.stdin.write("env\n");
             interpreter.process.stdin.write("step\n");
             return false;
         }
