@@ -174,3 +174,8 @@ functions (sections)
     data = split sections("data") on "\n"
 endfunction
 ```
+
+```plantuml
+@startuml
+@enduml
+```

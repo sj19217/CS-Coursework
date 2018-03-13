@@ -18,7 +18,8 @@
 * Wrote the basic table in the centre and fiddled round with borders and labels
 * Wrote the rest of the HTML for registers, etc.
 * Made the interpreter print all of its information out properly
-* Changed "env" command to write to env.json. 
+* Changed "env" command to write to env.json.
 * Wrote animation queue code
 * Wrote the high-level step functions to add animations to the loop
 * Wrote atomic functions but there are some graphical bugs still
+* Added interactive mode to assembler

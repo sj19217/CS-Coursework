@@ -13,18 +13,45 @@ be followed by JSON or some other format.
 
 ## Communication with the compiler
 The following instructions can be given to the compiler via stdin:
-* 
+
+* step - Moves one step. The steps are:
+  * Preprocessor #include
+  * Preprocessor #define
+  * Preprocessor #if
 
 These are the types of info that can be given back from the compiler to the GUI.
-* 
+*
 
 ## Communication with the assembler
+
+The following instructions can be given to the assembler via stdin:
+
+* step - Moves one step. The steps are:
+  * Starting text normalisation
+  * Remove comments
+  * Remove empty lines
+  * Remove duplicate whitespace
+  * Split into sections
+  * Processing data section
+  * Reading data section line
+  * Understand data section line
+  * Processing text section
+  * Reading text section line
+  * Understanding text section line
+  * Beginning to detect labels and variables
+  * Interpreted new variable
+  * Interpreted new label
+  * Calculating memory offsets
+  * Placing memory address
+  * Returning final bytecode
+
 
 ## Communication with the interpreter
 The interpreter will be started giving it the binary file through the -f command line argument, and the -i argument will
 also be given, which tells the interpreter to act interactively, responding to instructions and giving output.
 
 The commands given to the interpreter are:
+
 * step - Moves on one step. The steps are:
   * Get opcode
   * Get operand byte
