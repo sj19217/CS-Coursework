@@ -47,7 +47,7 @@ The following instructions can be given to the assembler via stdin:
 
 The types of data that can return are:
 
-* start_text <text> - Starting text normalisation. Given text is the text (in str form, e.g. with \n for newlines)
+* start_text <text> - Starting text normalisation. Given text is the text (in str form, e.g. with \n for newlines), as the single element of an array.
 * remove_comments <text> - Comments removed. Commentless text is given.
 * remove_empty_lines <text> - Empty lines removed. Given result.
 * remove_dup_wspace <text> - Removed duplicate whitespace. Given result.

@@ -637,17 +637,17 @@ def normalise_text(text):
         # 1.3. Strip all whitespace from the start and end of every line
         lines[i] = lines[i].strip()
 
-    if INTERACTIVE_MODE: print("remove_comments", json.dumps("\n".join(lines)))
+    if INTERACTIVE_MODE: print("remove_comments", json.dumps(["\n".join(lines)]))
 
     # 1.4. Remove empty lines
     lines = [line for line in lines if line != ""]
-    if INTERACTIVE_MODE: print("remove_empty_lines", json.dumps("\n".join(lines)))
+    if INTERACTIVE_MODE: print("remove_empty_lines", json.dumps(["\n".join(lines)]))
 
     # 1.5. Remove duplicate whitespace
     multiple_whitespace = re.compile(r"\s+")
     for i, line in enumerate(lines):
         lines[i] = multiple_whitespace.sub(" ", line)
-    if INTERACTIVE_MODE: print("remove_dup_wspace", json.dumps("\n".join(lines)))
+    if INTERACTIVE_MODE: print("remove_dup_wspace", json.dumps(["\n".join(lines)]))
 
     # 1.6. Put the lines back together
     normalised_text = "\n".join(line.strip() for line in lines)
@@ -699,9 +699,9 @@ def divide_and_contextualise(section_dict: dict):
 
     # Go through the lines and split on an = sign, then act on that
     for line in meta_lines:
-        if INTERACTIVE_MODE: print("read_meta_line", json.dumps(line))
+        if INTERACTIVE_MODE: print("read_meta_line", json.dumps([line]))
         item, value = line.split("=")
-        if INTERACTIVE_MODE: print("ustd_meta_line", json.dumps("Config item {item} has value {value}".format(item=item, value=value)))
+        if INTERACTIVE_MODE: print("ustd_meta_line", json.dumps(["Config item {item} has value {value}".format(item=item, value=value)]))
         config_dict.update(**{item: value})
 
     # Config dict done, moving on to the big part: instructions
@@ -712,13 +712,13 @@ def divide_and_contextualise(section_dict: dict):
     # Start with the data section, adding each one as a DataInstruction instance
     data_lines = [x.strip() for x in section_dict["data"].split("\n") if x.strip()]
     for line in data_lines:
-        if INTERACTIVE_MODE: print("read_data_line", json.dumps(line))
+        if INTERACTIVE_MODE: print("read_data_line", json.dumps([line]))
         # Takes the form name VAR type initial
         name, type_and_initial = [x.strip() for x in line.split("VAR") if x.strip()]
         dtype, initial = type_and_initial.split()
-        if INTERACTIVE_MODE: print("ustd_data_line", json.dumps(
+        if INTERACTIVE_MODE: print("ustd_data_line", json.dumps([
             "Variable '{name}' has type '{type}' and initial value '{initial}'".format(name=name, type=dtype,
-                                                                                       initial=initial)))
+                                                                                       initial=initial)]))
 
         instruction_list.append(DataInstruction(len(instruction_list), name, initial, dtype))
 
@@ -727,7 +727,7 @@ def divide_and_contextualise(section_dict: dict):
     # Next move onto the text section
     text_lines = [x.strip() for x in section_dict["text"].split("\n") if x.strip()]
     for line in text_lines:
-        if INTERACTIVE_MODE: print("read_text_line", json.dumps(line))
+        if INTERACTIVE_MODE: print("read_text_line", json.dumps([line]))
 
         # Split into basic tokens
         parts = line.split()
@@ -786,14 +786,14 @@ def divide_and_contextualise(section_dict: dict):
 
         if INTERACTIVE_MODE:
             print("ustd_text_line",
-                  json.dumps("Instruction {num}. Opcode={opcode}, type={type}, label={label}, op1={op1}, op2={op2}".format(
+                  json.dumps(["Instruction {num}. Opcode={opcode}, type={type}, label={label}, op1={op1}, op2={op2}".format(
                 num=len(instruction_list) - 1,
                 opcode=mnemonic,
                 type=dtype,
                 label=label,
                 op1=operand1,
                 op2=operand2
-            )))
+            )]))
         
     return config_dict, instruction_list
 
@@ -850,7 +850,7 @@ def record_labels_and_variables(instruction_list):
     for instruction in instruction_list:
         # If the instruction is a DataInstruction, add it to the variable table with its relative position
         if isinstance(instruction, DataInstruction):
-            if INTERACTIVE_MODE: print("found_var {name} {mrel} {type}".format(
+            if INTERACTIVE_MODE: print("found_var [{name}] [{mrel}] [{type}]".format(
                 name=instruction.name,
                 mrel=calculate_var_table_size(var_table),
                 type=instruction.data_type
@@ -859,7 +859,7 @@ def record_labels_and_variables(instruction_list):
 
         # If the instruction is a TextInstruction and has a label, add it to the label table
         elif isinstance(instruction, TextInstruction):
-            if INTERACTIVE_MODE: print("found_label {lname} {instrnum}".format(
+            if INTERACTIVE_MODE: print("found_label [{lname}] [{instrnum}]".format(
                 lname=instruction.label,
                 instrnum=instruction.instruction_num
             ))
@@ -918,7 +918,7 @@ def encode_instruction_list(instruction_list, memory_table):
     for instr in instruction_list:
         b = instr.get_bytes(memory_table)
         if INTERACTIVE_MODE:
-            print("conv_instr {opcode} {opbyte} {op1} {op2}".format(
+            print("conv_instr [{opcode}] [{opbyte}] {op1} {op2}".format(
                 opcode=b[0],
                 opbyte=b[1],
                 op1=list(instr.get_op1_bytes(memory_table)),
@@ -962,7 +962,7 @@ def main(asmfile, out_format, interactive=False):
 
     # 1. PERFORM TEXT NORMALISATION
 
-    if INTERACTIVE_MODE: print("start_text", json.dumps(text))
+    if INTERACTIVE_MODE: print("start_text", json.dumps([text]))
     normalised_text = normalise_text(text)
     if not INTERACTIVE_MODE: print(normalised_text)
 
