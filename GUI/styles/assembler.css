@@ -1,0 +1,32 @@
+#code {
+    border: 1px solid green;
+    float: left;
+    width: 29.8%;
+    overflow-y: scroll;
+}
+
+#centre {
+    border: 1px solid red;
+    float: left;
+    width: 29.8%;
+}
+
+#instr_list {
+    border: 1px solid blue;
+    float: left;
+    overflow-y: scroll;
+    width: 29.8%;
+}
+
+body {
+    width:100%;
+    text-align:center;
+}
+
+.page_part {
+    display: inline-block;
+    vertical-align: top;
+    text-align:center;
+    margin: 1%;
+    height: 700px;
+}

@@ -45,6 +45,31 @@ The following instructions can be given to the assembler via stdin:
   * Placing memory address
   * Returning final bytecode
 
+The types of data that can return are:
+
+* start_text <text> - Starting text normalisation. Given text is the text (in str form, e.g. with \n for newlines)
+* remove_comments <text> - Comments removed. Commentless text is given.
+* remove_empty_lines <text> - Empty lines removed. Given result.
+* remove_dup_wspace <text> - Removed duplicate whitespace. Given result.
+* split <json>> - Split the data into sections, given as [meta, data, text] JSON.
+* start_proc_meta - Starting to process the meta section
+* read_meta_line <line> - Read a line of the meta section
+* ustd_meta_line <desc> - Understood the meaning of the meta line, given a description
+* start_proc_data - Starting to process the data section.
+* read_data_line <line> - Read a line of the data section.
+* ustd_data_line <desc> - Understood the meaning of the data line, given a description.
+* start_proc_text - Started to process the text section
+* read_text_line <line> - Read the line of the text section
+* ustd_text_line <desc> - Understood the meaning of the data section line.
+* start_lv_detect - Started detecting labels and variables
+* found_var <name> <mrel> <type> - Found a variable. Give the name, location relative to data section start and data type.
+* found_label <lname> <instrnum> - Found a label. Give the label name and instruction number.
+* mem_offsets <dict> - Gives a JSON dict containing the results of the memory table.
+* place_addrs - Placing memory addresses in their correct locations
+* conv_meta <bytes> - Gives a JSON dict of the result of converting the meta section to bytes.
+* conv_instr <opcode> <opbyte> <operand1> <operand2> - Gives the instruction as it has been conveted to bytes. Give the 
+  operand and opbyte as an integer, and operand1 and operand2 as JSON arrays.
+* end <final> - The process has ended and the bytecode been fully found. The JSON given is an array of the final bytecode.
 
 ## Communication with the interpreter
 The interpreter will be started giving it the binary file through the -f command line argument, and the -i argument will
@@ -63,6 +88,7 @@ The commands given to the interpreter are:
 * env - Prints out a "data" statement with the environment in JSON
 
 The types of data that can return are:
+
 * start - The initial setup procedures, as far as just about to get the first opcode
 * fetch <pc> <opcode> <opbyte> <operand1> <operand2> - Got the opcode and operands from memory
 * decode <chosen> - The switch statement has decoded what to interpret the opcode as

@@ -8,6 +8,7 @@ from pprint import pprint
 import struct
 from collections import namedtuple
 import json
+import sys
 
 INTERACTIVE_MODE = False
 
@@ -949,6 +950,10 @@ def print_bytes_as_hex(bytes_, rowlen):
 def main(asmfile, out_format, interactive=False):
     global INTERACTIVE_MODE
     INTERACTIVE_MODE = interactive
+
+    if INTERACTIVE_MODE:
+        outfile = open("../GUI/asmout.txt", "w")
+        sys.stdout = outfile
 
     with open(asmfile, "rt") as file:
         text = file.read()
