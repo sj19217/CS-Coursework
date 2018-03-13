@@ -132,7 +132,7 @@ int getOpLen(int type)
 unsigned char getRegisterSize(unsigned char regnum)
 {
     log_trace("getRegisterSize(regnum=0x%x)", regnum);
-    if ((regnum >= 0xE1 && regnum <= 0xE4) || (regnum >> 4 >= 10 && regnum >> 4 <= 13)) {
+    if (((regnum >= 0xE1) && (regnum <= 0xE4)) || (((regnum >> 4) >= 10) && ((regnum >> 4) <= 13) && ((regnum & 0x0F) == 0))) {
         return 4;
     } else if ((regnum >> 4) >= 10 && (regnum >> 4) <= 13) {
         if ((regnum & 0x0F) == 1) {

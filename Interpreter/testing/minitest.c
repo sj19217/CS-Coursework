@@ -36,6 +36,7 @@ void startTest(char* name, ...)
     majorFailMessage = "";
     subFailMessage = "";
     inSubTest = FALSE;
+    numMajorTests++;
 
     printf("Starting test %i: %s\n", numMajorTests, name);
 }
