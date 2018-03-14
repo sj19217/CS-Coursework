@@ -165,17 +165,126 @@ functions (sections)
     config_dict = {}
     meta = split sections("meta") on "\n"
     for i from 0 to meta.length:
-        parts = split(meta[0], "=")
+        parts = split(meta[i], "=")
         key = parts[0]
         value = parts[1]
         config_gict.set(key, value)
 
     instruction_list = []
     data = split sections("data") on "\n"
+    for i from 0 to data.length:
+        parts = split data[i] on "VAR"
+        right_parts = split parts on " "
+        name = parts[0]
+        type = right_parts[0]
+        initial = right_parts[1]
+        add DataInstruction(name, type, initial) to instruction_list
+
+    commands = split sections("text") on "\n"
+    for i from 0 to commands.length:
+        
 endfunction
 ```
 
 ```plantuml
 @startuml
+:Create meta dictionary;
+:Divide meta section into lines;
+while (More lines to go through?) is (yes)
+    :Split line by = sign;
+    :Add info to dict;
+endwhile (no)
+:Create list of instructions;
+:Split data section into lines;
+while (more lines remaining?) is (yes)
+    :Divide by "VAR";
+    :Split right hand up by space;
+    :Create data instruction object and add to list;
+endwhile (no)
+:Split text section into lines;
+while (more lines remaining?) is (yes)
+    :Detect possible label;
+    :Find mnemonic;
+    :Detect type;
+    :Find opcodes and turn into objects;
+    :Create text instruction object and add to list;
+endwhile (no)
+:Return list and meta dict;
+@enduml
+```
+
+## record_labels_and_variables()
+
+```pseudocode
+```
+
+```plantuml
+@startuml
+:Get instruction list;
+:Create label/variable table;
+while (instructions remaining?) is (yes)
+    if (is DataInstruction?) then (yes)
+        :Add data to variable table;
+    else if (is TextInstruction?) then (yes)
+        :Add instruction number to label table if label is given;
+    endif
+endwhile (no)
+:Add variables to memory table;
+:Add labels to memory table;
+@enduml
+```
+
+## place_memory_addresses()
+
+```pseudocode
+```
+
+```plantuml
+@startuml
+:Get instruction list and memory table;
+while (instructions remaining?) is (yes)
+    if (operand1 is an address) then (yes)
+        :Replace operand1 with memory address;
+    endif
+    if (operand2 is an address) then (yes)
+        :Replace operand2 with memory address;
+    endif
+endwhile (no)
+end
+@enduml
+```
+
+## encode_metadata()
+
+```pseudocode
+```
+
+```plantuml
+@startuml
+:Get config dictionary;
+:Create byte string;
+while (config item remaining?) is (yes)
+    :Encode key;
+    :Encode value;
+    :Add both to byte string with = inbetween;
+endwhile (no)
+:Return byte string;
+@enduml
+```
+
+## encode_instruction_list()
+
+```pseudocode
+```
+
+```plantuml
+@startuml
+:Get instruction list and memory table;
+:Create empty byte string;
+while (instruction remaining) is (yes)
+    :Get bytes of instruction;
+    :Add bytes to byte string;
+endwhile (no)
+:Return byte string;
 @enduml
 ```

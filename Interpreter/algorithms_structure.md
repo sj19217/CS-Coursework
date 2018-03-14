@@ -1,5 +1,25 @@
 # Structure of the solution and algorithms - Interpreter
 
+The general overall view of the program is this:
+
+```pseudocode
+```
+
+```plantuml
+@startuml
+:Understand command line arguments;
+:Read bytecode file;
+:Read configuration data;
+while (Read instruction) is (Not HLT)
+    :Select instruction;
+    :Execute instruction function;
+endwhile (HLT)
+stop
+@enduml
+```
+
+## main()
+
 The pseudocode for the main function is this:
 
 ```pseudocode
@@ -32,7 +52,7 @@ The general UML activity diagram for this is:
 @startuml
 start
 
-:Set variables:
+:Set variables;
 :interactive=False;
 :filename="";
 :has_filename=False;
@@ -40,7 +60,8 @@ start
 while (more arguments?)
     if (argument='i') then (yes)
         :Set interactive to True;
-    elseif (argument='f') then (yes)
+    endif
+    if (argument='f') then (yes)
         :Set has_filename to True;
         :Set filename=argument.value;
     endif
@@ -81,8 +102,7 @@ runLoop()
 The corresponding activity diagram is this:
 
 ```plantuml
-start
-
+@startuml
 :Run processConfig();
 :Add result to config_length;
 :Set memsize to config.memorykb*1024;
@@ -93,6 +113,7 @@ while (more bytecode?) is (yes)
 end while (no)
 
 :Run loop;
+@enduml
 ```
 
 ## main.c/runLoop()
@@ -154,14 +175,16 @@ while True:
 The corresponding activity diagram is:
 
 ```plantuml
-start
-:Fetch opcode;
-:Set data type based on opcode;
-:Read operand byte;
-:Get types of each operand;
-:Find corresponding operand sizes;
-:Read operand values into byte arrays;
-:Run execute();
+@startuml
+while (fetch opcode) is (not HLT)
+    :Set data type based on opcode;
+    :Read operand byte;
+    :Get types of each operand;
+    :Find corresponding operand sizes;
+    :Read operand values into byte arrays;
+    :Run execute();
+endwhile (HLT)
+@enduml
 ```
 
 ## main.c/execute()
@@ -205,15 +228,18 @@ if (Is opcode CMP?) then (yes)
     :Run correct comparison
     function;
     detach
-elseif (Is opcode a jump) then (yes)
+endif
+if (Is opcode a jump) then (yes)
     :Run correct jump
     function;
     detach
-elseif (Is opcode a move?) then (yes)
+endif
+if (Is opcode a MOV?) then (yes)
     :Run correct MOV
     function;
     detach
-elseif (Is opcode an LEA?) then (yes)
+endif
+if (Is opcode an LEA?) then (yes)
     :Run correct LEA
     function;
     detach
