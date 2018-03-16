@@ -105,6 +105,7 @@ function afterAssemblerFinish() {
     for (let i = 0; i < prog_lines.length; i++) {
         console.log(prog_lines[i]);
         let line = prog_lines[i];
+        console.log("ABC: " + line.splitWithTail(" ", 1));
         let instr = line.splitWithTail(" ", 1)[0];
 
         let parts;
@@ -194,7 +195,7 @@ function afterAssemblerFinish() {
                 break;
             case "conv_instr":
                 parts = line.splitWithTail(" ");
-                console.log("conv_instr: " + parts.toString());
+                console.log("conv_instr: " + parts.slice(1).toString());
                 animations.conv_instr(JSON.parse(parts[1]),
                     JSON.parse(parts[2]),
                     JSON.parse(parts[3]),

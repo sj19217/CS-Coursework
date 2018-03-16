@@ -15,7 +15,7 @@ integerToBytes = function (num) {
     return bytes;
 };
 
-Object.prototype.splitWithTail = function (delim,count) {
+String.prototype.splitWithTail = function (delim, count) {
     let parts = this.split(delim);
     let tail = parts.slice(count).join(delim);
     let result = parts.slice(0,count);

@@ -587,7 +587,7 @@ class ArithmeticOperand(Operand):
             # A register
             try:
                 return REGISTERS[value]
-            except KeyError as err:
+            except KeyError:
                 pass    # It's probably just an immediate value
 
         # It is just an immediate value
@@ -892,7 +892,7 @@ def record_labels_and_variables(instruction_list):
 
 def calculate_var_table_size(var_table):
     size = 0
-    for (var, (_, dtype)) in var_table.items():
+    for (_, (_, dtype)) in var_table.items():
         size += DTYPE_META[dtype].size
 
     return size
