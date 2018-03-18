@@ -51,16 +51,16 @@ The types of data that can return are:
 * remove_comments <text> - Comments removed. Commentless text is given.
 * remove_empty_lines <text> - Empty lines removed. Given result.
 * remove_dup_wspace <text> - Removed duplicate whitespace. Given result.
-* split <json>> - Split the data into sections, given as [meta, data, text] JSON.
+* split <json> - Split the data into sections, given as \[meta, data, text] JSON.
 * start_proc_meta - Starting to process the meta section
 * read_meta_line <line> - Read a line of the meta section
-* ustd_meta_line <desc> - Understood the meaning of the meta line, given a description
+* ustd_meta_line \[<desc>, <name>, <value>] - Understood the meaning of the meta line, given a description
 * start_proc_data - Starting to process the data section.
 * read_data_line <line> - Read a line of the data section.
-* ustd_data_line <desc> - Understood the meaning of the data line, given a description.
+* ustd_data_line \[<desc>, <name>, <dtype>, <initial>] - Understood the meaning of the data line, given a description.
 * start_proc_text - Started to process the text section
 * read_text_line <line> - Read the line of the text section
-* ustd_text_line <desc> - Understood the meaning of the data section line.
+* ustd_text_line \[<desc>, <label>, <mnemonic>, <dtype>, <op1>, <op2>] - Understood the meaning of the data section line.
 * start_lv_detect - Started detecting labels and variables
 * found_var <name> <mrel> <type> - Found a variable. Give the name, location relative to data section start and data type.
 * found_label <lname> <instrnum> - Found a label. Give the label name and instruction number.

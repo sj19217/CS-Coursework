@@ -3,6 +3,8 @@
     float: left;
     width: 29.8%;
     overflow-y: scroll;
+    text-align: left;
+    font-family: Consolas, sans-serif;
 }
 
 #centre {
@@ -26,7 +28,48 @@ body {
 .page_part {
     display: inline-block;
     vertical-align: top;
-    text-align:center;
+    text-align:left;
     margin: 1%;
     height: 700px;
+}
+
+#commentary {
+    text-align: left;
+    overflow-y: scroll;
+    width: 97%;
+    height: 33%;
+    border: 1px solid black;
+}
+
+.asm-section {
+    border: 1px solid black;
+    width: 97%;
+    height: 30%;
+    text-align: left;
+}
+
+#metadata-holder {
+
+}
+
+#metadata-table {
+    border: 1px solid black;
+}
+
+#metadata-table td {
+    border: 1px solid black;
+    width: 48%;
+}
+
+#global-holder {
+
+}
+
+#global-table {
+    border: 1px solid black;
+}
+
+#global-table td {
+    border: 1px solid black;
+    width: 32%;
 }
