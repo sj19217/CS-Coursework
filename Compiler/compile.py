@@ -1,12 +1,11 @@
 import sys
-import os
 import logging
 from argparse import ArgumentParser
 import json
 
 from pycparser import CParser
 from pycparser.c_ast import Compound, FuncDef, ID
-from pycparser.c_json import to_dict
+from pycparser.c_json import to_dict, trim_tree
 
 from preprocessor import process as preprocess
 from global_parser import global_parser
@@ -35,6 +34,7 @@ def main(text):
 
     if INTERACTIVE_MODE:
         tree_dict = to_dict(tree)
+        trim_tree(tree_dict)
         print("tree", json.dumps(tree_dict))
 
     # STAGE 3 - GLOBAL VARIABLE TABLE

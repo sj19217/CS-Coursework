@@ -190,6 +190,28 @@ def from_json(ast_json):
     """ Build an ast from json string representation """
     return from_dict(json.loads(ast_json))
 
+def trim_tree(tree: dict):
+    """
+    Removes unnecessary things like "quals" and "bitsize" from anywhere in the tree
+    :param tree:
+    :return:
+    """
+
+    if not isinstance(tree, dict):
+        # It might just be a "leaf" of the tree
+        return
+
+    to_remove = []
+
+    for key, value in tree.items():
+        if key in ("quals", "bitsize", "coord"):
+            to_remove.append(key)
+        else:
+            trim_tree(tree[key])
+
+    for key in to_remove:
+        del tree[key]
+
 
 #------------------------------------------------------------------------------
 if __name__ == "__main__":

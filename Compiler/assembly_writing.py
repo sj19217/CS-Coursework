@@ -6,6 +6,7 @@ code_block_gen.py.
 import logging
 import io
 import collections
+import json
 
 from pycparser.c_ast import FuncDecl, FuncDef, Decl, Constant, TypeDecl
 from global_parser import GlobalVariable
@@ -24,7 +25,7 @@ def produce_data_section(global_symbols, interactive_mode=False):
         initial = "0"
         if symbol.initial is not None:
             if isinstance(symbol.initial, Constant):
-                if isinstance(symbol.initial.value, int):
+                if symbol.initial.type == "int":
                     initial = symbol.initial.value
                 else:
                     logging.error("Only integer initial global values are allowed currently")

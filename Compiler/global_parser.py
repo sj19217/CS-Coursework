@@ -1,5 +1,6 @@
 import logging
 from collections import namedtuple
+import json
 
 from pycparser.c_ast import Decl, FuncDef
 
@@ -33,7 +34,7 @@ def global_parser(tree, interactive_mode=False):
             table.append(GlobalVariable(name, str_type, initial))
             if interactive_mode:
                 print("found_global", json.dumps([
-                    name, str_type, initial
+                    name, str_type, initial.value
                 ]))
         elif isinstance(top_node, FuncDef):
             if top_node.decl.name == "main":

@@ -93,7 +93,7 @@ class CodeBlock:
                     self.instructions.insert(i, instr)
 
         for instr in self.instructions:
-            assembly.write(instr.generate_code(self, global_symbols, queue))
+            assembly.write(instr.generate_code(self, global_symbols, queue, interactive_mode))
 
         if len(self.locals) > 0:
             assembly.write(self.generate_return())
@@ -178,7 +178,7 @@ class Instruction:
     def __init__(self):
         pass
 
-    def generate_code(self, block: CodeBlock, global_symbols, queue, interactive_mode=False):
+    def generate_code(self, block: CodeBlock, global_symbols, queue, interactive_mode):
         raise NotImplementedError()
 
 
@@ -188,7 +188,7 @@ class InstrFuncCall(Instruction):
         self.func_name = name
         self._arg_types = arg_types
 
-    def generate_code(self, block, global_symbols, queue, interactive_mode=False):
+    def generate_code(self, block, global_symbols, queue, interactive_mode):
         if isinstance(self.func_name, ID) and self.func_name.name == "printf":
             # Currently only supports the ridiculously simple task of printing an integer type
             size = util.get_size_of_type(self._arg_types[0])
@@ -211,7 +211,7 @@ class InstrVariableAssignment(Instruction):
         self.var_name = lvalue.name
         self._stack_top_type = stack_top_type
 
-    def generate_code(self, block: CodeBlock, global_symbols, queue, interactive_mode=False):
+    def generate_code(self, block: CodeBlock, global_symbols, queue, interactive_mode):
         code = "; Assigning top of stack to variable {}\n".format(self.var_name)
         var, rel = block.get_local_var_data(self.var_name)
 
@@ -279,7 +279,7 @@ class InstrWhileLoop(Instruction):
         super().__init__()
         self._stmt = stmt
 
-    def generate_code(self, block: CodeBlock, global_symbols, queue, interactive_mode=False):
+    def generate_code(self, block: CodeBlock, global_symbols, queue, interactive_mode):
         code = io.StringIO()
         hash_obj = hashlib.md5()
         hash_obj.update(bytes(id(self)))
@@ -291,7 +291,7 @@ class InstrWhileLoop(Instruction):
         code.write("while_{rand} ")
         condition_instrs, top_type = expression_instructions(self._stmt.cond, block)
         for instr in condition_instrs:
-            code.write(instr.generate_code(block, global_symbols, queue))
+            code.write(instr.generate_code(block, global_symbols, queue, interactive_mode))
         code.write("CMP {type} [esp] 1  ; See if true and jump accordingly\n".format(type=top_type))
         code.write("ADD uint esp {size}\n".format(size=util.get_size_of_type(top_type)))
         code.write("JNE endwhile_{rand}\n")
@@ -328,7 +328,7 @@ class InstrIfStmt(Instruction):
         super().__init__()
         self._stmt = stmt
 
-    def generate_code(self, block: CodeBlock, global_symbols, queue, interactive_mode=False):
+    def generate_code(self, block: CodeBlock, global_symbols, queue, interactive_mode):
         # First, evaluate the truth expression
         code = io.StringIO()
         instrs, type_ = expression_instructions(self._stmt.cond, block)
@@ -401,7 +401,7 @@ class InstrPushValue(Instruction):
         self._value = value
         # The value can be either a Constant or an ID
 
-    def generate_code(self, block: CodeBlock, global_symbols, queue):
+    def generate_code(self, block: CodeBlock, global_symbols, queue, interactive_mode):
         # Move the stack pointer down by the right amount then write the data
         if isinstance(self._value, Constant) and self._value.type == "int":
             return "; Pushing constant to stack\n" + \
@@ -464,7 +464,7 @@ class InstrEvaluateBinary(Instruction):
     def rsize(self):
         return util.get_size_of_type(self._rtype)
 
-    def generate_code(self, block: CodeBlock, global_symbols, queue, interactive_mode=False):
+    def generate_code(self, block: CodeBlock, global_symbols, queue, interactive_mode):
         # Pop the right hand value into edx
         code = "; Evaluating binary expression: Popping values to registers.\n"
         code += "MOV {size}B edx [esp]\n".format(size=self.rsize)
@@ -486,7 +486,7 @@ class InstrEvaluateBinary(Instruction):
             mnemonic = "MOD"
         else:
             # Not one of the standard arithmetic types
-            return self._generate_code_comparison(code, block, global_symbols)
+            return self._generate_code_comparison(code, block, global_symbols, interactive_mode)
 
         # It is one of the normal arithmetic types
         # Find the biggest type of these two
@@ -509,7 +509,7 @@ class InstrEvaluateBinary(Instruction):
 
         return code
 
-    def _generate_code_comparison(self, pop_code, block: CodeBlock, global_symbols):
+    def _generate_code_comparison(self, pop_code, block: CodeBlock, global_symbols, interactive_mode=False):
         code = pop_code
         # ecx and edx contain the things to be compared
         code += "; Making comparison ({})\n".format(self._op)
