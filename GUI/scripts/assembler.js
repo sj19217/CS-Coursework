@@ -176,8 +176,9 @@ function afterAssemblerFinish() {
 
         switch (instr.toLowerCase()) {
             case "start_text":
-                parts = JSON.parse(line.splitWithTail(" ", 1)[1]);
-                animations.start_text(parts[0]);
+                // parts = JSON.parse(line.splitWithTail(" ", 1)[1]);
+                // animations.start_text(parts[0]);
+                animations.start_text(JSON.parse(line.splitWithTail(" ", 1)[1]));
                 break;
             case "remove_comments":
                 animations.remove_comments(JSON.parse(line.splitWithTail(" ", 1)[1]));
@@ -248,6 +249,7 @@ function afterAssemblerFinish() {
                 break;
             case "end":
                 animations.end(JSON.parse(line.splitWithTail(" ", 1)[1]));
+                break;
         }
     }
 }

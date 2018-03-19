@@ -701,7 +701,8 @@ def divide_and_contextualise(section_dict: dict):
     for line in meta_lines:
         if INTERACTIVE_MODE: print("read_meta_line", json.dumps([line]))
         item, value = line.split("=")
-        if INTERACTIVE_MODE: print("ustd_meta_line", json.dumps(["Config item {item} has value {value}".format(item=item, value=value)]))
+        if INTERACTIVE_MODE: print("ustd_meta_line", json.dumps(["Config item {item} has value {value}".format(item=item, value=value),
+            item, value]))
         config_dict.update(**{item: value})
 
     # Config dict done, moving on to the big part: instructions
@@ -718,7 +719,8 @@ def divide_and_contextualise(section_dict: dict):
         dtype, initial = type_and_initial.split()
         if INTERACTIVE_MODE: print("ustd_data_line", json.dumps([
             "Variable '{name}' has type '{type}' and initial value '{initial}'".format(name=name, type=dtype,
-                                                                                       initial=initial)]))
+                                                                                       initial=initial),
+                                                                                       name, dtype, initial]))
 
         instruction_list.append(DataInstruction(len(instruction_list), name, initial, dtype))
 
@@ -793,7 +795,8 @@ def divide_and_contextualise(section_dict: dict):
                 label=label,
                 op1=operand1,
                 op2=operand2
-            )]))
+            ),
+            label, mnemonic, dtype, str(operand1), str(operand2)]))
         
     return config_dict, instruction_list
 
