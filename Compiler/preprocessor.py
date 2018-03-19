@@ -2,6 +2,7 @@ import re
 import io
 import logging
 from collections import deque
+import json
 
 logging.basicConfig(level=logging.DEBUG)
 
@@ -66,7 +67,7 @@ DIRECTIVE_FUNCTIONS = {
 
 }
 
-def process(text):
+def process(text, interactive_mode=False):
     logging.debug("Running process(text)")
     # -------- First, look for all of the #include statements
     while True:
@@ -79,6 +80,13 @@ def process(text):
         lineno = lineof(text, m.string[m.start():m.end()].strip())
 
         text = directive_include(text, lineno, filename)
+
+        if interactive_mode:
+            print("prep_include", json.dumps([
+                filename,
+                text
+            ]))
+        
 
     # -------- Next, work through the #define statements
     defined_lines = []
@@ -139,6 +147,13 @@ def process(text):
                 item[2] = item[2] - 2
             elif item[2] > start_def:
                 item[2] = item[2] - 1
+        
+        if interactive_mode:
+            print("prep_define", json.dumps([
+                name,
+                value,
+                "\n".join(lines)
+            ]))
 
     # -------- Mark down where which if statements apply
     lines = text.split("\n")
@@ -168,6 +183,11 @@ def process(text):
         m = re.match(DIRECTIVES["endif"], line.strip())
         if m is not None:
             ifstack.pop()
+    
+    if interactive_mode:
+        print("prep_ifanalysis", json.dumps(
+            "\n".join("{}".format(data) for data in linedata)
+        ))
 
     # -------- Act on the constraints
     for i, line in enumerate(lines):
@@ -184,6 +204,9 @@ def process(text):
             lines[i] = ""
     text = "\n".join(lines)
 
+    if interactive_mode:
+        print("prep_if", json.dumps(text))
+
     # -------- Remove all remaining lines beginning with a #
     lines = text.split("\n")
     for i, line in enumerate(lines):
@@ -193,6 +216,9 @@ def process(text):
 
     # -------- Remove all duplicate newlines
     text = re.sub("\n+", "\n", text)
+
+    if interactive_mode:
+        print("prep_done", json.dumps(text))
 
     return text
 

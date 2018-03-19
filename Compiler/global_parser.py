@@ -6,7 +6,7 @@ from pycparser.c_ast import Decl, FuncDef
 GlobalVariable = namedtuple("GlobalVariable", "name type initial")
 GlobalFunction = namedtuple("GlobalFunction", "name definition")
 
-def global_parser(tree):
+def global_parser(tree, interactive_mode=False):
     table = []
 
     for top_node in tree:
@@ -31,6 +31,10 @@ def global_parser(tree):
             logging.info("Found global variable {name} of type {type}, initial {init}".format(name=name, type=str_type, init=initial))
 
             table.append(GlobalVariable(name, str_type, initial))
+            if interactive_mode:
+                print("found_global", json.dumps([
+                    name, str_type, initial
+                ]))
         elif isinstance(top_node, FuncDef):
             if top_node.decl.name == "main":
                 table.append(GlobalFunction("main", top_node))

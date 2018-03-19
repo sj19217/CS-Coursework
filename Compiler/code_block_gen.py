@@ -1,8 +1,8 @@
-import collections
 import io
 import logging
 import random
 import hashlib
+import json
 
 from pycparser.c_ast import *
 
@@ -70,12 +70,15 @@ class CodeBlock:
                 return i
         return -1
 
-    def generate_code(self, block_name, global_symbols, queue):
+    def generate_code(self, block_name, global_symbols, queue, interactive_mode=False):
         # The assembly is written to here. More efficient than remaking strings.
         assembly = io.StringIO()
         # If the block has variables, this stores info about how far from
         # the base pointer the variables are (as in, this index and the next
         # few bytes are the number) and their type
+
+        if interactive_mode:
+            print("gen_block", block_name)
 
         if len(self.locals) > 0:
             init_code = self.generate_init(block_name)
@@ -175,7 +178,7 @@ class Instruction:
     def __init__(self):
         pass
 
-    def generate_code(self, block: CodeBlock, global_symbols, queue):
+    def generate_code(self, block: CodeBlock, global_symbols, queue, interactive_mode=False):
         raise NotImplementedError()
 
 
@@ -185,12 +188,18 @@ class InstrFuncCall(Instruction):
         self.func_name = name
         self._arg_types = arg_types
 
-    def generate_code(self, block, global_symbols, queue):
+    def generate_code(self, block, global_symbols, queue, interactive_mode=False):
         if isinstance(self.func_name, ID) and self.func_name.name == "printf":
             # Currently only supports the ridiculously simple task of printing an integer type
             size = util.get_size_of_type(self._arg_types[0])
             # First line is doing it, second line is popping the item (no need to overwrite)
-            return "; Calling printf\nMOV {size}B out [esp]\nADD uint esp {size}\n".format(size=size)
+            asm = "; Calling printf\nMOV {size}B out [esp]\nADD uint esp {size}\n".format(size=size)
+            if interactive_mode:
+                print("gen_stmt", json.dumps([
+                    "Made call to function {}".format(self.func_name),
+                    asm
+                ]))
+            return asm
         else:
             logging.error("Unsupported function: {}".format(self.func_name))
 
@@ -202,7 +211,7 @@ class InstrVariableAssignment(Instruction):
         self.var_name = lvalue.name
         self._stack_top_type = stack_top_type
 
-    def generate_code(self, block: CodeBlock, global_symbols, queue):
+    def generate_code(self, block: CodeBlock, global_symbols, queue, interactive_mode=False):
         code = "; Assigning top of stack to variable {}\n".format(self.var_name)
         var, rel = block.get_local_var_data(self.var_name)
 
@@ -240,6 +249,12 @@ class InstrVariableAssignment(Instruction):
         # Move it from the register to the variable location
         code += "MOV {size}B [edi] ecx\n".format(size=size_var)
 
+        if interactive_mode:
+            print("gen_stmt", json.dumps([
+                "Assigning an expression to variable {}".format(self.var_name),
+                code
+            ]))
+
         return code
 
 
@@ -264,7 +279,7 @@ class InstrWhileLoop(Instruction):
         super().__init__()
         self._stmt = stmt
 
-    def generate_code(self, block: CodeBlock, global_symbols, queue):
+    def generate_code(self, block: CodeBlock, global_symbols, queue, interactive_mode=False):
         code = io.StringIO()
         hash_obj = hashlib.md5()
         hash_obj.update(bytes(id(self)))
@@ -297,6 +312,13 @@ class InstrWhileLoop(Instruction):
 
         code.write("endwhile_{rand} MOV 4B eax eax\n")
 
+        if interactive_mode:
+            code.seek(0)
+            print("gen_stmt", json.dumps([
+                "Generated code for while loop",
+                code.read()
+            ]))
+
         code.seek(0)
         return code.read().format(rand=block_rand)
 
@@ -306,7 +328,7 @@ class InstrIfStmt(Instruction):
         super().__init__()
         self._stmt = stmt
 
-    def generate_code(self, block: CodeBlock, global_symbols, queue):
+    def generate_code(self, block: CodeBlock, global_symbols, queue, interactive_mode=False):
         # First, evaluate the truth expression
         code = io.StringIO()
         instrs, type_ = expression_instructions(self._stmt.cond, block)
@@ -358,6 +380,13 @@ class InstrIfStmt(Instruction):
 
         code.write("endif_{rand} MOV 4B eax eax\n".format(rand=block_rand))
 
+        if interactive_mode:
+            code.seek(0)
+            print("gen_stmt", json.dumps(
+                "Generating if statement",
+                code.read()
+            ))
+
         code.seek(0)
         return code.read()
 
@@ -374,18 +403,6 @@ class InstrPushValue(Instruction):
 
     def generate_code(self, block: CodeBlock, global_symbols, queue):
         # Move the stack pointer down by the right amount then write the data
-#         if isinstance(self._value, Constant) and self._value.type == "int":
-#             value = self._value.value
-#             size = 4
-#         elif isinstance(self._value, ID):
-#             value, _ = block.get_local_var_data(self._value.name)
-#             value = value.initial
-#             size = self._value.memory_size(block)
-#         else:
-#             logging.error("Can only push a Constant or ID to the stack")
-#             return
-#         return """SUB uint esp {size}
-# MOV {size}B [esp] {value}""".format(value=value, size=size)
         if isinstance(self._value, Constant) and self._value.type == "int":
             return "; Pushing constant to stack\n" + \
                    "SUB uint esp 4\n" + \
@@ -415,6 +432,13 @@ MOV 4B esi ebp
                 elif rel_to_base > 0:
                     code += "SUB uint esi {rel}\n".format(rel=rel_to_base)
                 code += "MOV {size}B [esp] [esi]\n".format(size=size)
+
+                if interactive_mode:
+                    print("gen_stmt", json.dumps([
+                        "Created code to push a value to the stack",
+                        code
+                    ]))
+
                 return code
         else:
             logging.error("Can only push a Constant or ID, not {}".format(self._value))
@@ -440,7 +464,7 @@ class InstrEvaluateBinary(Instruction):
     def rsize(self):
         return util.get_size_of_type(self._rtype)
 
-    def generate_code(self, block: CodeBlock, global_symbols, queue):
+    def generate_code(self, block: CodeBlock, global_symbols, queue, interactive_mode=False):
         # Pop the right hand value into edx
         code = "; Evaluating binary expression: Popping values to registers.\n"
         code += "MOV {size}B edx [esp]\n".format(size=self.rsize)
@@ -477,6 +501,12 @@ class InstrEvaluateBinary(Instruction):
         code += "SUB uint esp {size}\n".format(size=max(s(self._ltype), s(self._rtype)))
         code += "MOV {size}B [esp] ecx\n".format(size=max(s(self._ltype), s(self._rtype)))
 
+        if interactive_mode:
+            print("gen_stmt", json.dumps([
+                "Generating code to evaluate a binary expression ({op})".format(op=self._op),
+                code
+            ]))
+
         return code
 
     def _generate_code_comparison(self, pop_code, block: CodeBlock, global_symbols):
@@ -512,6 +542,12 @@ class InstrEvaluateBinary(Instruction):
         code += "jmpcmpend_{rand} MOV 4B eax eax    ; Determined truth and added to stack\n"
 
         code = code.format(rand=block_rand)
+
+        if interactive_mode:
+            print("gen_stmt", json.dumps([
+                "Generating code to evaluate a binary comparison ({op})".format(op=self._op),
+                code
+            ]))
 
         return code
 

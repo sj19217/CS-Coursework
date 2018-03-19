@@ -17,7 +17,23 @@ be followed by JSON or some other format.
 
 Commands are not given to the compiler. The compiler simply runs and producs output in cplout.txt. The types of data returned are:
 
-* start <data> - The compilation process has started, 
+* start <data> - The compilation process has started, and the text as a string is given.
+* prep_include [<fname>, <data>] - One include statement has been done. New text given.
+* prep_define [<name>, <value>, <data>] - A #define statement has been performed.
+* prep_ifanalysis <desc> - The analysis of what applies where has been done. A description is given of the results.
+* prep_if <data> - The #ifdef/#ifndef statements are all done. Output is given.
+* prep_done <data> - Finished all the preprocessing
+* tree <json> - The lexical analysis has been done and a syntax tree produced. The JSON given represents this tree structure, with Compound objects being arrays and other things being in the form {"type": <objname>, ...}
+* found_global [<name>, <type>, <initial>] - Found a global variable
+* locals - Means local variables have been detected
+* start_codegen - Starting code generation
+* gen_data - Starting to generate data section
+* gen\_data\_line [<name>, <type>, <initial>, <asm>] - Generated a particular data line from a global variable
+* fin\_gen\_data <asm> - Finished writing the data section.
+* gen_text - Starting to generate text section
+* gen_block <name> - Started generating a code block of the given name
+* gen_stmt [<desc>, <asm>] - Generated a statement, described by the first argument and with the code of the second
+* finish <asm> - Finished, giving the final assembly
 
 ## Communication with the assembler
 
