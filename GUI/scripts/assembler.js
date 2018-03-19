@@ -158,15 +158,16 @@ animations = {
 
     console.log(decodeURIComponent(urlParam("fname")));
     let process = exec(`python ../Assembler/assembler_interactive.py ${decodeURIComponent(urlParam("fname"))}`);
-    fs.readFile("asmout.txt", "utf8", function (err, data) {
-        if (err) throw err;
-        prog_lines = data.splitWithTail("\n");
-    });
 
     process.on("close", afterAssemblerFinish);
 })();
 
 function afterAssemblerFinish() {
+    fs.readFile("asmout.txt", "utf8", function (err, data) {
+        if (err) throw err;
+        prog_lines = data.splitWithTail("\n");
+    });
+
     for (let i = 0; i < prog_lines.length; i++) {
         console.log(prog_lines[i]);
         let line = prog_lines[i];

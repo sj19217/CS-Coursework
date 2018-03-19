@@ -1,0 +1,45 @@
+#left {
+    border: 1px solid green;
+    float: left;
+    width: 29.8%;
+    overflow-y: scroll;
+    text-align: left;
+    font-family: Consolas, sans-serif;
+}
+
+#centre {
+    border: 1px solid red;
+    float: left;
+    width: 29.8%;
+}
+
+#right {
+    border: 1px solid blue;
+    float: left;
+    overflow-y: scroll;
+    width: 29.8%;
+}
+
+body {
+    width:100%;
+    text-align:center;
+}
+
+.page_part {
+    display: inline-block;
+    vertical-align: top;
+    text-align:left;
+    margin: 1%;
+    height: 700px;
+}
+
+#commentary {
+    width: 98%;
+    height: 40%;
+    border: 1px solid black;
+    overflow-y: scroll;
+}
+
+#globals-table td {
+    border: 1px solid black;
+}
