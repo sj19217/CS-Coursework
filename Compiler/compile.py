@@ -12,6 +12,7 @@ from global_parser import global_parser
 from variable_traversal import parse_compound
 from code_block_gen import generate_code_block
 from assembly_writing import produce_data_section, produce_text_section
+from optimisation import optimise
 
 INTERACTIVE_MODE = False
 
@@ -73,6 +74,10 @@ section.text
 """.format(mem_amt=4,
               data_section=produce_data_section(global_symbols, INTERACTIVE_MODE),
                text_section=produce_text_section(main_block, global_symbols, INTERACTIVE_MODE))
+
+    # STAGE 7 - POST-GENERATION OPTIMISATION
+    assembly = optimise(assembly)
+
 
     if INTERACTIVE_MODE:
         print("finish", json.dumps(assembly))

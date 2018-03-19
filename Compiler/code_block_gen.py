@@ -382,10 +382,10 @@ class InstrIfStmt(Instruction):
 
         if interactive_mode:
             code.seek(0)
-            print("gen_stmt", json.dumps(
+            print("gen_stmt", json.dumps([
                 "Generating if statement",
                 code.read()
-            ))
+            ]))
 
         code.seek(0)
         return code.read()
