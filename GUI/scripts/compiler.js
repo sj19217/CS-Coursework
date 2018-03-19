@@ -56,39 +56,49 @@ let animations = {
 
     locals: function () {
         console.log("Found local variables");
+        $("#commentary").append("Found local variables<br />");
     },
 
     start_codegen: function () {
         console.log("Started code generation");
+        $("#commentary").append("Started code generation<br />");
     },
 
     gen_data: function () {
         console.log("Generating data section from globals");
+        $("#commentary").append("Started generating data section from globals<br />");
     },
 
     gen_data_line: function (name, type, initial, asm) {
         console.log(`Data section line. Name is ${name}, type is ${type}, initial is ${initial}: ${asm}`);
+        $("#commentary").append(`Data section line. Name is ${name}, type is ${type}, initial is ${initial}: ${asm}<br />`);
     },
 
     fin_gen_data: function (asm) {
         console.log(`Finished generating data section: ${asm}`);
+        $("#commentary").append("Finished generating data section<br />");
+        $("#right").html(asm.replace(/\n/g, "<br/>").replace(/ /g, "&nbsp;"))
     },
 
     gen_text: function () {
         console.log("Generating text section");
+        $("#commentary").append("Started generating text section<br />");
     },
 
     gen_block: function (name) {
         console.log(`Generating code block called ${name}`);
+        $("#commentary").append(`Generating code block called ${name}<br />`);
     },
 
     gen_stmt: function (desc, asm) {
         console.log(`Generating statement: ${desc}`);
         console.log(`Code for statement: ${asm}`);
+        $("#commentary").append(`${desc}:<br />${asm}<br />`);
     },
 
     finish: function (asm) {
         console.log(`Finished. Final assembly code:\n${asm}`);
+        $("#right").html(asm.replace(/\n/g, "<br/>").replace(/ /g, "&nbsp;"));
         throw "Finished";
     }
 };
@@ -111,13 +121,10 @@ let animations = {
 })();
 
 function afterCompilerFinish() {
-    console.log("------------afterCompilerFinish()");
     for (let i = 0; i < prog_lines.length; i++) {
         let line = prog_lines[i];
-        //console.log(prog_lines[i]);
         let instr = line.splitWithTail(" ", 1)[0].trim();
         let after = line.splitWithTail(" ", 1)[1].trim();
-        //console.log(instr + " " + after);
         let json;
         if (after !== "" && after !== undefined) {
             try {

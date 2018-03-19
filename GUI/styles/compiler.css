@@ -18,6 +18,7 @@
     float: left;
     overflow-y: scroll;
     width: 29.8%;
+    font-family: Consolas, sans-serif;
 }
 
 body {
