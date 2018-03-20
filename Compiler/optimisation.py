@@ -14,6 +14,8 @@ def optimise(text: str) -> str:
     :return:
     """
 
+    original_text = text
+
     # POST-CODEGEN OPTIMISATION 1 - MERGE CHANGES TO SAME REGISTER
     # Record which lines are just the changing of a register by an immediate amount
     lines = text.split("\n")
@@ -63,7 +65,7 @@ def optimise(text: str) -> str:
 
     # POST-CODEGEN OPTIMISATION 2 - MERGE BLOCK ENDINGS
     lines = text.split("\n")
-    end_block_regex = re.compile("^(?P<label>[a-zA-Z_0-9]+)\s*MOV 4B eax eax")
+    end_block_regex = re.compile("^(?P<label>[a-zA-Z_0-9]+)\s*MOV 4B eax eax", re.IGNORECASE)
     for i in range(1, len(lines)):
         # Loop through the lines, with each looking back at the last as well
         this_match = re.match(end_block_regex, lines[i])
@@ -88,4 +90,47 @@ def optimise(text: str) -> str:
     # Stitch back together and remove empty lines, again
     text = "\n".join(l for l in lines if l)
 
-    return text
+
+
+
+    # POST-CODEGEN OPTIMISATION 2 - REMOVE END BLOCK INSTRUCTIONS AND MOVE LABELS
+    lines = text.split("\n")
+    op_name_regex = re.compile("(HLT|CMP|JMP|JE|JNE|JLT|JLE|JGT|JGE|MOV|LEA|" + \
+                               "ADD|SUB|MUL|IDIV|MOD|EDIV|AND|OR|XOR|NOT|LSH|RSH)", re.IGNORECASE)
+    replacements_to_make = []
+    for i in range(len(lines) - 1):
+        # Loop through the lines looking to see if this line then the next can be acted on
+        endblock_match = re.match(end_block_regex, lines[i])
+        if endblock_match is None:
+            # Don't bother anyway, this isn't a statement end block
+            continue
+        # This is a statement end block
+        # Split the next line by its operation, then we know its label
+        next_op_parts = re.split(op_name_regex, lines[i+1])
+        if len(next_op_parts) < 3 or len(next_op_parts) > 3:
+            # Cannot quite sure what's happening, just skip it
+            continue
+        # It has 2 parts, a label then a data type/some operands
+        label, _, rest = next_op_parts
+        if label.strip():
+            # It does have a label, so replace all instances of end block label with this one
+            replacements_to_make.append((endblock_match.group("label"), label.strip()))
+        else:
+            # It does not have a label, so give it one
+            lines[i+1] = endblock_match.group("label") + " " + lines[i+1]
+        # Any changes to the useful line have been made, now get rid of end block line
+        lines[i] = ""
+
+    # Put it back into text
+    text = "\n".join(l for l in lines if l)
+
+    # Then on that text, perform the replacements
+    for from_, to_ in replacements_to_make:
+        text = re.sub(r"\b{}\b".format(from_), to_, text)
+
+    if text == original_text:
+        # Nothing changed, done all we can
+        return text
+    else:
+        # Could use another go round
+        return optimise(text)
