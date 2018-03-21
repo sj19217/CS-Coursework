@@ -1,3 +1,8 @@
+/*
+This is used for the sole purpose of making pycparser generate a tree, then I can look at
+that tree and see how different types of nodes work.
+*/
+
 int main()
 {
     printf("Hello, world!\n");

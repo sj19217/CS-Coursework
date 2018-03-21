@@ -1,5 +1,5 @@
 //
-// Created by Stephen on 21/01/2018.
+// A number of definitions to record the numerical forms of opcodes. Simplifies code.
 //
 
 #ifndef INTERPRETER_INSTRUCTIONS_H

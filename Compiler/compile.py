@@ -7,6 +7,11 @@ from pycparser import CParser
 from pycparser.c_ast import Compound, FuncDef, ID
 from pycparser.c_json import to_dict, trim_tree
 
+"""
+The compiler. This is a big one. This file attaches the various different parts together. 
+For information on exactly why the breakdown into parts is like this, consule Decomposing the Problem.
+"""
+
 from preprocessor import process as preprocess
 from global_parser import global_parser
 from variable_traversal import parse_compound
@@ -85,6 +90,7 @@ section.text
         print(assembly)
 
 if __name__ == "__main__":
+    # Comprehend the arguments and act based on them
     print(sys.argv)
 
     argparser = ArgumentParser(description="Compile a C file into assembly")

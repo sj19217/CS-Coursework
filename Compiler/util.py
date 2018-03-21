@@ -1,3 +1,7 @@
+"""
+Utility functions.
+"""
+
 import logging
 
 def get_size_of_type(type_: str):

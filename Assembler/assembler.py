@@ -1,6 +1,6 @@
 """
-The assembler. This file will manage the actual assembly, with calls to the GUI module added to make the educational
-part work.
+The assembler. This file will manage the actual assembly. It is not split up into different files because fundamentally the assembler is not too complex. 
+Communication with the GUI is managed via standard output.
 """
 
 import re
@@ -10,8 +10,10 @@ from collections import namedtuple
 import json
 import sys
 
+# Set to true if the -i flag is used (i.e. the GUI is running)
 INTERACTIVE_MODE = False
 
+# The default values for the contents of the meta section
 META_CONFIG_DEFAULT = {
     "mem_amt": 4
 }
@@ -115,6 +117,7 @@ OPCODES = {
     "RSH_4B": 0x66
 }
 
+# The names of opcodes without any extra information. Useful for searching.
 OPCODE_NAMES = {
     "HLT",
     "CMP",
@@ -141,6 +144,7 @@ OPCODE_NAMES = {
     "RSH"
 }
 
+# A mapping between register names and their numbers.
 REGISTERS = {
     "eax": 0xA0,
     "ebx": 0xB0,
@@ -170,8 +174,9 @@ REGISTERS = {
     "in": 0xF1
 }
 
+# Code below is for storing information about the data types.
+# I expected other pieces of information too.
 DataTypeMetadata = namedtuple("DataTypeMetadata", ["size"])
-
 DTYPE_META = {
     "char": DataTypeMetadata(1),
     "uchar": DataTypeMetadata(1),
@@ -189,6 +194,9 @@ DTYPE_META = {
 
 
 class Instruction:
+    """
+    Base class for instructions. 
+    """
     def __init__(self, instr_num):
         self.instruction_num = instr_num
 
@@ -277,9 +285,11 @@ class DataInstruction(Instruction):
         return instr + operand_num + mem_addr + value_bytes
 
     def get_op1_bytes(self, mem_table):
+        """Get the bytes of the first operand."""
         return struct.pack(">I", mem_table[self.name])
 
     def get_op2_bytes(self, mem_table):
+        """Get the bytes of the second operand."""
         valsize = self._calculate_valsize()
         # The byte to describe the operands and the format string for how to turn the immediate value into binary
         if valsize == 1:
@@ -299,6 +309,10 @@ class DataInstruction(Instruction):
 
 
 class TextInstruction(Instruction):
+    """
+    Represents a standard instruction in the assembly code. Has to store the mnemonic, a label (optionally),
+    the data type and the operands.
+    """
     def __init__(self, instr_num, opcode: str, dtype: str, op1, op2, label=""):
         super().__init__(instr_num)
         self.opcode_mnemonic = opcode
@@ -402,6 +416,10 @@ class TextInstruction(Instruction):
 
 
 class Operand:
+    """
+    Superclass for all operands. They use the features here to standardise
+    things that all operands have. 
+    """
     def __init__(self):
         self._bit_designation = -1
         self._required_length = -1
@@ -417,7 +435,10 @@ class Operand:
 
 
 class RegisterOperand(Operand):
-    def __init__(self, regname):
+    """
+    Refers to a register. Stores its name, bit designation and length needed, and works out its numerical version.
+    """
+    def __init__(self, regname: str):
         super().__init__()
         self.name = regname.lower()
         self.numerical = REGISTERS[regname.lower()]
@@ -444,7 +465,10 @@ class RegisterOperand(Operand):
 
 
 class ImmediateOperand(Operand):
-    def __init__(self, value):
+    """
+    Represents an immediate value, like "5". Has to work out the size and type.
+    """
+    def __init__(self, value: str):
         super().__init__()
         try:
             self.value = int(value)
@@ -496,7 +520,10 @@ class ImmediateOperand(Operand):
         return struct.pack(self._get_value_format_string(), self.value)
 
 class AddressOperand(Operand):
-    def __init__(self, address):
+    """
+    An address. To start with, self.addr will be a string, but eventually it will be replaced with a memory address.
+    """
+    def __init__(self, address: (str, int)):
         super().__init__()
         self.addr = address
         self._bit_designation = 5
@@ -516,13 +543,16 @@ class AddressOperand(Operand):
 
 
 class ArithmeticOperand(Operand):
+    """
+    One of the following types of arithmetic operands. 
+    """
     type_6 = r"^(?P<a>[a-zA-Z0-9]+)$"    # a
     type_7 = r"^(?P<a>[a-zA-Z0-9]+)\*(?P<b>[a-zA-Z0-9]+)$"    # a*b
     type_8 = r"^(?P<a>[a-zA-Z0-9]+)\+(?P<b>[a-zA-Z0-9]+)$"    # a+b
-    type_9 = r"^(?P<a>[a-zA-Z0-9]+)\*(?P<b>[a-zA-Z0-9]+)\+(?P<c>[a-zA-Z0-9]+)$"    # a*b+c
+    type_9 = r"^(?P<a>[a-zA-Z0-9]+)\*(?P<b>[a-zA-Z0-9]+)\+(?P<c>[a-zA-Z0-9]+)$"     # a*b+c
     type_10 = r"^(?P<a>[a-zA-Z0-9]+)\+(?P<b>[a-zA-Z0-9]+)\*(?P<c>[a-zA-Z0-9]+)$"    # a+b*c
 
-    def __init__(self, asm_str):
+    def __init__(self, asm_str: str):
         super().__init__()
         self.asm_str = asm_str
 
@@ -609,6 +639,9 @@ class ArithmeticOperand(Operand):
 
 
 class AssemblyError(Exception):
+    """
+    Raised when an error has happened, to inform the user of it in a standard way.
+    """
     def __init__(self, line_no, description):
         super().__init__("Error on line {}: {}".format(line_no, description))
         self.line_no = line_no
@@ -620,7 +653,7 @@ class AssemblyError(Exception):
 
 
 
-def normalise_text(text):
+def normalise_text(text: str) -> str:
     """
     Removes comments, unnecessary whitespace and empty lines
     :param text:
@@ -655,7 +688,7 @@ def normalise_text(text):
     return normalised_text
 
 
-def split_into_sections(text):
+def split_into_sections(text: str) -> str:
     """
     Takes the normalised text and splits it into its individual sections
     :param text:
@@ -666,13 +699,16 @@ def split_into_sections(text):
     parts = text.split("section.")
     parts_with_titles = [part.split("\n", maxsplit=1) for part in parts]
 
+    # Fill out the dictionary of sections
     sections_dict = {}
     for title, *other in parts_with_titles:
+        # The thing left on the first line is the name of the section
         if title.strip() == "" and len(other) == 0:
             continue
 
         sections_dict[title] = (other[0] if len(other) > 0 else "").strip()
 
+    # All sections have to be present, so check that
     for section in ("meta", "data", "text"):
         if section not in sections_dict.keys():
             raise AssemblyError(-1, "No {} section".format(section))
@@ -680,7 +716,7 @@ def split_into_sections(text):
     return sections_dict
 
 
-def divide_and_contextualise(section_dict: dict):
+def divide_and_contextualise(section_dict: dict) -> (dict, str):
     """
     Divides the sections up into lines. Interprets the meta section to create a config dict, and then creates a list
     of Instruction objects based on the data and text sections. Returns both as a tuple
@@ -803,6 +839,9 @@ def divide_and_contextualise(section_dict: dict):
 
 
 def interpret_operand(string: str) -> Operand:
+    """
+    Takes a single operand and turns it into the correct type of object.
+    """
     # The operand can be one of four things:
     # * register (the name of a register)
     # * immediate (a number)
@@ -844,6 +883,10 @@ def interpret_operand(string: str) -> Operand:
 
 
 def record_labels_and_variables(instruction_list):
+    """
+    Analyse the instruction list to create a table mapping variable/label names to the 
+    memory addresses they refer to.
+    """
     # Create the empty tables
     label_table = {}
     var_table = {}
@@ -894,6 +937,7 @@ def record_labels_and_variables(instruction_list):
 
 
 def calculate_var_table_size(var_table):
+    """Calculate the current total size of the variable table, taking into account the data types of the entries."""
     size = 0
     for (_, (_, dtype)) in var_table.items():
         size += DTYPE_META[dtype].size
@@ -901,13 +945,15 @@ def calculate_var_table_size(var_table):
     return size
 
 def calculate_instr_start_address(instr_num, instruction_list):
+    """Work out where a given instruction number will start."""
     total = 0
     for instr in instruction_list[:instr_num]:
         total += instr.get_bytes_length()
     return total
 
 
-def encode_metadata(config_dict):
+def encode_metadata(config_dict: dict) -> bytes:
+    """Takes the meta dictionary and writes it into bytes."""
     encoded = b""
     for key, value in config_dict.items():
         encoded += key.encode() + b"=" + str(value).encode() + b"&"
@@ -916,7 +962,8 @@ def encode_metadata(config_dict):
     return encoded
 
 
-def encode_instruction_list(instruction_list, memory_table):
+def encode_instruction_list(instruction_list: list, memory_table: dict) -> bytes:
+    """Turn the full instruction list into bytes."""
     encoded = b""
     for instr in instruction_list:
         b = instr.get_bytes(memory_table)
@@ -931,7 +978,8 @@ def encode_instruction_list(instruction_list, memory_table):
     return encoded
 
 
-def place_memory_addresses(mem_table, instruction_list):
+def place_memory_addresses(mem_table: dict, instruction_list: list):
+    """Replace textual references in the instructions with the right memory addresses."""
     for instr in instruction_list:
         if isinstance(instr, DataInstruction):
             continue    # These don't have operands
@@ -943,14 +991,14 @@ def place_memory_addresses(mem_table, instruction_list):
             instr.operand2 = AddressOperand(mem_table[instr.operand2.addr])
 
 
-def print_bytes_as_hex(bytes_, rowlen):
+def print_bytes_as_hex(bytes_: bytes, rowlen: int):
     for i, byte in enumerate(bytes_):
         print(format(byte, ">02X") + " ", end="")
         if (i+1) % rowlen == 0:
             print()
 
 
-def main(asmfile, out_format, interactive=False):
+def main(asmfile: str, out_format: str, interactive=False):
     global INTERACTIVE_MODE
     INTERACTIVE_MODE = interactive
 
@@ -1008,6 +1056,7 @@ def main(asmfile, out_format, interactive=False):
 
 
 if __name__ == "__main__":
+    # Interpret the information from the command line arguments
     import sys
 
     if len(sys.argv) > 1:

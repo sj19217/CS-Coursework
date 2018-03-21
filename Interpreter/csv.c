@@ -1,3 +1,5 @@
+// A library from online. Parses CSV. I use it to split lines on spaces when interpreting commands from the GUI.
+
 #include <stdlib.h>
 #include <string.h>
 

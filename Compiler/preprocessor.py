@@ -1,3 +1,7 @@
+"""
+The preprocessor - handles directives.
+"""
+
 import re
 import io
 import logging

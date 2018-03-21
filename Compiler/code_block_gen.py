@@ -1,3 +1,7 @@
+"""
+This file holds all of the definitions for code blocks and instructions, including their internal assembly generation.
+"""
+
 import io
 import logging
 import random

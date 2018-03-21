@@ -1,4 +1,4 @@
-; Prints the fibonacci sequence up to 50 places
+; Prints the fibonacci sequence up to 40 places
 section.meta
 mem_amt=2
 

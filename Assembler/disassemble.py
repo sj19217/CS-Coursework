@@ -43,7 +43,8 @@ DTYPE_STRUCT_FMT_STRINGS = {
 
 Instruction = namedtuple("Instruction", "start_byte opcode dtype op1 op2")
 
-def dis(bytecode):
+def dis(bytecode: bytes):
+    # There is a 4-byte buffer of zeroes between the config and instructions
     config, text = bytecode.split(b"\x00\x00\x00\x00", maxsplit=1)
 
     # Config section should be able to be interpreted as text
@@ -110,7 +111,7 @@ def dis(bytecode):
 
 
 
-def interpret_operand(text_stream, desc, dtype):
+def interpret_operand(text_stream: BytesIO, desc: str, dtype: str):
     if desc == 0:
         return ""
     elif desc == 1:
@@ -163,7 +164,7 @@ def interpret_operand(text_stream, desc, dtype):
         return "[" + a + "+" + b + "*" + c + "]"
 
 
-def read_arithmetic_part(text_stream):
+def read_arithmetic_part(text_stream: BytesIO) -> str:
     num = text_stream.read(1)[0]
     if num in REGISTERS.keys():
         return REGISTERS[num]
@@ -172,6 +173,7 @@ def read_arithmetic_part(text_stream):
 
 
 if __name__ == "__main__":
+    # Interpret command line arguments
     if len(sys.argv) > 1:
         fname = sys.argv[1]
     else:

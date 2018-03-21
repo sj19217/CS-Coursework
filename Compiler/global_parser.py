@@ -1,3 +1,7 @@
+"""
+Holds the code to parse global variables into a dictionary of information.
+"""
+
 import logging
 from collections import namedtuple
 import json
@@ -7,7 +11,10 @@ from pycparser.c_ast import Decl, FuncDef
 GlobalVariable = namedtuple("GlobalVariable", "name type initial")
 GlobalFunction = namedtuple("GlobalFunction", "name definition")
 
-def global_parser(tree, interactive_mode=False):
+def global_parser(tree, interactive_mode=False) -> dict:
+    """
+    Takes the syntax tree and generates a dictionary of information.
+    """
     table = []
 
     for top_node in tree:

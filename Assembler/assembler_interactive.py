@@ -1,3 +1,7 @@
+"""
+This is the file that gets called when the GUI is running and wants a commentary.
+"""
+
 import assembler
 
 if __name__ == "__main__":

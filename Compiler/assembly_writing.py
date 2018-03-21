@@ -11,7 +11,7 @@ import json
 from pycparser.c_ast import FuncDecl, FuncDef, Decl, Constant, TypeDecl
 from global_parser import GlobalVariable
 
-def produce_data_section(global_symbols, interactive_mode=False):
+def produce_data_section(global_symbols: dict, interactive_mode=False) -> str:
     data_section = ""
     var_list = {}
 
@@ -22,6 +22,7 @@ def produce_data_section(global_symbols, interactive_mode=False):
         if not isinstance(symbol, GlobalVariable):
             continue
 
+        # Get the initial value for the global
         initial = "0"
         if symbol.initial is not None:
             if isinstance(symbol.initial, Constant):
@@ -32,8 +33,10 @@ def produce_data_section(global_symbols, interactive_mode=False):
             else:
                 logging.error("Only constants are allowed for initial global values")
 
+        # Add the info to the (badly named for historical reasons) dictionary
         var_list[symbol.name] = (initial, symbol.type)
 
+    # Turning each into a string.
     for name, (value, type_) in var_list.items():
         data_section += "{name} VAR {type} {initial}\n".format(name=name, type=type_, initial=value)
         if interactive_mode:
@@ -43,9 +46,11 @@ def produce_data_section(global_symbols, interactive_mode=False):
 
     if interactive_mode:
         print("fin_gen_data", json.dumps(data_section))
+    
+    # Return the final thing
     return data_section
 
-def produce_text_section(top_block, global_symbols, interactive_mode=False):
+def produce_text_section(top_block: CodeBlock, global_symbols: dict, interactive_mode=False) -> str:
     assembly = io.StringIO()
     # A queue containing (block name, block object)
     queue = collections.deque()
