@@ -60,10 +60,12 @@ start
 while (more arguments?)
     if (argument='i') then (yes)
         :Set interactive to True;
+    else (no)
     endif
     if (argument='f') then (yes)
         :Set has_filename to True;
         :Set filename=argument.value;
+    else (no)
     endif
 endwhile
 
@@ -149,7 +151,7 @@ while True:
         dtype = "4"
     else:
         dtype = "n"
-    
+
     env.pc = env.pc + 1
     operand_byte = env.memory[env.pc]
     op1_type = first 4 bits of operand_byte
@@ -228,16 +230,19 @@ if (Is opcode CMP?) then (yes)
     :Run correct comparison
     function;
     detach
+else (no)
 endif
 if (Is opcode a jump) then (yes)
     :Run correct jump
     function;
     detach
+else (no)
 endif
 if (Is opcode a MOV?) then (yes)
     :Run correct MOV
     function;
     detach
+else (no)
 endif
 if (Is opcode an LEA?) then (yes)
     :Run correct LEA

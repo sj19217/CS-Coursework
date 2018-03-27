@@ -108,11 +108,13 @@ endfunction
 @startuml
 :Create table as empty list;
 while (select node from tree) is (found)
-    if (statement is a declaration?)
+    if (statement is a declaration?) then (yes)
         :Record name, type and initial;
         :Add variable to table;
+    else (no)
     endif
 endwhile (none left)
+:Return list;
 @enduml
 ```
 
@@ -139,16 +141,19 @@ endprocedure
 :Get block, list of parents and globals;
 :Add parent to block if known;
 while (read next statement) is (found)
-    if (statement is a declaration) is (true)
+    if (statement is a declaration) then (true)
         :Get name and type;
         :Create local variable object;
         :Add variable to locals;
+    else (false)
     endif
-    if (is an if statement) is (true)
+    if (is an if statement) then (true)
         :Run this function on true and false sub-statements;
+    else (false)
     endif
-    if (is a while statement) is (true)
+    if (is a while statement) then (true)
         :Run this function on statement sub-block;
+    else (false)
     endif
 endwhile (none left)
 stop
